@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.AccountListPage"
+    x:Name="PageRoot"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    xmlns:models="clr-namespace:Arthiva.Models"
+    xmlns:components="clr-namespace:Arthiva.Views.Components"
+    x:DataType="vm:AccountListViewModel"
+    Title="Accounts">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="+ Add" Command="{Binding GoToAddCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+        <Grid>
+
+            <ScrollView>
+                <VerticalStackLayout Padding="16" Spacing="0">
+                    <CollectionView ItemsSource="{Binding Accounts}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Account">
+                                <SwipeView>
+                                    <SwipeView.RightItems>
+                                        <SwipeItems>
+                                            <SwipeItem Text="Default"
+                                                       BackgroundColor="{StaticResource Primary}"
+                                                       Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SetDefaultCommand}"
+                                                       CommandParameter="{Binding .}" />
+                                            <SwipeItem Text="Delete"
+                                                       BackgroundColor="{StaticResource Expense}"
+                                                       Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                                       CommandParameter="{Binding .}" />
+                                        </SwipeItems>
+                                    </SwipeView.RightItems>
+
+                                    <Grid>
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Grid.GestureRecognizers>
+                                        <components:AccountCardView />
+                                    </Grid>
+                                </SwipeView>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <components:EmptyStateView Icon="&#128179;" Message="No accounts yet. Tap + Add to create one."
+                IsVisible="{Binding Accounts.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+
+            <ActivityIndicator Style="{StaticResource LoadingIndicator}"
+                                IsVisible="{Binding IsBusy}"
+                                VerticalOptions="Center" HorizontalOptions="Center" />
+
+        </Grid>
+    </RefreshView>
+
+</ContentPage>

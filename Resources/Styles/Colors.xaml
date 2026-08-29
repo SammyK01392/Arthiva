@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Brand -->
+    <Color x:Key="Primary">#F97316</Color>
+    <Color x:Key="PrimaryDark">#EA580C</Color>
+
+    <!-- Surfaces -->
+    <Color x:Key="Background">#F8FAFC</Color>
+    <Color x:Key="Surface">#FFFFFF</Color>
+    <Color x:Key="Border">#E2E8F0</Color>
+
+    <!-- Text -->
+    <Color x:Key="TextPrimary">#0F172A</Color>
+    <Color x:Key="TextSecondary">#64748B</Color>
+    <Color x:Key="TextOnPrimary">#FFFFFF</Color>
+
+    <!-- Semantic -->
+    <Color x:Key="Income">#16A34A</Color>
+    <Color x:Key="Expense">#DC2626</Color>
+    <Color x:Key="Warning">#F59E0B</Color>
+
+    <!-- Tints (used for subtle chip/badge backgrounds; ~12% opacity of the base) -->
+    <Color x:Key="PrimaryTint">#1AF97316</Color>
+    <Color x:Key="IncomeTint">#1A16A34A</Color>
+    <Color x:Key="ExpenseTint">#1ADC2626</Color>
+    <Color x:Key="WarningTint">#1AF59E0B</Color>
+
+    <!-- Brushes (for properties that need a Brush rather than a Color, e.g. Border/Background) -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />
+    <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDark}" />
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource Background}" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource Surface}" />
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource Border}" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}" />
+    <SolidColorBrush x:Key="TextOnPrimaryBrush" Color="{StaticResource TextOnPrimary}" />
+    <SolidColorBrush x:Key="IncomeBrush" Color="{StaticResource Income}" />
+    <SolidColorBrush x:Key="ExpenseBrush" Color="{StaticResource Expense}" />
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource Warning}" />
+    <SolidColorBrush x:Key="PrimaryTintBrush" Color="{StaticResource PrimaryTint}" />
+    <SolidColorBrush x:Key="IncomeTintBrush" Color="{StaticResource IncomeTint}" />
+    <SolidColorBrush x:Key="ExpenseTintBrush" Color="{StaticResource ExpenseTint}" />
+    <SolidColorBrush x:Key="WarningTintBrush" Color="{StaticResource WarningTint}" />
+
+</ResourceDictionary>

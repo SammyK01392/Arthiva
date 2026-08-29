@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.EmiEditPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    x:DataType="vm:EmiEditViewModel"
+    Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <Label Style="{StaticResource FormLabel}" Text="LOAN TITLE" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding EmiTitle}" Placeholder="e.g. Car Loan" />
+
+            <Label Style="{StaticResource FormLabel}" Text="LOAN PROVIDER (OPTIONAL)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding LoanProvider}" Placeholder="e.g. HDFC Bank" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <VerticalStackLayout Grid.Column="0" Spacing="6">
+                    <Label Style="{StaticResource FormLabel}" Text="TOTAL AMOUNT" />
+                    <Entry Style="{StaticResource FormEntry}" Text="{Binding TotalAmount}" Keyboard="Numeric" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="6">
+                    <Label Style="{StaticResource FormLabel}" Text="MONTHLY EMI" />
+                    <Entry Style="{StaticResource FormEntry}" Text="{Binding EmiAmount}" Keyboard="Numeric" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <VerticalStackLayout Grid.Column="0" Spacing="6">
+                    <Label Style="{StaticResource FormLabel}" Text="INTEREST RATE (%)" />
+                    <Entry Style="{StaticResource FormEntry}" Text="{Binding InterestRate}" Keyboard="Numeric" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="6">
+                    <Label Style="{StaticResource FormLabel}" Text="TOTAL INSTALLMENTS" />
+                    <Entry Style="{StaticResource FormEntry}" Text="{Binding TotalInstallment}" Keyboard="Numeric" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <Label Style="{StaticResource FormLabel}" Text="DUE DAY OF MONTH (1-31)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding DueDay}" Keyboard="Numeric" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <VerticalStackLayout Grid.Column="0" Spacing="6">
+                    <Label Style="{StaticResource FormLabel}" Text="START DATE" />
+                    <DatePicker Style="{StaticResource FormDatePicker}" Date="{Binding StartDate}" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="6">
+                    <Label Style="{StaticResource FormLabel}" Text="END DATE (OPTIONAL)" />
+                    <DatePicker Style="{StaticResource FormDatePicker}" Date="{Binding EndDate}" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <Label Style="{StaticResource FormLabel}" Text="AUTO-PAY FROM ACCOUNT (OPTIONAL)" />
+            <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding Accounts}"
+                    ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedAccount}" />
+            <Label Style="{StaticResource CaptionLabel}" Text="When set, recording a payment auto-creates a matching Expense transaction on this account." />
+
+            <Label Style="{StaticResource FormLabel}" Text="LOAN REFERENCE NO. (OPTIONAL)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding LoanReferenceNo}" />
+
+            <Label Style="{StaticResource FormLabel}" Text="REMIND ME BEFORE (DAYS)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding ReminderBeforeDays}" Keyboard="Numeric" />
+
+            <Label Style="{StaticResource FormLabel}" Text="NOTES (OPTIONAL)" />
+            <Editor Style="{StaticResource FormEditor}" Text="{Binding Notes}" HeightRequest="80" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Expense}"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}" />
+
+            <Button Style="{StaticResource PrimaryButton}" Text="Save EMI"
+                    Command="{Binding SaveCommand}" Margin="0,10,0,0" />
+            <Button Style="{StaticResource TextButton}" Text="Cancel"
+                    Command="{Binding CancelCommand}" HorizontalOptions="Center" />
+
+            <ActivityIndicator Style="{StaticResource LoadingIndicator}" IsVisible="{Binding IsBusy}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

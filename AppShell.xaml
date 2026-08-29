@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="Arthiva.AppShell"
+    x:Name="RootShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:Arthiva.Views"
+    xmlns:converters="clr-namespace:Arthiva.Converters"
+    FlyoutBehavior="Disabled"
+    BackgroundColor="{StaticResource Background}"
+    Title="Arthiva">
+
+    <Shell.Resources>
+        <ResourceDictionary>
+            <converters:IntGreaterThanZeroConverter x:Key="LocalIntGreaterThanZeroConverter" />
+        </ResourceDictionary>
+    </Shell.Resources>
+
+    <!--
+        Global title bar for every page: app/page title on the left,
+        a bell icon with an unread-count badge on the right. Tapping the
+        bell navigates to NotificationListPage.
+    -->
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*,Auto" Padding="16,4">
+            <Label
+                Grid.Column="0"
+                Text="{Binding Title, Source={x:Reference RootShell}}"
+                Style="{StaticResource TitleLabel}"
+                VerticalOptions="Center" />
+
+            <Grid Grid.Column="1" WidthRequest="40" HeightRequest="40">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBellTapped" />
+                </Grid.GestureRecognizers>
+
+                <Label
+                    Text="&#128276;"
+                    FontSize="22"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+
+                <Border
+                    IsVisible="{Binding UnreadNotificationCount, Source={x:Reference RootShell}, Converter={StaticResource LocalIntGreaterThanZeroConverter}}"
+                    BackgroundColor="{StaticResource Expense}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    WidthRequest="16"
+                    HeightRequest="16"
+                    HorizontalOptions="End"
+                    VerticalOptions="Start"
+                    Padding="0">
+                    <Label
+                        Text="{Binding UnreadNotificationCount, Source={x:Reference RootShell}}"
+                        TextColor="White"
+                        FontSize="10"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+            </Grid>
+        </Grid>
+    </Shell.TitleView>
+
+    <!--
+        Bottom tabs: Home, Transactions, Add (quick-add action, opens the
+        Add Transaction form modally), Accounts, More. Bills/EMI/BorrowLend/
+        SavingGoal/Budget/Categories/Settings live inside MorePage.
+        Notifications are reached via the bell in the title bar above.
+    -->
+    <TabBar>
+
+        <ShellContent
+            Title="Home"
+            Icon="tab_home.png"
+            ContentTemplate="{DataTemplate views:DashboardPage}"
+            Route="DashboardPage" />
+
+        <ShellContent
+            Title="Transactions"
+            Icon="tab_transactions.png"
+            ContentTemplate="{DataTemplate views:TransactionListPage}"
+            Route="TransactionListPage" />
+
+        <ShellContent
+            Title="Add"
+            Icon="tab_add.png"
+            ContentTemplate="{DataTemplate views:AddEditTransactionPage}"
+            Route="QuickAddTransactionPage" />
+
+        <ShellContent
+            Title="Accounts"
+            Icon="tab_accounts.png"
+            ContentTemplate="{DataTemplate views:AccountListPage}"
+            Route="AccountListPage" />
+
+        <ShellContent
+            Title="More"
+            Icon="tab_more.png"
+            ContentTemplate="{DataTemplate views:MorePage}"
+            Route="MorePage" />
+
+    </TabBar>
+
+</Shell>

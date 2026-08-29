@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.BudgetListPage"
+    x:Name="PageRoot"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    xmlns:components="clr-namespace:Arthiva.Views.Components"
+    x:DataType="vm:BudgetListViewModel"
+    Title="Budgets">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="+ Add" Command="{Binding GoToAddCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*" Padding="16,12">
+
+        <!-- Month navigation -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
+            <Button Grid.Column="0" Text="&#8249;" Style="{StaticResource SecondaryButton}"
+                    WidthRequest="48" HeightRequest="48" Padding="0"
+                    Command="{Binding PreviousMonthCommand}" />
+            <Label Grid.Column="1" Style="{StaticResource SubtitleLabel}" Text="{Binding MonthYearLabel}"
+                   HorizontalOptions="Center" VerticalOptions="Center" />
+            <Button Grid.Column="2" Text="&#8250;" Style="{StaticResource SecondaryButton}"
+                    WidthRequest="48" HeightRequest="48" Padding="0"
+                    Command="{Binding NextMonthCommand}" />
+        </Grid>
+
+        <RefreshView Grid.Row="1" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+            <Grid>
+                <ScrollView>
+                    <VerticalStackLayout Spacing="0">
+                        <CollectionView ItemsSource="{Binding Budgets}">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="vm:BudgetListItem">
+                                    <SwipeView>
+                                        <SwipeView.RightItems>
+                                            <SwipeItems>
+                                                <SwipeItem Text="Edit"
+                                                           BackgroundColor="{StaticResource Primary}"
+                                                           Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
+                                                           CommandParameter="{Binding .}" />
+                                                <SwipeItem Text="Delete"
+                                                           BackgroundColor="{StaticResource Expense}"
+                                                           Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                                           CommandParameter="{Binding .}" />
+                                            </SwipeItems>
+                                        </SwipeView.RightItems>
+
+                                        <Border Style="{StaticResource CardBorder}" Margin="0,6">
+                                            <VerticalStackLayout Spacing="8">
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <Label Grid.Column="0" Style="{StaticResource SubtitleLabel}" Text="{Binding CategoryName}" />
+                                                    <Label Grid.Column="1" FontAttributes="Bold">
+                                                        <Label.Text>
+                                                            <MultiBinding StringFormat="{}{0} / {1}">
+                                                                <Binding Path="Budget.SpentAmount" Converter="{StaticResource CurrencyConverter}" />
+                                                                <Binding Path="Budget.BudgetAmount" Converter="{StaticResource CurrencyConverter}" />
+                                                            </MultiBinding>
+                                                        </Label.Text>
+                                                    </Label>
+                                                </Grid>
+
+                                                <ProgressBar>
+                                                    <ProgressBar.Progress>
+                                                        <MultiBinding Converter="{StaticResource SpentToBudgetRatioConverter}">
+                                                            <Binding Path="Budget.SpentAmount" />
+                                                            <Binding Path="Budget.BudgetAmount" />
+                                                        </MultiBinding>
+                                                    </ProgressBar.Progress>
+                                                    <ProgressBar.ProgressColor>
+                                                        <MultiBinding Converter="{StaticResource SpentToBudgetColorConverter}">
+                                                            <Binding Path="Budget.SpentAmount" />
+                                                            <Binding Path="Budget.BudgetAmount" />
+                                                        </MultiBinding>
+                                                    </ProgressBar.ProgressColor>
+                                                </ProgressBar>
+
+                                                <Label Style="{StaticResource CaptionLabel}">
+                                                    <Label.Text>
+                                                        <MultiBinding StringFormat="{}{0} remaining">
+                                                            <Binding Path="Budget.RemainingAmount" Converter="{StaticResource CurrencyConverter}" />
+                                                        </MultiBinding>
+                                                    </Label.Text>
+                                                </Label>
+                                            </VerticalStackLayout>
+                                        </Border>
+                                    </SwipeView>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <components:EmptyStateView Icon="&#128176;" Message="No budgets set for this month."
+                    IsVisible="{Binding Budgets.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+            </Grid>
+        </RefreshView>
+
+    </Grid>
+
+</ContentPage>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.DashboardPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    xmlns:models="clr-namespace:Arthiva.Models"
+    xmlns:components="clr-namespace:Arthiva.Views.Components"
+    x:DataType="vm:DashboardViewModel"
+    Title="Dashboard">
+
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="18">
+
+                <!-- Total balance -->
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                        BackgroundColor="{StaticResource Primary}" Padding="18">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Total Balance" TextColor="{StaticResource TextOnPrimary}"
+                               Opacity="0.85" FontSize="13" />
+                        <Label Text="{Binding TotalBalance, Converter={StaticResource CurrencyConverter}}"
+                               TextColor="{StaticResource TextOnPrimary}" FontSize="30" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Income / Expense / Saving this month -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <components:SummaryCardView Grid.Column="0"
+                        CardTitle="Income"
+                        CardAmount="{Binding MonthIncome, Converter={StaticResource CurrencyConverter}}"
+                        AccentColor="{StaticResource Income}" />
+                    <components:SummaryCardView Grid.Column="1"
+                        CardTitle="Expense"
+                        CardAmount="{Binding MonthExpense, Converter={StaticResource CurrencyConverter}}"
+                        AccentColor="{StaticResource Expense}" />
+                    <components:SummaryCardView Grid.Column="2"
+                        CardTitle="Saving"
+                        CardAmount="{Binding MonthSaving, Converter={StaticResource CurrencyConverter}}"
+                        AccentColor="{StaticResource Primary}" />
+                </Grid>
+
+                <!-- Recent transactions -->
+                <Label Style="{StaticResource SectionHeaderLabel}" Text="RECENT TRANSACTIONS" />
+
+                <Border Style="{StaticResource CardBorder}" Padding="4,0"
+                        IsVisible="{Binding RecentTransactions.Count, Converter={StaticResource CountToBoolConverter}}">
+                    <CollectionView ItemsSource="{Binding RecentTransactions}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Transaction">
+                                <components:TransactionRowView />
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Border>
+
+                <components:EmptyStateView Icon="&#128179;" Message="No transactions yet. Tap Add to record one."
+                    IsVisible="{Binding RecentTransactions.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+
+                <!-- Upcoming bills -->
+                <Label Style="{StaticResource SectionHeaderLabel}" Text="UPCOMING BILLS"
+                       IsVisible="{Binding UpcomingBills.Count, Converter={StaticResource CountToBoolConverter}}" />
+
+                <Border Style="{StaticResource CardBorder}"
+                        IsVisible="{Binding UpcomingBills.Count, Converter={StaticResource CountToBoolConverter}}">
+                    <CollectionView ItemsSource="{Binding UpcomingBills}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Bill">
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,8">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Style="{StaticResource BodyLabel}" FontAttributes="Bold" Text="{Binding Name}" />
+                                        <Label Style="{StaticResource CaptionLabel}"
+                                               Text="{Binding DueDate, StringFormat='Due {0:dd MMM}'}" />
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="1" VerticalOptions="Center" FontAttributes="Bold"
+                                           TextColor="{StaticResource Warning}"
+                                           Text="{Binding Amount, Converter={StaticResource CurrencyConverter}}" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Border>
+
+                <!-- Active EMIs -->
+                <Label Style="{StaticResource SectionHeaderLabel}" Text="ACTIVE EMIs"
+                       IsVisible="{Binding ActiveEmis.Count, Converter={StaticResource CountToBoolConverter}}" />
+
+                <Border Style="{StaticResource CardBorder}"
+                        IsVisible="{Binding ActiveEmis.Count, Converter={StaticResource CountToBoolConverter}}">
+                    <CollectionView ItemsSource="{Binding ActiveEmis}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:EmiMaster">
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,8">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Style="{StaticResource BodyLabel}" FontAttributes="Bold" Text="{Binding Title}" />
+                                        <Label Style="{StaticResource CaptionLabel}">
+                                            <Label.Text>
+                                                <MultiBinding StringFormat="{}{0} of {1} paid">
+                                                    <Binding Path="PaidInstallment" />
+                                                    <Binding Path="TotalInstallment" />
+                                                </MultiBinding>
+                                            </Label.Text>
+                                        </Label>
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="1" VerticalOptions="Center" FontAttributes="Bold"
+                                           Text="{Binding EmiAmount, Converter={StaticResource CurrencyConverter}}" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Border>
+
+                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Expense}"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}"
+                       HorizontalOptions="Center" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

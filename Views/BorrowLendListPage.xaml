@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.BorrowLendListPage"
+    x:Name="PageRoot"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    xmlns:components="clr-namespace:Arthiva.Views.Components"
+    x:DataType="vm:BorrowLendListViewModel"
+    Title="Borrow / Lend">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="+ Add" Command="{Binding GoToAddCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*" Padding="16,12">
+
+        <!-- Lend / Borrow tabs -->
+        <HorizontalStackLayout Grid.Row="0" Spacing="8" Margin="0,0,0,12"
+                                BindableLayout.ItemsSource="{Binding Tabs}">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                    <Border Style="{StaticResource ChipBorder}" Padding="16,6">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SelectedTab}" Value="{Binding .}">
+                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SetTabCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                        <Label Style="{StaticResource ChipLabel}" Text="{Binding .}" TextColor="{StaticResource TextPrimary}" />
+                    </Border>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </HorizontalStackLayout>
+
+        <RefreshView Grid.Row="1" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+            <Grid>
+                <CollectionView ItemsSource="{Binding Records}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BorrowLendListItem">
+                            <SwipeView>
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItem Text="Settle"
+                                                   BackgroundColor="{StaticResource Primary}"
+                                                   Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToRecordTransactionCommand}"
+                                                   CommandParameter="{Binding .}" />
+                                        <SwipeItem Text="Delete"
+                                                   BackgroundColor="{StaticResource Expense}"
+                                                   Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                                   CommandParameter="{Binding .}" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+
+                                <Border Style="{StaticResource CardBorder}" Margin="0,6">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToRecordTransactionCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
+                                        <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource SubtitleLabel}" Text="{Binding ContactName}" />
+
+                                        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource ChipBorder}">
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding Record.Status}" Value="Overdue">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource ExpenseTint}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Border" Binding="{Binding Record.Status}" Value="Pending">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource WarningTint}" />
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Label Style="{StaticResource ChipLabel}" Text="{Binding Record.Status}">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding Record.Status}" Value="Overdue">
+                                                        <Setter Property="TextColor" Value="{StaticResource Expense}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding Record.Status}" Value="Pending">
+                                                        <Setter Property="TextColor" Value="{StaticResource Warning}" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </Border>
+
+                                        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource CaptionLabel}"
+                                               Text="{Binding Record.DueDate, StringFormat='Due {0:dd MMM yyyy}'}"
+                                               IsVisible="{Binding Record.DueDate, Converter={StaticResource IsNotNullConverter}}" />
+
+                                        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                               FontSize="18" FontAttributes="Bold"
+                                               TextColor="{Binding Record.Type, Converter={StaticResource BorrowLendTypeToColorConverter}}"
+                                               Text="{Binding Record.PendingAmount, Converter={StaticResource CurrencyConverter}}" />
+                                    </Grid>
+                                </Border>
+                            </SwipeView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <components:EmptyStateView Icon="&#129309;" Message="Nothing here yet."
+                    IsVisible="{Binding Records.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+            </Grid>
+        </RefreshView>
+
+    </Grid>
+
+</ContentPage>

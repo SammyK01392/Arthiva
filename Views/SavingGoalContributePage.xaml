@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.SavingGoalContributePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    x:DataType="vm:SavingGoalContributeViewModel"
+    Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <!-- Goal reference card -->
+            <Border Style="{StaticResource CardBorder}" BackgroundColor="{StaticResource PrimaryTint}">
+                <VerticalStackLayout Spacing="2">
+                    <Label Style="{StaticResource CaptionLabel}" Text="SAVING GOAL" />
+                    <Label Style="{StaticResource SubtitleLabel}" Text="{Binding Goal.Name}" />
+                    <Label Style="{StaticResource CaptionLabel}">
+                        <Label.Text>
+                            <MultiBinding StringFormat="{}{0} saved of {1}">
+                                <Binding Path="Goal.SavedAmount" Converter="{StaticResource CurrencyConverter}" />
+                                <Binding Path="Goal.TargetAmount" Converter="{StaticResource CurrencyConverter}" />
+                            </MultiBinding>
+                        </Label.Text>
+                    </Label>
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Style="{StaticResource FormLabel}" Text="ACTION" />
+            <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding MovementTypes}" SelectedItem="{Binding MovementType}" />
+
+            <Label Style="{StaticResource FormLabel}" Text="AMOUNT" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding Amount}" Keyboard="Numeric"
+                   FontSize="22" FontAttributes="Bold" />
+
+            <Label Style="{StaticResource FormLabel}" Text="VIA ACCOUNT (OPTIONAL)" />
+            <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding Accounts}"
+                    ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedAccount}" />
+            <Label Style="{StaticResource CaptionLabel}"
+                   Text="Contribution debits this account; Withdrawal credits it back." />
+
+            <Label Style="{StaticResource FormLabel}" Text="NOTES (OPTIONAL)" />
+            <Editor Style="{StaticResource FormEditor}" Text="{Binding Notes}" HeightRequest="70" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Expense}"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}" />
+
+            <Button Style="{StaticResource PrimaryButton}" Text="Confirm"
+                    Command="{Binding SaveCommand}" Margin="0,10,0,0" />
+            <Button Style="{StaticResource TextButton}" Text="Cancel"
+                    Command="{Binding CancelCommand}" HorizontalOptions="Center" />
+
+            <ActivityIndicator Style="{StaticResource LoadingIndicator}" IsVisible="{Binding IsBusy}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.CategoryListPage"
+    x:Name="PageRoot"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    xmlns:models="clr-namespace:Arthiva.Models"
+    x:DataType="vm:CategoryListViewModel"
+    Title="Categories">
+
+    <ContentPage.Resources>
+        <!-- Shared card template for both Income and Expense grids -->
+        <DataTemplate x:Key="CategoryCardTemplate" x:DataType="models:Category">
+            <Border Style="{StaticResource CardBorder}" Padding="10">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.ToggleFavoriteCommand}"
+                        CommandParameter="{Binding .}" />
+                </Border.GestureRecognizers>
+
+                <Grid>
+                    <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                        <Border WidthRequest="40" HeightRequest="40" StrokeThickness="0"
+                                StrokeShape="RoundRectangle 20" HorizontalOptions="Center">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding Type}" Value="Income">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource IncomeTint}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" Binding="{Binding Type}" Value="Expense">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource ExpenseTint}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                        </Border>
+                        <Label Text="{Binding Name}" Style="{StaticResource CaptionLabel}"
+                               HorizontalTextAlignment="Center" LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+
+                    <!-- Favorite star, top-right corner -->
+                    <Label FontSize="14" Text="&#9734;" TextColor="{StaticResource TextSecondary}"
+                           HorizontalOptions="End" VerticalOptions="Start">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsFavorite}" Value="True">
+                                <Setter Property="Text" Value="&#9733;" />
+                                <Setter Property="TextColor" Value="{StaticResource Warning}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </ContentPage.Resources>
+
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="8">
+
+                <Label Style="{StaticResource SectionHeaderLabel}" Text="EXPENSE" />
+                <CollectionView ItemsSource="{Binding ExpenseCategories}"
+                                ItemTemplate="{StaticResource CategoryCardTemplate}">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="8" VerticalItemSpacing="8" />
+                    </CollectionView.ItemsLayout>
+                </CollectionView>
+
+                <Label Style="{StaticResource SectionHeaderLabel}" Text="INCOME" />
+                <CollectionView ItemsSource="{Binding IncomeCategories}"
+                                ItemTemplate="{StaticResource CategoryCardTemplate}">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="8" VerticalItemSpacing="8" />
+                    </CollectionView.ItemsLayout>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

@@ -1,0 +1,145 @@
+﻿using Microsoft.Extensions.Logging;
+using Arthiva.Data;
+using Arthiva.Services;
+using Arthiva.ViewModels;
+using Arthiva.Views;
+
+namespace Arthiva;
+
+public static class MauiProgram
+{
+    public static MauiApp CreateMauiApp()
+    {
+        var builder = MauiApp.CreateBuilder();
+        builder
+            .UseMauiApp<App>()
+            .ConfigureFonts(fonts =>
+            {
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            });
+
+#if DEBUG
+        builder.Logging.AddDebug();
+#endif
+
+        RegisterDatabase(builder.Services);
+        RegisterRepositories(builder.Services);
+        RegisterServices(builder.Services);
+        RegisterViewModels(builder.Services);
+        RegisterPages(builder.Services);
+
+        return builder.Build();
+    }
+
+    private static void RegisterDatabase(IServiceCollection services)
+    {
+        // Singleton: one SQLite connection shared across the whole app lifetime.
+        services.AddSingleton(_ =>
+        {
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, DatabaseConstants.DatabaseFileName);
+            return new ArthivaDatabase(dbPath);
+        });
+    }
+
+    private static void RegisterRepositories(IServiceCollection services)
+    {
+        // Open generic registration — resolves IGenericRepository<Account>,
+        // IGenericRepository<Transaction>, etc. automatically wherever needed.
+        services.AddSingleton(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+    }
+
+    private static void RegisterServices(IServiceCollection services)
+    {
+        services.AddSingleton<AppShell>();
+        services.AddSingleton<IAccountService, AccountService>();
+        services.AddSingleton<ICategoryService, CategoryService>();
+        services.AddSingleton<ITransactionService, TransactionService>();
+        services.AddSingleton<IContactService, ContactService>();
+        services.AddSingleton<IBorrowLendService, BorrowLendService>();
+        services.AddSingleton<IEmiService, EmiService>();
+        services.AddSingleton<IBillService, BillService>();
+        services.AddSingleton<IBudgetService, BudgetService>();
+        services.AddSingleton<ISavingGoalService, SavingGoalService>();
+        services.AddSingleton<IRecurringTransactionService, RecurringTransactionService>();
+        services.AddSingleton<INotificationService, NotificationService>();
+        services.AddSingleton<IAttachmentService, AttachmentService>();
+        services.AddSingleton<IMonthlySummaryService, MonthlySummaryService>();
+        services.AddSingleton<IUserProfileService, UserProfileService>();
+    }
+
+    private static void RegisterViewModels(IServiceCollection services)
+    {
+        // Transient: a fresh instance every time a page is navigated to, so
+        // leftover form state from a previous visit never leaks into a new one.
+        services.AddTransient<DashboardViewModel>();
+
+        services.AddTransient<AccountListViewModel>();
+        services.AddTransient<AccountEditViewModel>();
+
+        services.AddTransient<TransactionListViewModel>();
+        services.AddTransient<AddEditTransactionViewModel>();
+
+        services.AddTransient<CategoryListViewModel>();
+
+        services.AddTransient<BillListViewModel>();
+        services.AddTransient<BillEditViewModel>();
+        services.AddTransient<RecordBillPaymentViewModel>();
+
+        services.AddTransient<EmiListViewModel>();
+        services.AddTransient<EmiEditViewModel>();
+        services.AddTransient<RecordEmiPaymentViewModel>();
+
+        services.AddTransient<BorrowLendListViewModel>();
+        services.AddTransient<BorrowLendEditViewModel>();
+        services.AddTransient<RecordBorrowLendTransactionViewModel>();
+
+        services.AddTransient<SavingGoalListViewModel>();
+        services.AddTransient<SavingGoalEditViewModel>();
+        services.AddTransient<SavingGoalContributeViewModel>();
+
+        services.AddTransient<BudgetListViewModel>();
+        services.AddTransient<BudgetEditViewModel>();
+
+        services.AddTransient<NotificationListViewModel>();
+    }
+
+    private static void RegisterPages(IServiceCollection services)
+    {
+    //NOTE: these Page classes are created in the next step(XAML Pages).
+    //     Registering them here now means no further MauiProgram changes will
+    //     be needed once those files are added to the Views/ folder.
+        services.AddTransient<DashboardPage>();
+
+        services.AddTransient<AccountListPage>();
+        services.AddTransient<AccountEditPage>();
+
+        services.AddTransient<TransactionListPage>();
+        services.AddTransient<AddEditTransactionPage>();
+
+        services.AddTransient<CategoryListPage>();
+
+        services.AddTransient<BillListPage>();
+        services.AddTransient<BillEditPage>();
+        services.AddTransient<RecordBillPaymentPage>();
+
+        services.AddTransient<EmiListPage>();
+        services.AddTransient<EmiEditPage>();
+        services.AddTransient<RecordEmiPaymentPage>();
+
+        services.AddTransient<BorrowLendListPage>();
+        services.AddTransient<BorrowLendEditPage>();
+        services.AddTransient<RecordBorrowLendTransactionPage>();
+
+        services.AddTransient<SavingGoalListPage>();
+        services.AddTransient<SavingGoalEditPage>();
+        services.AddTransient<SavingGoalContributePage>();
+
+        services.AddTransient<BudgetListPage>();
+        services.AddTransient<BudgetEditPage>();
+
+        services.AddTransient<NotificationListPage>();
+
+        services.AddTransient<MorePage>();
+    }
+}

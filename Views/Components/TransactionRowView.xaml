@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView
+    x:Class="Arthiva.Views.Components.TransactionRowView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:Arthiva.Models"
+    x:DataType="models:Transaction">
+
+    <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="12" Padding="4,10">
+
+        <!-- Icon circle: tinted green for Income, red for Expense -->
+        <Border Grid.Column="0" WidthRequest="44" HeightRequest="44"
+                StrokeThickness="0" StrokeShape="RoundRectangle 22"
+                VerticalOptions="Center">
+            <Border.Triggers>
+                <DataTrigger TargetType="Border" Binding="{Binding TransactionType}" Value="Income">
+                    <Setter Property="BackgroundColor" Value="{StaticResource IncomeTint}" />
+                </DataTrigger>
+                <DataTrigger TargetType="Border" Binding="{Binding TransactionType}" Value="Expense">
+                    <Setter Property="BackgroundColor" Value="{StaticResource ExpenseTint}" />
+                </DataTrigger>
+            </Border.Triggers>
+
+            <Label FontSize="18" HorizontalOptions="Center" VerticalOptions="Center">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding TransactionType}" Value="Income">
+                        <Setter Property="Text" Value="&#8595;" />
+                        <Setter Property="TextColor" Value="{StaticResource Income}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label" Binding="{Binding TransactionType}" Value="Expense">
+                        <Setter Property="Text" Value="&#8593;" />
+                        <Setter Property="TextColor" Value="{StaticResource Expense}" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+        </Border>
+
+        <!-- Description + date -->
+        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+            <Label Style="{StaticResource BodyLabel}" FontAttributes="Bold"
+                   Text="{Binding Description, TargetNullValue='Transaction'}"
+                   LineBreakMode="TailTruncation" />
+            <Label Style="{StaticResource CaptionLabel}"
+                   Text="{Binding TransactionDate, StringFormat='{0:dd MMM, hh:mm tt}'}" />
+        </VerticalStackLayout>
+
+        <!-- Signed, colored amount -->
+        <Label Grid.Column="2" VerticalOptions="Center"
+               FontSize="15" FontAttributes="Bold"
+               Text="{Binding ., Converter={StaticResource TransactionAmountTextConverter}}"
+               TextColor="{Binding TransactionType, Converter={StaticResource TransactionAmountColorConverter}}" />
+
+    </Grid>
+</ContentView>

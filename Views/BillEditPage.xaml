@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.BillEditPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    x:DataType="vm:BillEditViewModel"
+    Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <Label Style="{StaticResource FormLabel}" Text="BILL NAME" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding Name}" Placeholder="e.g. Electricity Bill" />
+
+            <Label Style="{StaticResource FormLabel}" Text="PROVIDER (OPTIONAL)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding Provider}" Placeholder="e.g. Tata Power" />
+
+            <Label Style="{StaticResource FormLabel}" Text="TYPE" />
+            <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding BillTypes}" SelectedItem="{Binding Type}" />
+
+            <Label Style="{StaticResource FormLabel}" Text="AMOUNT" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding Amount}" Keyboard="Numeric" Placeholder="0.00" />
+
+            <Label Style="{StaticResource FormLabel}" Text="DUE DATE" />
+            <DatePicker Style="{StaticResource FormDatePicker}" Date="{Binding DueDate}" />
+
+            <Label Style="{StaticResource FormLabel}" Text="REMIND ME BEFORE (DAYS)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding ReminderDays}" Keyboard="Numeric" />
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Style="{StaticResource BodyLabel}" FontAttributes="Bold"
+                       Text="Recurring bill" VerticalOptions="Center" />
+                <Switch Grid.Column="1" IsToggled="{Binding IsRecurring}" OnColor="{StaticResource Primary}" />
+            </Grid>
+
+            <VerticalStackLayout IsVisible="{Binding IsRecurring}" Spacing="6">
+                <Label Style="{StaticResource FormLabel}" Text="FREQUENCY" />
+                <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding Frequencies}" SelectedItem="{Binding Frequency}" />
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Style="{StaticResource BodyLabel}" FontAttributes="Bold"
+                       Text="Reminder notifications" VerticalOptions="Center" />
+                <Switch Grid.Column="1" IsToggled="{Binding ReminderEnabled}" OnColor="{StaticResource Primary}" />
+            </Grid>
+
+            <Label Style="{StaticResource FormLabel}" Text="NOTES (OPTIONAL)" />
+            <Editor Style="{StaticResource FormEditor}" Text="{Binding Notes}" HeightRequest="80" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Expense}"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}" />
+
+            <Button Style="{StaticResource PrimaryButton}" Text="Save Bill"
+                    Command="{Binding SaveCommand}" Margin="0,10,0,0" />
+            <Button Style="{StaticResource TextButton}" Text="Cancel"
+                    Command="{Binding CancelCommand}" HorizontalOptions="Center" />
+
+            <ActivityIndicator Style="{StaticResource LoadingIndicator}" IsVisible="{Binding IsBusy}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

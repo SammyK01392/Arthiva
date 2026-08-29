@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.AddEditTransactionPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    x:DataType="vm:AddEditTransactionViewModel"
+    Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <!-- Income / Expense toggle -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0" Text="Expense"
+                        Command="{Binding SetTypeCommand}" CommandParameter="Expense">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding TransactionType}" Value="Expense">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Expense}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Button" Binding="{Binding TransactionType}" Value="Income">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
+                            <Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button Grid.Column="1" Text="Income"
+                        Command="{Binding SetTypeCommand}" CommandParameter="Income">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding TransactionType}" Value="Income">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Income}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Button" Binding="{Binding TransactionType}" Value="Expense">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
+                            <Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+            </Grid>
+
+            <Label Style="{StaticResource FormLabel}" Text="AMOUNT" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding Amount}" Keyboard="Numeric"
+                   Placeholder="0.00" FontSize="24" FontAttributes="Bold" />
+
+            <Label Style="{StaticResource FormLabel}" Text="ACCOUNT" />
+            <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding Accounts}"
+                    ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedAccount}" />
+
+            <Label Style="{StaticResource FormLabel}" Text="CATEGORY" />
+            <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding Categories}"
+                    ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedCategory}" />
+
+            <Label Style="{StaticResource FormLabel}" Text="DATE" />
+            <DatePicker Style="{StaticResource FormDatePicker}" Date="{Binding TransactionDate}" />
+
+            <Label Style="{StaticResource FormLabel}" Text="DESCRIPTION (OPTIONAL)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding Description}" Placeholder="e.g. Grocery shopping" />
+
+            <Label Style="{StaticResource FormLabel}" Text="PAYEE (OPTIONAL)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding Payee}" Placeholder="e.g. Big Bazaar" />
+
+            <Label Style="{StaticResource FormLabel}" Text="PAYMENT METHOD" />
+            <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding PaymentMethods}" SelectedItem="{Binding PaymentMethod}" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Expense}"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}" />
+
+            <Button Style="{StaticResource PrimaryButton}" Text="Save Transaction"
+                    Command="{Binding SaveCommand}" Margin="0,10,0,0" />
+            <Button Style="{StaticResource TextButton}" Text="Cancel"
+                    Command="{Binding CancelCommand}" HorizontalOptions="Center"
+                    IsVisible="{Binding IsEditMode}" />
+
+            <ActivityIndicator Style="{StaticResource LoadingIndicator}" IsVisible="{Binding IsBusy}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

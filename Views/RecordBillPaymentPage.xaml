@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.RecordBillPaymentPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    x:DataType="vm:RecordBillPaymentViewModel"
+    Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <!-- Bill reference card -->
+            <Border Style="{StaticResource CardBorder}" BackgroundColor="{StaticResource WarningTint}">
+                <VerticalStackLayout Spacing="2">
+                    <Label Style="{StaticResource CaptionLabel}" Text="PAYING FOR" />
+                    <Label Style="{StaticResource SubtitleLabel}" Text="{Binding Bill.Name}" />
+                    <Label Style="{StaticResource CaptionLabel}"
+                           Text="{Binding Bill.DueDate, StringFormat='Due {0:dd MMM yyyy}'}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Style="{StaticResource FormLabel}" Text="AMOUNT PAID" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding Amount}" Keyboard="Numeric"
+                   FontSize="22" FontAttributes="Bold" />
+
+            <Label Style="{StaticResource FormLabel}" Text="PAYMENT DATE" />
+            <DatePicker Style="{StaticResource FormDatePicker}" Date="{Binding PaymentDate}" />
+
+            <Label Style="{StaticResource FormLabel}" Text="PAID FROM ACCOUNT" />
+            <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding Accounts}"
+                    ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedAccount}" />
+
+            <Label Style="{StaticResource FormLabel}" Text="PAYMENT METHOD" />
+            <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding PaymentMethods}" SelectedItem="{Binding PaymentMethod}" />
+
+            <Label Style="{StaticResource FormLabel}" Text="REFERENCE NO. (OPTIONAL)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding ReferenceNo}" Placeholder="Transaction / UTR number" />
+
+            <Label Style="{StaticResource FormLabel}" Text="NOTES (OPTIONAL)" />
+            <Editor Style="{StaticResource FormEditor}" Text="{Binding Notes}" HeightRequest="70" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Expense}"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}" />
+
+            <Button Style="{StaticResource PrimaryButton}" Text="Confirm Payment"
+                    Command="{Binding SaveCommand}" Margin="0,10,0,0" />
+            <Button Style="{StaticResource TextButton}" Text="Cancel"
+                    Command="{Binding CancelCommand}" HorizontalOptions="Center" />
+
+            <ActivityIndicator Style="{StaticResource LoadingIndicator}" IsVisible="{Binding IsBusy}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

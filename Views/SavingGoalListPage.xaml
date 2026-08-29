@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.SavingGoalListPage"
+    x:Name="PageRoot"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    xmlns:models="clr-namespace:Arthiva.Models"
+    xmlns:components="clr-namespace:Arthiva.Views.Components"
+    x:DataType="vm:SavingGoalListViewModel"
+    Title="Saving Goals">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="+ Add" Command="{Binding GoToAddCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+        <Grid>
+            <ScrollView>
+                <VerticalStackLayout Padding="16" Spacing="0">
+                    <CollectionView ItemsSource="{Binding Goals}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:SavingGoal">
+                                <SwipeView>
+                                    <SwipeView.RightItems>
+                                        <SwipeItems>
+                                            <SwipeItem Text="Edit"
+                                                       BackgroundColor="{StaticResource Primary}"
+                                                       Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
+                                                       CommandParameter="{Binding .}" />
+                                            <SwipeItem Text="Delete"
+                                                       BackgroundColor="{StaticResource Expense}"
+                                                       Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                                       CommandParameter="{Binding .}" />
+                                        </SwipeItems>
+                                    </SwipeView.RightItems>
+
+                                    <Border Style="{StaticResource CardBorder}" Margin="0,6">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToContributeCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+
+                                        <VerticalStackLayout Spacing="8">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <Label Grid.Column="0" Style="{StaticResource SubtitleLabel}" Text="{Binding Name}" />
+                                                <Border Grid.Column="1" Style="{StaticResource ChipBorder}"
+                                                        BackgroundColor="{StaticResource IncomeTint}"
+                                                        IsVisible="{Binding IsCompleted}">
+                                                    <Label Style="{StaticResource ChipLabel}" TextColor="{StaticResource Income}" Text="Completed" />
+                                                </Border>
+                                            </Grid>
+
+                                            <Label Style="{StaticResource CaptionLabel}"
+                                                   Text="{Binding TargetDate, StringFormat='Target: {0:dd MMM yyyy}'}"
+                                                   IsVisible="{Binding TargetDate, Converter={StaticResource IsNotNullConverter}}" />
+
+                                            <ProgressBar ProgressColor="{StaticResource Primary}">
+                                                <ProgressBar.Progress>
+                                                    <MultiBinding Converter="{StaticResource SpentToBudgetRatioConverter}">
+                                                        <Binding Path="SavedAmount" />
+                                                        <Binding Path="TargetAmount" />
+                                                    </MultiBinding>
+                                                </ProgressBar.Progress>
+                                            </ProgressBar>
+
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <Label Grid.Column="0" Style="{StaticResource CaptionLabel}"
+                                                       Text="{Binding SavedAmount, Converter={StaticResource CurrencyConverter}}" />
+                                                <Label Grid.Column="1" Style="{StaticResource CaptionLabel}">
+                                                    <Label.Text>
+                                                        <MultiBinding StringFormat="of {0}">
+                                                            <Binding Path="TargetAmount" Converter="{StaticResource CurrencyConverter}" />
+                                                        </MultiBinding>
+                                                    </Label.Text>
+                                                </Label>
+                                            </Grid>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </SwipeView>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <components:EmptyStateView Icon="&#127919;" Message="No saving goals yet. Tap + Add to start one."
+                IsVisible="{Binding Goals.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+        </Grid>
+    </RefreshView>
+
+</ContentPage>

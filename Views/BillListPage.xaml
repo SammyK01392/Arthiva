@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.BillListPage"
+    x:Name="PageRoot"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    xmlns:models="clr-namespace:Arthiva.Models"
+    xmlns:components="clr-namespace:Arthiva.Views.Components"
+    x:DataType="vm:BillListViewModel"
+    Title="Bills">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="+ Add" Command="{Binding GoToAddCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*" Padding="16,12">
+
+        <HorizontalStackLayout Grid.Row="0" Spacing="8" Margin="0,0,0,12"
+                                BindableLayout.ItemsSource="{Binding FilterOptions}">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                    <Border Style="{StaticResource ChipBorder}">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SelectedFilter}" Value="{Binding .}">
+                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SetFilterCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                        <Label Style="{StaticResource ChipLabel}" Text="{Binding .}" TextColor="{StaticResource TextPrimary}" />
+                    </Border>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </HorizontalStackLayout>
+
+        <RefreshView Grid.Row="1" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+            <Grid>
+                <CollectionView ItemsSource="{Binding Bills}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Bill">
+                            <SwipeView>
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItem Text="Pay"
+                                                   BackgroundColor="{StaticResource Income}"
+                                                   Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToPayCommand}"
+                                                   CommandParameter="{Binding .}" />
+                                        <SwipeItem Text="Delete"
+                                                   BackgroundColor="{StaticResource Expense}"
+                                                   Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                                   CommandParameter="{Binding .}" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+
+                                <Border Style="{StaticResource CardBorder}" Margin="0,6">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
+                                        <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource SubtitleLabel}" Text="{Binding Name}" />
+
+                                        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource ChipBorder}">
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="Paid">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource IncomeTint}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="Pending">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource WarningTint}" />
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Label Style="{StaticResource ChipLabel}" Text="{Binding Status}">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="Paid">
+                                                        <Setter Property="TextColor" Value="{StaticResource Income}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="Pending">
+                                                        <Setter Property="TextColor" Value="{StaticResource Warning}" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </Border>
+
+                                        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource CaptionLabel}"
+                                               Text="{Binding DueDate, StringFormat='Due {0:dd MMM yyyy}'}" />
+
+                                        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                               FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}"
+                                               Text="{Binding Amount, Converter={StaticResource CurrencyConverter}}" />
+                                    </Grid>
+                                </Border>
+                            </SwipeView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <components:EmptyStateView Icon="&#128179;" Message="No bills found."
+                    IsVisible="{Binding Bills.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+            </Grid>
+        </RefreshView>
+
+    </Grid>
+
+</ContentPage>

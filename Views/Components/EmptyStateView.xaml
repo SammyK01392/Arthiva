@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView
+    x:Class="Arthiva.Views.Components.EmptyStateView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Name="Root">
+
+    <VerticalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center" Padding="32,60">
+
+        <Label Text="{Binding Icon, Source={x:Reference Root}}"
+               FontSize="40" HorizontalOptions="Center" Opacity="0.5" />
+
+        <Label Text="{Binding Message, Source={x:Reference Root}}"
+               Style="{StaticResource BodyLabel}" TextColor="{StaticResource TextSecondary}"
+               HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+    </VerticalStackLayout>
+</ContentView>

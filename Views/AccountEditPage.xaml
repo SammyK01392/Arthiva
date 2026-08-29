@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.AccountEditPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    x:DataType="vm:AccountEditViewModel"
+    Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <Label Style="{StaticResource FormLabel}" Text="ACCOUNT NAME" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding Name}" Placeholder="e.g. HDFC Savings" />
+
+            <Label Style="{StaticResource FormLabel}" Text="TYPE" />
+            <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding AccountTypes}" SelectedItem="{Binding Type}" />
+
+            <Label Style="{StaticResource FormLabel}" Text="OPENING BALANCE" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding OpeningBalance}"
+                   Keyboard="Numeric" Placeholder="0.00"
+                   IsEnabled="{Binding IsEditMode, Converter={StaticResource InverseBoolConverter}}" />
+            <Label Style="{StaticResource CaptionLabel}" Text="Opening balance can't be changed after creation."
+                   IsVisible="{Binding IsEditMode}" />
+
+            <Label Style="{StaticResource FormLabel}" Text="BANK NAME (OPTIONAL)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding BankName}" Placeholder="e.g. SBI, HDFC" />
+
+            <Label Style="{StaticResource FormLabel}" Text="ACCOUNT NUMBER (MASKED, OPTIONAL)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding AccountNumber}" Placeholder="XXXX4567" />
+
+            <Label Style="{StaticResource FormLabel}" Text="UPI ID (OPTIONAL)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding UpiId}" Placeholder="name@upi" />
+
+            <Grid ColumnDefinitions="*,Auto" Margin="0,10,0,0">
+                <Label Grid.Column="0" Style="{StaticResource BodyLabel}" FontAttributes="Bold"
+                       Text="Set as default account" VerticalOptions="Center" />
+                <Switch Grid.Column="1" IsToggled="{Binding IsDefault}" OnColor="{StaticResource Primary}" />
+            </Grid>
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Expense}"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}" />
+
+            <Button Style="{StaticResource PrimaryButton}" Text="Save Account"
+                    Command="{Binding SaveCommand}" Margin="0,10,0,0" />
+            <Button Style="{StaticResource TextButton}" Text="Cancel"
+                    Command="{Binding CancelCommand}" HorizontalOptions="Center" />
+
+            <ActivityIndicator Style="{StaticResource LoadingIndicator}" IsVisible="{Binding IsBusy}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
