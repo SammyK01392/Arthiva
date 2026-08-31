@@ -10,10 +10,6 @@
     x:DataType="vm:EmiListViewModel"
     Title="EMIs">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ Add" Command="{Binding GoToAddCommand}" />
-    </ContentPage.ToolbarItems>
-
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
         <Grid>
             <ScrollView>
@@ -99,8 +95,13 @@
                 </VerticalStackLayout>
             </ScrollView>
 
-            <components:EmptyStateView Icon="&#128179;" Message="No EMIs yet. Tap + Add to track a loan."
-                IsVisible="{Binding Emis.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
+                IsVisible="{Binding Emis.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                <Label Text="No EMIs yet. Tap + Add to track a loan." Style="{StaticResource BodyLabel}"
+                       TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <Button Style="{StaticResource FabButton}" Text="+" Command="{Binding GoToAddCommand}" />
         </Grid>
     </RefreshView>
 

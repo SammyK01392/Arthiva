@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.ContactDetailPage"
+    x:Name="PageRoot"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    xmlns:models="clr-namespace:Arthiva.Models"
+    x:DataType="vm:ContactDetailViewModel"
+    Title="{Binding Title}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Share" Command="{Binding ShareReportCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding AppearingCommand}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="16">
+
+                <!-- Contact header -->
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                        BackgroundColor="{StaticResource Primary}" Padding="18">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{Binding Contact.Name}" TextColor="{StaticResource TextOnPrimary}"
+                               FontSize="22" FontAttributes="Bold" />
+                        <Label Text="{Binding Contact.Mobile}" TextColor="{StaticResource TextOnPrimary}"
+                               Opacity="0.9" FontSize="13"
+                               IsVisible="{Binding Contact.Mobile, Converter={StaticResource StringNotEmptyConverter}}" />
+                        <Label Text="{Binding Contact.Email}" TextColor="{StaticResource TextOnPrimary}"
+                               Opacity="0.9" FontSize="13"
+                               IsVisible="{Binding Contact.Email, Converter={StaticResource StringNotEmptyConverter}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Net summary -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Style="{StaticResource CaptionLabel}" Text="You'll Receive" />
+                            <Label FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Income}"
+                                   Text="{Binding TotalYouWillReceive, StringFormat='₹{0:N2}'}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="1" Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Style="{StaticResource CaptionLabel}" Text="You Owe" />
+                            <Label FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Expense}"
+                                   Text="{Binding TotalYouOwe, StringFormat='₹{0:N2}'}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <Border Style="{StaticResource CardBorder}" BackgroundColor="{StaticResource PrimaryTint}">
+                    <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                        <Label Style="{StaticResource CaptionLabel}" Text="NET BALANCE" HorizontalOptions="Center" />
+                        <Label FontSize="22" FontAttributes="Bold" HorizontalOptions="Center"
+                               Text="{Binding NetBalanceLabel}"
+                               TextColor="{Binding NetBalanceColor}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Open records -->
+                <Label Style="{StaticResource SectionHeaderLabel}" Text="RECORDS" />
+                <CollectionView ItemsSource="{Binding Records}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:BorrowLend">
+                            <Border Style="{StaticResource CardBorder}" Margin="0,6">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToRecordTransactionCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Style="{StaticResource BodyLabel}" FontAttributes="Bold" Text="{Binding Type}" />
+                                        <Label Style="{StaticResource CaptionLabel}"
+                                               Text="{Binding GivenDate, StringFormat='Since {0:dd MMM yyyy}'}" />
+                                        <Label Style="{StaticResource CaptionLabel}" Text="{Binding Status}" />
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="1" VerticalOptions="Center" FontAttributes="Bold"
+                                           Text="{Binding PendingAmount, StringFormat='₹{0:N2}'}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Full history -->
+                <Label Style="{StaticResource SectionHeaderLabel}" Text="HISTORY" />
+                <Label Style="{StaticResource CaptionLabel}" Text="Swipe an entry to delete it if it was entered incorrectly." />
+                <CollectionView ItemsSource="{Binding History}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ContactHistoryItem">
+                            <SwipeView>
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItem Text="Delete"
+                                                   BackgroundColor="{StaticResource Expense}"
+                                                   IsVisible="{Binding IsDeletable}"
+                                                   Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteHistoryItemCommand}"
+                                                   CommandParameter="{Binding .}" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,8">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Style="{StaticResource BodyLabel}" FontAttributes="Bold" Text="{Binding MovementLabel}" />
+                                        <Label Style="{StaticResource CaptionLabel}" Text="{Binding Date, StringFormat='{0:dd MMM yyyy}'}" />
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="1" VerticalOptions="Center" FontAttributes="Bold"
+                                           Text="{Binding Amount, StringFormat='₹{0:N2}'}" />
+                                </Grid>
+                            </SwipeView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Button Style="{StaticResource PrimaryButton}" Text="Share Report" Command="{Binding ShareReportCommand}" Margin="0,10" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

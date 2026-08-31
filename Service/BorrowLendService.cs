@@ -8,6 +8,8 @@ public class BorrowLendService : IBorrowLendService
     private readonly IGenericRepository<BorrowLendTransaction> _txnRepo;
     private readonly ITransactionService _transactionService;
 
+    private static readonly string[] ReturnMovementTypes = { "Return", "Receive", "PartialReturn" };
+
     public BorrowLendService(
         IGenericRepository<BorrowLend> repo,
         IGenericRepository<BorrowLendTransaction> txnRepo,
@@ -29,6 +31,12 @@ public class BorrowLendService : IBorrowLendService
             all = all.Where(b => !b.IsClosed).ToList();
 
         return all.OrderByDescending(b => b.GivenDate).ToList();
+    }
+
+    public async Task<List<BorrowLend>> GetByContactAsync(int contactId)
+    {
+        var records = await _repo.FindAsync(b => !b.IsDeleted && b.ContactId == contactId);
+        return records.OrderByDescending(b => b.GivenDate).ToList();
     }
 
     public Task<BorrowLend?> GetByIdAsync(int id)
@@ -84,45 +92,42 @@ public class BorrowLendService : IBorrowLendService
         return await _repo.UpdateAsync(record);
     }
 
-    public async Task<int> RecordTransactionAsync(BorrowLendTransaction txn, int? accountId = null)
+    public async Task<BorrowLendResult> RecordTransactionAsync(BorrowLendTransaction txn, int? accountId = null)
     {
         var borrowLend = await _repo.GetByIdAsync(txn.BorrowLendId);
-        if (borrowLend is null) return 0;
+        if (borrowLend is null)
+            return new BorrowLendResult(false, "Record not found.");
 
-        var isReturnMovement = txn.Type is "Return" or "Receive" or "PartialReturn";
+        if (txn.Amount <= 0)
+            return new BorrowLendResult(false, "Enter a valid amount.");
 
-        if (isReturnMovement)
+        var isReturnMovement = ReturnMovementTypes.Contains(txn.Type);
+
+        // The core fix: never let a Return/Receive/PartialReturn exceed what's
+        // actually still outstanding. Previously this was silently clamped to
+        // zero, which is how a ₹1,000 "Receive" against a ₹500 Lend produced a
+        // record that looked "Completed" with no error shown anywhere.
+        if (isReturnMovement && txn.Amount > borrowLend.PendingAmount)
         {
-            borrowLend.PendingAmount -= txn.Amount;
-            if (borrowLend.PendingAmount < 0) borrowLend.PendingAmount = 0;
+            return new BorrowLendResult(false,
+                $"Amount (₹{txn.Amount:N2}) can't exceed the outstanding balance of ₹{borrowLend.PendingAmount:N2}.");
         }
-        else
+
+        if (!isReturnMovement)
         {
-            // Extra Borrow / Lend against the same record.
-            borrowLend.PendingAmount += txn.Amount;
+            // Extra Borrow/Lend against the same record increases the principal.
             borrowLend.TotalAmount += txn.Amount;
+            borrowLend.UpdatedAt = DateTime.UtcNow;
+            await _repo.UpdateAsync(borrowLend);
         }
-
-        if (borrowLend.PendingAmount <= 0)
-        {
-            borrowLend.Status = "Completed";
-            borrowLend.IsClosed = true;
-        }
-        else if (borrowLend.DueDate.HasValue && borrowLend.DueDate.Value.Date < DateTime.UtcNow.Date)
-        {
-            borrowLend.Status = "Overdue";
-        }
-        else
-        {
-            borrowLend.Status = "Pending";
-        }
-
-        borrowLend.UpdatedAt = DateTime.UtcNow;
-        await _repo.UpdateAsync(borrowLend);
 
         txn.CreatedAt = DateTime.UtcNow;
         txn.UpdatedAt = DateTime.UtcNow;
-        var result = await _txnRepo.AddAsync(txn);
+        await _txnRepo.AddAsync(txn);
+
+        // Recompute from the full ledger rather than incrementing in place —
+        // this is what keeps Records/History/Summary permanently consistent.
+        await RecalculateAsync(borrowLend.Id);
 
         if (accountId.HasValue)
         {
@@ -152,6 +157,56 @@ public class BorrowLendService : IBorrowLendService
             await _txnRepo.UpdateAsync(txn);
         }
 
-        return result;
+        return new BorrowLendResult(true);
+    }
+
+    public async Task<bool> DeleteTransactionAsync(int transactionId)
+    {
+        var txn = await _txnRepo.GetByIdAsync(transactionId);
+        if (txn is null) return false;
+
+        txn.IsDeleted = true;
+        txn.UpdatedAt = DateTime.UtcNow;
+        await _txnRepo.UpdateAsync(txn);
+
+        await RecalculateAsync(txn.BorrowLendId);
+        return true;
+    }
+
+    public async Task RecalculateAsync(int borrowLendId)
+    {
+        var borrowLend = await _repo.GetByIdAsync(borrowLendId);
+        if (borrowLend is null) return;
+
+        var txns = await _txnRepo.FindAsync(t => !t.IsDeleted && t.BorrowLendId == borrowLendId);
+
+        // TotalAmount already reflects the original amount plus any extra
+        // Borrow/Lend advances (grown at the time each was recorded — see
+        // RecordTransactionAsync). PendingAmount is simply what's left of that
+        // principal after every Return/Receive/PartialReturn recorded against it.
+        var totalReturned = txns
+            .Where(t => ReturnMovementTypes.Contains(t.Type))
+            .Sum(t => t.Amount);
+
+        borrowLend.PendingAmount = Math.Max(0, borrowLend.TotalAmount - totalReturned);
+
+        if (borrowLend.PendingAmount <= 0)
+        {
+            borrowLend.Status = "Completed";
+            borrowLend.IsClosed = true;
+        }
+        else if (borrowLend.DueDate.HasValue && borrowLend.DueDate.Value.Date < DateTime.UtcNow.Date)
+        {
+            borrowLend.Status = "Overdue";
+            borrowLend.IsClosed = false;
+        }
+        else
+        {
+            borrowLend.Status = "Pending";
+            borrowLend.IsClosed = false;
+        }
+
+        borrowLend.UpdatedAt = DateTime.UtcNow;
+        await _repo.UpdateAsync(borrowLend);
     }
 }

@@ -48,14 +48,39 @@
                     <CollectionView ItemsSource="{Binding RecentTransactions}">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:Transaction">
-                                <components:TransactionRowView />
+                                <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="12" Padding="4,10">
+                                    <Border Grid.Column="0" WidthRequest="44" HeightRequest="44"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 22"
+                                            BackgroundColor="{StaticResource PrimaryTint}"
+                                            VerticalOptions="Center">
+                                        <Label Text="₹" FontSize="18" TextColor="{StaticResource Primary}"
+                                               HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                        <Label Style="{StaticResource BodyLabel}" FontAttributes="Bold"
+                                               Text="{Binding Description, TargetNullValue='Transaction'}"
+                                               LineBreakMode="TailTruncation" />
+                                        <Label Style="{StaticResource CaptionLabel}"
+                                               Text="{Binding TransactionDate, StringFormat='{0:dd MMM, hh:mm tt}'}" />
+                                        <Label Style="{StaticResource CaptionLabel}" Text="{Binding TransactionType}" />
+                                    </VerticalStackLayout>
+
+                                    <Label Grid.Column="2" VerticalOptions="Center"
+                                           FontSize="15" FontAttributes="Bold"
+                                           Text="{Binding Amount, StringFormat='₹{0:N2}'}" />
+                                </Grid>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
                 </Border>
 
-                <components:EmptyStateView Icon="&#128179;" Message="No transactions yet. Tap Add to record one."
-                    IsVisible="{Binding RecentTransactions.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center" Padding="0,24"
+                    IsVisible="{Binding RecentTransactions.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                    <Label Text="No transactions yet. Tap Add to record one."
+                           Style="{StaticResource BodyLabel}" TextColor="{StaticResource TextSecondary}"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
 
                 <!-- Upcoming bills -->
                 <Label Style="{StaticResource SectionHeaderLabel}" Text="UPCOMING BILLS"

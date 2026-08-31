@@ -1,4 +1,4 @@
-﻿using Arthiva.Services;
+using Arthiva.Services;
 using Arthiva.Views;
 
 namespace Arthiva;
@@ -52,6 +52,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(AccountEditPage), typeof(AccountEditPage));
 
         Routing.RegisterRoute(nameof(CategoryListPage), typeof(CategoryListPage));
+        Routing.RegisterRoute(nameof(CategoryEditPage), typeof(CategoryEditPage));
 
         Routing.RegisterRoute(nameof(BillListPage), typeof(BillListPage));
         Routing.RegisterRoute(nameof(BillEditPage), typeof(BillEditPage));
@@ -73,6 +74,12 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(BudgetEditPage), typeof(BudgetEditPage));
 
         Routing.RegisterRoute(nameof(NotificationListPage), typeof(NotificationListPage));
+
+        Routing.RegisterRoute(nameof(ContactListPage), typeof(ContactListPage));
+        Routing.RegisterRoute(nameof(ContactEditPage), typeof(ContactEditPage));
+        Routing.RegisterRoute(nameof(ContactDetailPage), typeof(ContactDetailPage));
+
+        Routing.RegisterRoute(nameof(UserProfilePage), typeof(UserProfilePage));
 
         // AddEditTransactionPage also needs a flat route for edit-mode
         // navigation from the Transactions list (the tab route is add-only).

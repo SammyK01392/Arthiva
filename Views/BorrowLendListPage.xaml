@@ -9,14 +9,29 @@
     x:DataType="vm:BorrowLendListViewModel"
     Title="Borrow / Lend">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ Add" Command="{Binding GoToAddCommand}" />
-    </ContentPage.ToolbarItems>
+    <Grid>
+    <Grid RowDefinitions="Auto,Auto,*" Padding="16,12">
 
-    <Grid RowDefinitions="Auto,*" Padding="16,12">
+        <!-- Net summary: total you'll receive (Lend) vs total you owe (Borrow) -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,0,0,12">
+            <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Style="{StaticResource CaptionLabel}" Text="You'll Receive" />
+                    <Label FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Income}"
+                           Text="{Binding TotalYouWillReceive, StringFormat='₹{0:N2}'}" />
+                </VerticalStackLayout>
+            </Border>
+            <Border Grid.Column="1" Style="{StaticResource CardBorder}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Style="{StaticResource CaptionLabel}" Text="You Owe" />
+                    <Label FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Expense}"
+                           Text="{Binding TotalYouOwe, StringFormat='₹{0:N2}'}" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
 
-        <!-- Lend / Borrow tabs -->
-        <HorizontalStackLayout Grid.Row="0" Spacing="8" Margin="0,0,0,12"
+        <!-- All / Lend / Borrow tabs -->
+        <HorizontalStackLayout Grid.Row="1" Spacing="8" Margin="0,0,0,12"
                                 BindableLayout.ItemsSource="{Binding Tabs}">
             <BindableLayout.ItemTemplate>
                 <DataTemplate x:DataType="x:String">
@@ -37,7 +52,7 @@
             </BindableLayout.ItemTemplate>
         </HorizontalStackLayout>
 
-        <RefreshView Grid.Row="1" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
             <Grid>
                 <CollectionView ItemsSource="{Binding Records}">
                     <CollectionView.ItemTemplate>
@@ -63,7 +78,7 @@
                                             CommandParameter="{Binding .}" />
                                     </Border.GestureRecognizers>
 
-                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="4">
                                         <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource SubtitleLabel}" Text="{Binding ContactName}" />
 
                                         <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource ChipBorder}">
@@ -87,11 +102,26 @@
                                             </Label>
                                         </Border>
 
-                                        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource CaptionLabel}"
+                                        <!-- Lend/Borrow badge — needed once the "All" tab mixes both types -->
+                                        <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource ChipBorder}"
+                                                HorizontalOptions="Start" Padding="10,2">
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding Record.Type}" Value="Lend">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource ExpenseTint}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Border" Binding="{Binding Record.Type}" Value="Borrow">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource IncomeTint}" />
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Label Style="{StaticResource ChipLabel}" FontSize="10" Text="{Binding Record.Type}"
+                                                   TextColor="{Binding Record.Type, Converter={StaticResource BorrowLendTypeToColorConverter}}" />
+                                        </Border>
+
+                                        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource CaptionLabel}"
                                                Text="{Binding Record.DueDate, StringFormat='Due {0:dd MMM yyyy}'}"
                                                IsVisible="{Binding Record.DueDate, Converter={StaticResource IsNotNullConverter}}" />
 
-                                        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                        <Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                                                FontSize="18" FontAttributes="Bold"
                                                TextColor="{Binding Record.Type, Converter={StaticResource BorrowLendTypeToColorConverter}}"
                                                Text="{Binding Record.PendingAmount, Converter={StaticResource CurrencyConverter}}" />
@@ -102,11 +132,17 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
 
-                <components:EmptyStateView Icon="&#129309;" Message="Nothing here yet."
-                    IsVisible="{Binding Records.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
+                    IsVisible="{Binding Records.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                    <Label Text="Nothing here yet." Style="{StaticResource BodyLabel}"
+                           TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
+                </VerticalStackLayout>
             </Grid>
         </RefreshView>
 
+    </Grid>
+
+        <Button Style="{StaticResource FabButton}" Text="+" Command="{Binding GoToAddCommand}" />
     </Grid>
 
 </ContentPage>

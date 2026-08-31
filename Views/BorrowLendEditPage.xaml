@@ -43,6 +43,8 @@
             <Label Style="{StaticResource FormLabel}" Text="CONTACT" />
             <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding Contacts}"
                     ItemDisplayBinding="{Binding Name}" SelectedItem="{Binding SelectedContact}" />
+            <Button Style="{StaticResource TextButton}" Text="+ Add New Contact"
+                    Command="{Binding GoToAddContactCommand}" HorizontalOptions="Start" />
 
             <Label Style="{StaticResource FormLabel}" Text="AMOUNT" />
             <Entry Style="{StaticResource FormEntry}" Text="{Binding TotalAmount}" Keyboard="Numeric"

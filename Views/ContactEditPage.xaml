@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.ContactEditPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    x:DataType="vm:ContactEditViewModel"
+    Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <Label Style="{StaticResource FormLabel}" Text="NAME" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding Name}" Placeholder="e.g. Rahul Sharma" />
+
+            <Label Style="{StaticResource FormLabel}" Text="MOBILE (OPTIONAL)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding Mobile}" Keyboard="Telephone" Placeholder="10-digit number" />
+
+            <Label Style="{StaticResource FormLabel}" Text="EMAIL (OPTIONAL)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding Email}" Keyboard="Email" />
+
+            <Label Style="{StaticResource FormLabel}" Text="TYPE" />
+            <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding ContactTypes}" SelectedItem="{Binding ContactType}" />
+
+            <Label Style="{StaticResource FormLabel}" Text="UPI ID (OPTIONAL)" />
+            <Entry Style="{StaticResource FormEntry}" Text="{Binding UpiId}" Placeholder="name@upi" />
+
+            <Label Style="{StaticResource FormLabel}" Text="ADDRESS (OPTIONAL)" />
+            <Editor Style="{StaticResource FormEditor}" Text="{Binding Address}" HeightRequest="70" />
+
+            <Label Style="{StaticResource FormLabel}" Text="NOTES (OPTIONAL)" />
+            <Editor Style="{StaticResource FormEditor}" Text="{Binding Notes}" HeightRequest="70" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Expense}"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}" />
+
+            <Button Style="{StaticResource PrimaryButton}" Text="Save Contact"
+                    Command="{Binding SaveCommand}" Margin="0,10,0,0" />
+            <Button Style="{StaticResource TextButton}" Text="Cancel"
+                    Command="{Binding CancelCommand}" HorizontalOptions="Center" />
+
+            <ActivityIndicator Style="{StaticResource LoadingIndicator}" IsVisible="{Binding IsBusy}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

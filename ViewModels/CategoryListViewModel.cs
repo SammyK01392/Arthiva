@@ -37,6 +37,10 @@ public partial class CategoryListViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private static async Task GoToAddAsync()
+        => await Shell.Current.GoToAsync(nameof(CategoryEditViewModel).Replace("ViewModel", "Page"));
+
+    [RelayCommand]
     private async Task ToggleFavoriteAsync(Category category)
     {
         await ExecuteAsync(async () =>

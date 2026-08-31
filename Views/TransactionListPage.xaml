@@ -6,14 +6,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:Arthiva.ViewModels"
     xmlns:models="clr-namespace:Arthiva.Models"
-    xmlns:components="clr-namespace:Arthiva.Views.Components"
     x:DataType="vm:TransactionListViewModel"
     Title="Transactions">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ Add" Command="{Binding GoToAddCommand}" />
-    </ContentPage.ToolbarItems>
-
+    <Grid>
     <Grid RowDefinitions="Auto,*" Padding="16,12">
 
         <!-- Filter chips: All / Income / Expense -->
@@ -53,24 +49,58 @@
                                     </SwipeItems>
                                 </SwipeView.RightItems>
 
-                                <Grid>
+                                <Grid Padding="4,10">
                                     <Grid.GestureRecognizers>
                                         <TapGestureRecognizer
                                             Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
                                             CommandParameter="{Binding .}" />
                                     </Grid.GestureRecognizers>
-                                    <components:TransactionRowView />
+
+                                    <!-- Inlined row (no custom ContentView) -->
+                                    <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="12">
+                                        <Border Grid.Column="0" WidthRequest="44" HeightRequest="44"
+                                                StrokeThickness="0" StrokeShape="RoundRectangle 22"
+                                                BackgroundColor="{StaticResource PrimaryTint}"
+                                                VerticalOptions="Center">
+                                            <Label Text="₹" FontSize="18" TextColor="{StaticResource Primary}"
+                                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+
+                                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                            <Label Style="{StaticResource BodyLabel}" FontAttributes="Bold"
+                                                   Text="{Binding Description, TargetNullValue='Transaction'}"
+                                                   LineBreakMode="TailTruncation" />
+                                            <Label Style="{StaticResource CaptionLabel}"
+                                                   Text="{Binding TransactionDate, StringFormat='{0:dd MMM, hh:mm tt}'}" />
+                                            <Label Style="{StaticResource CaptionLabel}" Text="{Binding TransactionType}" />
+                                        </VerticalStackLayout>
+
+                                        <Label Grid.Column="2" VerticalOptions="Center"
+                                               FontSize="15" FontAttributes="Bold"
+                                               Text="{Binding Amount, StringFormat='₹{0:N2}'}" />
+                                    </Grid>
                                 </Grid>
                             </SwipeView>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
 
-                <components:EmptyStateView Icon="&#128179;" Message="No transactions found."
-                    IsVisible="{Binding Transactions.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+                <!-- Inlined empty state (no custom ContentView) -->
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
+                    IsVisible="{Binding Transactions.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                    <Label Text="No transactions found." Style="{StaticResource BodyLabel}"
+                           TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Expense}"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}"
+                       HorizontalOptions="Center" VerticalOptions="Center" Margin="20" />
             </Grid>
         </RefreshView>
 
+    </Grid>
+
+        <Button Style="{StaticResource FabButton}" Text="+" Command="{Binding GoToAddCommand}" />
     </Grid>
 
 </ContentPage>

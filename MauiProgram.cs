@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Arthiva.Data;
 using Arthiva.Services;
 using Arthiva.ViewModels;
@@ -29,6 +29,10 @@ public static class MauiProgram
         RegisterViewModels(builder.Services);
         RegisterPages(builder.Services);
 
+        // One Shell instance for the app's lifetime — it owns the
+        // notification-badge state shown in the global title bar.
+        builder.Services.AddSingleton<AppShell>();
+
         return builder.Build();
     }
 
@@ -51,7 +55,6 @@ public static class MauiProgram
 
     private static void RegisterServices(IServiceCollection services)
     {
-        services.AddSingleton<AppShell>();
         services.AddSingleton<IAccountService, AccountService>();
         services.AddSingleton<ICategoryService, CategoryService>();
         services.AddSingleton<ITransactionService, TransactionService>();
@@ -81,6 +84,7 @@ public static class MauiProgram
         services.AddTransient<AddEditTransactionViewModel>();
 
         services.AddTransient<CategoryListViewModel>();
+        services.AddTransient<CategoryEditViewModel>();
 
         services.AddTransient<BillListViewModel>();
         services.AddTransient<BillEditViewModel>();
@@ -102,13 +106,19 @@ public static class MauiProgram
         services.AddTransient<BudgetEditViewModel>();
 
         services.AddTransient<NotificationListViewModel>();
+
+        services.AddTransient<ContactListViewModel>();
+        services.AddTransient<ContactEditViewModel>();
+        services.AddTransient<ContactDetailViewModel>();
+
+        services.AddTransient<UserProfileViewModel>();
     }
 
     private static void RegisterPages(IServiceCollection services)
     {
-    //NOTE: these Page classes are created in the next step(XAML Pages).
-    //     Registering them here now means no further MauiProgram changes will
-    //     be needed once those files are added to the Views/ folder.
+        // NOTE: these Page classes are created in the next step (XAML Pages).
+        // Registering them here now means no further MauiProgram changes will
+        // be needed once those files are added to the Views/ folder.
         services.AddTransient<DashboardPage>();
 
         services.AddTransient<AccountListPage>();
@@ -118,6 +128,7 @@ public static class MauiProgram
         services.AddTransient<AddEditTransactionPage>();
 
         services.AddTransient<CategoryListPage>();
+        services.AddTransient<CategoryEditPage>();
 
         services.AddTransient<BillListPage>();
         services.AddTransient<BillEditPage>();
@@ -139,6 +150,12 @@ public static class MauiProgram
         services.AddTransient<BudgetEditPage>();
 
         services.AddTransient<NotificationListPage>();
+
+        services.AddTransient<ContactListPage>();
+        services.AddTransient<ContactEditPage>();
+        services.AddTransient<ContactDetailPage>();
+
+        services.AddTransient<UserProfilePage>();
 
         services.AddTransient<MorePage>();
     }

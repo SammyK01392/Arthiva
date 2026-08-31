@@ -10,10 +10,7 @@
     x:DataType="vm:BillListViewModel"
     Title="Bills">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ Add" Command="{Binding GoToAddCommand}" />
-    </ContentPage.ToolbarItems>
-
+    <Grid>
     <Grid RowDefinitions="Auto,*" Padding="16,12">
 
         <HorizontalStackLayout Grid.Row="0" Spacing="8" Margin="0,0,0,12"
@@ -100,11 +97,17 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
 
-                <components:EmptyStateView Icon="&#128179;" Message="No bills found."
-                    IsVisible="{Binding Bills.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
+                    IsVisible="{Binding Bills.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                    <Label Text="No bills found." Style="{StaticResource BodyLabel}"
+                           TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
+                </VerticalStackLayout>
             </Grid>
         </RefreshView>
 
+    </Grid>
+
+        <Button Style="{StaticResource FabButton}" Text="+" Command="{Binding GoToAddCommand}" />
     </Grid>
 
 </ContentPage>

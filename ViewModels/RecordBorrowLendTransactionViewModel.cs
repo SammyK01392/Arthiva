@@ -106,6 +106,13 @@ public partial class RecordBorrowLendTransactionViewModel : BaseViewModel
             return;
         }
 
+        var isReturnMovement = MovementType is "Return" or "Receive" or "PartialReturn";
+        if (isReturnMovement && Amount > Record.PendingAmount)
+        {
+            ErrorMessage = $"Amount can't exceed the outstanding balance of ₹{Record.PendingAmount:N2}.";
+            return;
+        }
+
         await ExecuteAsync(async () =>
         {
             var txn = new BorrowLendTransaction
@@ -119,7 +126,14 @@ public partial class RecordBorrowLendTransactionViewModel : BaseViewModel
                 Notes = Notes
             };
 
-            await _borrowLendService.RecordTransactionAsync(txn, SelectedAccount?.Id);
+            var result = await _borrowLendService.RecordTransactionAsync(txn, SelectedAccount?.Id);
+
+            if (!result.Success)
+            {
+                ErrorMessage = result.ErrorMessage ?? "Couldn't save this transaction.";
+                return;
+            }
+
             await Shell.Current.GoToAsync("..");
         });
     }

@@ -51,28 +51,32 @@
         </DataTemplate>
     </ContentPage.Resources>
 
-    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
-        <ScrollView>
-            <VerticalStackLayout Padding="16" Spacing="8">
+    <Grid>
+        <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+            <ScrollView>
+                <VerticalStackLayout Padding="16" Spacing="8">
 
-                <Label Style="{StaticResource SectionHeaderLabel}" Text="EXPENSE" />
-                <CollectionView ItemsSource="{Binding ExpenseCategories}"
-                                ItemTemplate="{StaticResource CategoryCardTemplate}">
-                    <CollectionView.ItemsLayout>
-                        <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="8" VerticalItemSpacing="8" />
-                    </CollectionView.ItemsLayout>
-                </CollectionView>
+                    <Label Style="{StaticResource SectionHeaderLabel}" Text="EXPENSE" />
+                    <CollectionView ItemsSource="{Binding ExpenseCategories}"
+                                    ItemTemplate="{StaticResource CategoryCardTemplate}">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="8" VerticalItemSpacing="8" />
+                        </CollectionView.ItemsLayout>
+                    </CollectionView>
 
-                <Label Style="{StaticResource SectionHeaderLabel}" Text="INCOME" />
-                <CollectionView ItemsSource="{Binding IncomeCategories}"
-                                ItemTemplate="{StaticResource CategoryCardTemplate}">
-                    <CollectionView.ItemsLayout>
-                        <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="8" VerticalItemSpacing="8" />
-                    </CollectionView.ItemsLayout>
-                </CollectionView>
+                    <Label Style="{StaticResource SectionHeaderLabel}" Text="INCOME" />
+                    <CollectionView ItemsSource="{Binding IncomeCategories}"
+                                    ItemTemplate="{StaticResource CategoryCardTemplate}">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="8" VerticalItemSpacing="8" />
+                        </CollectionView.ItemsLayout>
+                    </CollectionView>
 
-            </VerticalStackLayout>
-        </ScrollView>
-    </RefreshView>
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+
+        <Button Style="{StaticResource FabButton}" Text="+" Command="{Binding GoToAddCommand}" />
+    </Grid>
 
 </ContentPage>

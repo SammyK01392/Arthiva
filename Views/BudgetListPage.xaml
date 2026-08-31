@@ -9,10 +9,7 @@
     x:DataType="vm:BudgetListViewModel"
     Title="Budgets">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ Add" Command="{Binding GoToAddCommand}" />
-    </ContentPage.ToolbarItems>
-
+    <Grid>
     <Grid RowDefinitions="Auto,*" Padding="16,12">
 
         <!-- Month navigation -->
@@ -93,11 +90,17 @@
                     </VerticalStackLayout>
                 </ScrollView>
 
-                <components:EmptyStateView Icon="&#128176;" Message="No budgets set for this month."
-                    IsVisible="{Binding Budgets.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
+                    IsVisible="{Binding Budgets.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                    <Label Text="No budgets set for this month." Style="{StaticResource BodyLabel}"
+                           TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
+                </VerticalStackLayout>
             </Grid>
         </RefreshView>
 
+    </Grid>
+
+        <Button Style="{StaticResource FabButton}" Text="+" Command="{Binding GoToAddCommand}" />
     </Grid>
 
 </ContentPage>

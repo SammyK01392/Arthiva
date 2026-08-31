@@ -64,6 +64,10 @@
             <Label Style="{StaticResource FormLabel}" Text="PAYMENT METHOD" />
             <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding PaymentMethods}" SelectedItem="{Binding PaymentMethod}" />
 
+            <Label Text="{Binding SuccessMessage}" TextColor="{StaticResource Income}"
+                   IsVisible="{Binding SuccessMessage, Converter={StaticResource StringNotEmptyConverter}}"
+                   HorizontalOptions="Center" FontAttributes="Bold" />
+
             <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Expense}"
                    IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}" />
 

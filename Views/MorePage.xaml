@@ -31,6 +31,18 @@
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="20">
 
+            <!-- Profile -->
+            <Border Style="{StaticResource MenuRowBorder}" StrokeShape="RoundRectangle 12">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnProfileTapped" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <Label Grid.Column="0" Style="{StaticResource MenuIconLabel}" Text="&#128100;" />
+                    <Label Grid.Column="1" Style="{StaticResource MenuTitleLabel}" Text="My Profile" />
+                    <Label Grid.Column="2" Style="{StaticResource MenuChevronLabel}" />
+                </Grid>
+            </Border>
+
             <!-- Money management -->
             <VerticalStackLayout Spacing="1">
                 <Label Style="{StaticResource SectionHeaderLabel}" Text="MONEY MANAGEMENT" Margin="4,0,4,4" />
@@ -90,6 +102,18 @@
                     <Grid ColumnDefinitions="Auto,*,Auto">
                         <Label Grid.Column="0" Style="{StaticResource MenuIconLabel}" Text="&#128176;" />
                         <Label Grid.Column="1" Style="{StaticResource MenuTitleLabel}" Text="Budget" />
+                        <Label Grid.Column="2" Style="{StaticResource MenuChevronLabel}" />
+                    </Grid>
+                </Border>
+                <BoxView Style="{StaticResource Divider}" />
+
+                <Border Style="{StaticResource MenuRowBorder}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnContactsTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <Label Grid.Column="0" Style="{StaticResource MenuIconLabel}" Text="&#128100;" />
+                        <Label Grid.Column="1" Style="{StaticResource MenuTitleLabel}" Text="Contacts" />
                         <Label Grid.Column="2" Style="{StaticResource MenuChevronLabel}" />
                     </Grid>
                 </Border>

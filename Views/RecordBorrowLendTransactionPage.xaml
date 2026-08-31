@@ -27,6 +27,13 @@
             <Label Style="{StaticResource FormLabel}" Text="AMOUNT" />
             <Entry Style="{StaticResource FormEntry}" Text="{Binding Amount}" Keyboard="Numeric"
                    FontSize="22" FontAttributes="Bold" />
+            <Label Style="{StaticResource CaptionLabel}">
+                <Label.Text>
+                    <MultiBinding StringFormat="Outstanding balance: {0}">
+                        <Binding Path="Record.PendingAmount" Converter="{StaticResource CurrencyConverter}" />
+                    </MultiBinding>
+                </Label.Text>
+            </Label>
 
             <Label Style="{StaticResource FormLabel}" Text="DATE" />
             <DatePicker Style="{StaticResource FormDatePicker}" Date="{Binding TransactionDate}" />

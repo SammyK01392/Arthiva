@@ -19,8 +19,16 @@ public class GenericRepository<T> : IGenericRepository<T> where T : new()
     public Task<T?> GetByIdAsync(int id)
         => Db.FindAsync<T>(id);
 
-    public Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate)
-        => Db.Table<T>().Where(predicate).ToListAsync();
+    public async Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate)
+    {
+        // Filtering in-memory (instead of Db.Table<T>().Where(predicate)) sidesteps
+        // any inconsistencies in SQLite-net's expression-to-SQL translation for
+        // compound predicates. Table sizes in this app are small enough that the
+        // extra materialization cost is negligible, and correctness matters more.
+        var all = await Db.Table<T>().ToListAsync();
+        var compiled = predicate.Compile();
+        return all.Where(compiled).ToList();
+    }
 
     public Task<int> AddAsync(T entity)
         => Db.InsertAsync(entity);

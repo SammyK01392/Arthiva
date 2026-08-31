@@ -88,6 +88,10 @@ public partial class BorrowLendEditViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private static async Task GoToAddContactAsync()
+        => await Shell.Current.GoToAsync(nameof(ContactEditViewModel).Replace("ViewModel", "Page"));
+
+    [RelayCommand]
     private async Task SaveAsync()
     {
         if (SelectedContact is null)

@@ -28,9 +28,9 @@ public partial class BorrowLendListViewModel : BaseViewModel
     public ObservableCollection<BorrowLendListItem> Records { get; } = new();
 
     [ObservableProperty]
-    private string selectedTab = "Lend"; // Lend / Borrow
+    private string selectedTab = "All"; // All / Lend / Borrow
 
-    public List<string> Tabs { get; } = new() { "Lend", "Borrow" };
+    public List<string> Tabs { get; } = new() { "All", "Lend", "Borrow" };
 
     partial void OnSelectedTabChanged(string value)
         => _ = LoadAsync();
@@ -46,6 +46,12 @@ public partial class BorrowLendListViewModel : BaseViewModel
     private void SetTab(string tab)
         => SelectedTab = tab;
 
+    [ObservableProperty]
+    private decimal totalYouWillReceive; // sum of pending on your "Lend" records
+
+    [ObservableProperty]
+    private decimal totalYouOwe; // sum of pending on your "Borrow" records
+
     [RelayCommand]
     private async Task LoadAsync()
     {
@@ -54,7 +60,8 @@ public partial class BorrowLendListViewModel : BaseViewModel
             var contacts = await _contactService.GetAllAsync();
             var contactLookup = contacts.ToDictionary(c => c.Id, c => c);
 
-            var records = await _borrowLendService.GetAllAsync(SelectedTab, includeClosed: false);
+            var filterType = SelectedTab == "All" ? null : SelectedTab;
+            var records = await _borrowLendService.GetAllAsync(filterType, includeClosed: false);
 
             Records.Clear();
             foreach (var r in records)
@@ -62,6 +69,12 @@ public partial class BorrowLendListViewModel : BaseViewModel
                 var name = contactLookup.TryGetValue(r.ContactId, out var contact) ? contact.Name : "Unknown";
                 Records.Add(new BorrowLendListItem { Record = r, ContactName = name });
             }
+
+            // Net summary across everything (independent of the active tab filter)
+            // so switching tabs doesn't make these numbers flicker between partial views.
+            var everything = await _borrowLendService.GetAllAsync(null, includeClosed: false);
+            TotalYouWillReceive = everything.Where(r => r.Type == "Lend").Sum(r => r.PendingAmount);
+            TotalYouOwe = everything.Where(r => r.Type == "Borrow").Sum(r => r.PendingAmount);
         });
     }
 

@@ -10,10 +10,6 @@
     x:DataType="vm:AccountListViewModel"
     Title="Accounts">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ Add" Command="{Binding GoToAddCommand}" />
-    </ContentPage.ToolbarItems>
-
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
         <Grid>
 
@@ -42,7 +38,29 @@
                                                 Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
                                                 CommandParameter="{Binding .}" />
                                         </Grid.GestureRecognizers>
-                                        <components:AccountCardView />
+
+                                        <Border Style="{StaticResource CardBorder}" Margin="0,6">
+                                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
+
+                                                <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource SubtitleLabel}"
+                                                       Text="{Binding Name}" />
+
+                                                <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource ChipBorder}"
+                                                        BackgroundColor="{StaticResource PrimaryTint}"
+                                                        IsVisible="{Binding IsDefault}">
+                                                    <Label Style="{StaticResource ChipLabel}" TextColor="{StaticResource Primary}" Text="Default" />
+                                                </Border>
+
+                                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                       Style="{StaticResource CaptionLabel}"
+                                                       Text="{Binding Type}" />
+
+                                                <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                                       FontSize="22" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}"
+                                                       Text="{Binding CurrentBalance, StringFormat='₹{0:N2}'}" />
+
+                                            </Grid>
+                                        </Border>
                                     </Grid>
                                 </SwipeView>
                             </DataTemplate>
@@ -51,12 +69,17 @@
                 </VerticalStackLayout>
             </ScrollView>
 
-            <components:EmptyStateView Icon="&#128179;" Message="No accounts yet. Tap + Add to create one."
-                IsVisible="{Binding Accounts.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
+                IsVisible="{Binding Accounts.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                <Label Text="No accounts yet. Tap + Add to create one." Style="{StaticResource BodyLabel}"
+                       TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
+            </VerticalStackLayout>
 
             <ActivityIndicator Style="{StaticResource LoadingIndicator}"
                                 IsVisible="{Binding IsBusy}"
                                 VerticalOptions="Center" HorizontalOptions="Center" />
+
+            <Button Style="{StaticResource FabButton}" Text="+" Command="{Binding GoToAddCommand}" />
 
         </Grid>
     </RefreshView>

@@ -10,10 +10,6 @@
     x:DataType="vm:SavingGoalListViewModel"
     Title="Saving Goals">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+ Add" Command="{Binding GoToAddCommand}" />
-    </ContentPage.ToolbarItems>
-
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
         <Grid>
             <ScrollView>
@@ -85,8 +81,13 @@
                 </VerticalStackLayout>
             </ScrollView>
 
-            <components:EmptyStateView Icon="&#127919;" Message="No saving goals yet. Tap + Add to start one."
-                IsVisible="{Binding Goals.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
+                IsVisible="{Binding Goals.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                <Label Text="No saving goals yet. Tap + Add to start one." Style="{StaticResource BodyLabel}"
+                       TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <Button Style="{StaticResource FabButton}" Text="+" Command="{Binding GoToAddCommand}" />
         </Grid>
     </RefreshView>
 

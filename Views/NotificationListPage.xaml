@@ -75,8 +75,11 @@
                     </VerticalStackLayout>
                 </ScrollView>
 
-                <components:EmptyStateView Icon="&#128276;" Message="No notifications."
-                    IsVisible="{Binding Notifications.Count, Converter={StaticResource CountToInverseBoolConverter}}" />
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
+                    IsVisible="{Binding Notifications.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                    <Label Text="No notifications." Style="{StaticResource BodyLabel}"
+                           TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
+                </VerticalStackLayout>
             </Grid>
         </RefreshView>
 
