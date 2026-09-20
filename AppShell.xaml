@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+
 <Shell
     x:Class="Arthiva.AppShell"
     x:Name="RootShell"
@@ -7,67 +8,111 @@
     xmlns:views="clr-namespace:Arthiva.Views"
     xmlns:converters="clr-namespace:Arthiva.Converters"
     FlyoutBehavior="Disabled"
+    Shell.NavBarIsVisible="True"
+    Shell.NavBarHasShadow="False"
+    Shell.TabBarBackgroundColor="{StaticResource Surface}"
+    Shell.TabBarForegroundColor="{StaticResource Primary}"
+    Shell.TabBarUnselectedColor="{StaticResource TextSecondary}"
+    Shell.TabBarTitleColor="{StaticResource Primary}"
     BackgroundColor="{StaticResource Background}"
     Title="Arthiva">
 
     <Shell.Resources>
         <ResourceDictionary>
-            <converters:IntGreaterThanZeroConverter x:Key="LocalIntGreaterThanZeroConverter" />
+            <converters:IntGreaterThanZeroConverter
+                x:Key="LocalIntGreaterThanZeroConverter" />
         </ResourceDictionary>
     </Shell.Resources>
 
-    <!--
-        Global title bar for every page: app/page title on the left,
-        a bell icon with an unread-count badge on the right. Tapping the
-        bell navigates to NotificationListPage.
-    -->
+    <!-- ===================================================== -->
+    <!-- TOP APP BAR                                            -->
+    <!-- ===================================================== -->
+
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto" Padding="16,4">
+
+        <Grid
+            Padding="18,0,12,0"
+            ColumnDefinitions="*,Auto"
+            HeightRequest="56">
+
             <Label
                 Grid.Column="0"
                 Text="{Binding Title, Source={x:Reference RootShell}}"
                 Style="{StaticResource TitleLabel}"
+                FontSize="20"
+                FontAttributes="Bold"
+                TextColor="{StaticResource TextPrimary}"
                 VerticalOptions="Center" />
 
-            <Grid Grid.Column="1" WidthRequest="40" HeightRequest="40">
+            <Grid
+                Grid.Column="1"
+                WidthRequest="44"
+                HeightRequest="44"
+                HorizontalOptions="End"
+                VerticalOptions="Center">
+
                 <Grid.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnBellTapped" />
+                    <TapGestureRecognizer
+                        Tapped="OnBellTapped" />
                 </Grid.GestureRecognizers>
 
-                <Label
-                    Text="&#128276;"
-                    FontSize="22"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center" />
-
                 <Border
-                    IsVisible="{Binding UnreadNotificationCount, Source={x:Reference RootShell}, Converter={StaticResource LocalIntGreaterThanZeroConverter}}"
-                    BackgroundColor="{StaticResource Expense}"
-                    StrokeThickness="0"
-                    StrokeShape="RoundRectangle 8"
-                    WidthRequest="16"
-                    HeightRequest="16"
-                    HorizontalOptions="End"
-                    VerticalOptions="Start"
-                    Padding="0">
+                    BackgroundColor="{StaticResource Background}"
+                    Stroke="{StaticResource Border}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 22"
+                    WidthRequest="42"
+                    HeightRequest="42"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center">
+
                     <Label
-                        Text="{Binding UnreadNotificationCount, Source={x:Reference RootShell}}"
-                        TextColor="White"
-                        FontSize="10"
-                        FontAttributes="Bold"
+                        Text="🔔"
+                        FontSize="19"
                         HorizontalOptions="Center"
                         VerticalOptions="Center" />
+
                 </Border>
+
+                <Border
+                    IsVisible="{Binding UnreadNotificationCount,
+                        Source={x:Reference RootShell},
+                        Converter={StaticResource LocalIntGreaterThanZeroConverter}}"
+                    BackgroundColor="{StaticResource Expense}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 9"
+                    WidthRequest="18"
+                    HeightRequest="18"
+                    HorizontalOptions="End"
+                    VerticalOptions="Start"
+                    TranslationX="-1"
+                    TranslationY="1"
+                    Padding="0">
+
+                    <Label
+                        Text="{Binding UnreadNotificationCount,
+                            Source={x:Reference RootShell}}"
+                        TextColor="White"
+                        FontSize="9"
+                        FontAttributes="Bold"
+                        HorizontalTextAlignment="Center"
+                        VerticalTextAlignment="Center"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+
+                </Border>
+
             </Grid>
+
         </Grid>
+
     </Shell.TitleView>
 
-    <!--
-        Bottom tabs: Home, Transactions, Add (quick-add action, opens the
-        Add Transaction form modally), Accounts, More. Bills/EMI/BorrowLend/
-        SavingGoal/Budget/Categories/Settings live inside MorePage.
-        Notifications are reached via the bell in the title bar above.
-    -->
+
+    <!-- ===================================================== -->
+    <!-- BOTTOM NAVIGATION                                      -->
+    <!-- ===================================================== -->
+
     <TabBar>
 
         <ShellContent
@@ -82,11 +127,12 @@
             ContentTemplate="{DataTemplate views:TransactionListPage}"
             Route="TransactionListPage" />
 
+        <!-- Converters — available by key in every page's bindings 
         <ShellContent
             Title="Add"
             Icon="tab_add.png"
             ContentTemplate="{DataTemplate views:AddEditTransactionPage}"
-            Route="QuickAddTransactionPage" />
+            Route="AddEditTransactionPage" /> -->
 
         <ShellContent
             Title="Accounts"

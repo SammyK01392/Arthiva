@@ -6,103 +6,122 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:Arthiva.ViewModels"
     xmlns:models="clr-namespace:Arthiva.Models"
-    xmlns:components="clr-namespace:Arthiva.Views.Components"
     x:DataType="vm:EmiListViewModel"
     Title="EMIs">
 
-    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
-        <Grid>
-            <ScrollView>
-                <VerticalStackLayout Padding="16" Spacing="0">
-                    <CollectionView ItemsSource="{Binding Emis}">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="models:EmiMaster">
-                                <SwipeView>
-                                    <SwipeView.RightItems>
-                                        <SwipeItems>
-                                            <SwipeItem Text="Pay"
-                                                       BackgroundColor="{StaticResource Income}"
-                                                       Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToPayCommand}"
-                                                       CommandParameter="{Binding .}" />
-                                            <SwipeItem Text="Delete"
-                                                       BackgroundColor="{StaticResource Expense}"
-                                                       Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
-                                                       CommandParameter="{Binding .}" />
-                                        </SwipeItems>
-                                    </SwipeView.RightItems>
+    <Grid RowDefinitions="*">
 
-                                    <Border Style="{StaticResource CardBorder}" Margin="0,6">
-                                        <Border.GestureRecognizers>
-                                            <TapGestureRecognizer
-                                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
-                                                CommandParameter="{Binding .}" />
-                                        </Border.GestureRecognizers>
+        <RefreshView
+            Grid.Row="0"
+            IsRefreshing="{Binding IsBusy}"
+            Command="{Binding LoadCommand}">
 
-                                        <VerticalStackLayout Spacing="8">
-                                            <Grid ColumnDefinitions="*,Auto">
-                                                <Label Grid.Column="0" Style="{StaticResource SubtitleLabel}" Text="{Binding Title}" />
-                                                <Border Grid.Column="1" Style="{StaticResource ChipBorder}">
-                                                    <Border.Triggers>
-                                                        <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="Completed">
-                                                            <Setter Property="BackgroundColor" Value="{StaticResource IncomeTint}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="Active">
-                                                            <Setter Property="BackgroundColor" Value="{StaticResource PrimaryTint}" />
-                                                        </DataTrigger>
-                                                    </Border.Triggers>
-                                                    <Label Style="{StaticResource ChipLabel}" Text="{Binding Status}">
-                                                        <Label.Triggers>
-                                                            <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="Completed">
-                                                                <Setter Property="TextColor" Value="{StaticResource Income}" />
-                                                            </DataTrigger>
-                                                            <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="Active">
-                                                                <Setter Property="TextColor" Value="{StaticResource Primary}" />
-                                                            </DataTrigger>
-                                                        </Label.Triggers>
-                                                    </Label>
-                                                </Border>
-                                            </Grid>
+            <CollectionView
+                ItemsSource="{Binding Emis}"
+                SelectionMode="None"
+                Margin="16,8,16,0">
 
-                                            <Label Style="{StaticResource CaptionLabel}" Text="{Binding LoanProvider}" />
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        Spacing="8"
+                        Margin="0,60,0,0">
 
-                                            <ProgressBar ProgressColor="{StaticResource Primary}">
-                                                <ProgressBar.Progress>
-                                                    <MultiBinding Converter="{StaticResource InstallmentRatioConverter}">
-                                                        <Binding Path="PaidInstallment" />
-                                                        <Binding Path="TotalInstallment" />
-                                                    </MultiBinding>
-                                                </ProgressBar.Progress>
-                                            </ProgressBar>
+                        <Label Text="No EMIs yet." Style="{StaticResource BodyLabel}"
+                               TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
+                        <Label Text="Tap + to add an EMI." Style="{StaticResource CaptionLabel}"
+                               TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
 
-                                            <Grid ColumnDefinitions="*,Auto">
-                                                <Label Grid.Column="0" Style="{StaticResource CaptionLabel}">
-                                                    <Label.Text>
-                                                        <MultiBinding StringFormat="{}{0} of {1} installments paid">
-                                                            <Binding Path="PaidInstallment" />
-                                                            <Binding Path="TotalInstallment" />
-                                                        </MultiBinding>
-                                                    </Label.Text>
-                                                </Label>
-                                                <Label Grid.Column="1" FontAttributes="Bold"
-                                                       Text="{Binding EmiAmount, Converter={StaticResource CurrencyConverter}}" />
-                                            </Grid>
-                                        </VerticalStackLayout>
-                                    </Border>
-                                </SwipeView>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </VerticalStackLayout>
-            </ScrollView>
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
 
-            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
-                IsVisible="{Binding Emis.Count, Converter={StaticResource CountToInverseBoolConverter}}">
-                <Label Text="No EMIs yet. Tap + Add to track a loan." Style="{StaticResource BodyLabel}"
-                       TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
-            </VerticalStackLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:EmiMaster">
 
-            <Button Style="{StaticResource FabButton}" Text="+" Command="{Binding GoToAddCommand}" />
-        </Grid>
-    </RefreshView>
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems Mode="Reveal">
+                                    <SwipeItem Text="💰 Pay" BackgroundColor="{StaticResource Income}"
+                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToPayCommand}"
+                                               CommandParameter="{Binding .}" />
+                                    <SwipeItem Text="🗑 Delete" BackgroundColor="{StaticResource Expense}"
+                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                               CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+
+                            <!-- Single tap target: goes to Detail page only -->
+                            <Border Style="{StaticResource ListCardBorder}" Margin="0,6">
+
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToDetailCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+
+                                <VerticalStackLayout Spacing="10">
+
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Style="{StaticResource SubtitleLabel}"
+                                               Text="{Binding Title}" VerticalOptions="Center" />
+                                        <Border Grid.Column="1" Style="{StaticResource ChipBorder}" Padding="10,4">
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="Completed">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource IncomeTint}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="Active">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource PrimaryTint}" />
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Label Style="{StaticResource ChipLabel}" Text="{Binding Status}">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="Completed">
+                                                        <Setter Property="TextColor" Value="{StaticResource Income}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="Active">
+                                                        <Setter Property="TextColor" Value="{StaticResource Primary}" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </Border>
+                                    </Grid>
+
+                                    <Label Style="{StaticResource CaptionLabel}" Text="{Binding LoanProvider}"
+                                           IsVisible="{Binding LoanProvider, Converter={StaticResource StringNotEmptyConverter}}" />
+
+                                    <ProgressBar HeightRequest="8" ProgressColor="{StaticResource Primary}"
+                                                 Progress="{Binding ProgressRatio}" />
+
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Style="{StaticResource CaptionLabel}"
+                                               Text="{Binding InstallmentSummary}" />
+                                        <Label Grid.Column="1" FontAttributes="Bold"
+                                               Text="{Binding EmiAmount, Converter={StaticResource CurrencyConverter}}" />
+                                    </Grid>
+
+                                </VerticalStackLayout>
+
+                            </Border>
+
+                        </SwipeView>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+        </RefreshView>
+
+        <Button
+            Grid.Row="0"
+            Style="{StaticResource FabButton}"
+            Text="+"
+            Command="{Binding GoToAddCommand}"
+            HorizontalOptions="End"
+            VerticalOptions="End"
+            Margin="0,0,20,20" />
+
+    </Grid>
 
 </ContentPage>

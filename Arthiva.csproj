@@ -118,6 +118,9 @@
 	  <MauiXaml Update="Views\EmiListPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+		<MauiXaml Update="Views\EmiDetailPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 	  <MauiXaml Update="Views\Components\EmptyStateView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

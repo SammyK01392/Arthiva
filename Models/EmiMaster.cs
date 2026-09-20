@@ -39,6 +39,20 @@ public class EmiMaster
     public int RemainingInstallment => TotalInstallment - PaidInstallment;
 
     /// <summary>
+    /// Paid/Total ratio (0.0–1.0) for progress bar binding — avoids MultiBinding,
+    /// which renders ProgressBar invisible inside CollectionView on Windows/WinUI.
+    /// </summary>
+    public double ProgressRatio => TotalInstallment > 0
+        ? Math.Clamp((double)PaidInstallment / TotalInstallment, 0d, 1d)
+        : 0d;
+
+    /// <summary>
+    /// "3 of 12 installments paid" — precomputed to avoid MultiBinding
+    /// with StringFormat, which has the same Windows/WinUI rendering bug.
+    /// </summary>
+    public string InstallmentSummary => $"{PaidInstallment} of {TotalInstallment} installments paid";
+
+    /// <summary>
     /// Due day of every month (1-31)
     /// </summary>
     public int DueDay { get; set; }

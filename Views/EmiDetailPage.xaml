@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.EmiDetailPage"
+    x:Name="PageRoot"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    xmlns:models="clr-namespace:Arthiva.Models"
+    x:DataType="vm:EmiDetailViewModel"
+    Title="{Binding Emi.Title}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Edit" Command="{Binding EditEmiCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding AppearingCommand}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="14">
+
+                <!-- Loan header -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Style="{StaticResource CaptionLabel}" Text="{Binding Emi.LoanProvider}" />
+                        <Label Style="{StaticResource TitleLabel}" Text="{Binding Emi.Title}" />
+                        <Label Style="{StaticResource CaptionLabel}" Text="{Binding Emi.InstallmentSummary}" />
+                        <ProgressBar ProgressColor="{StaticResource Primary}"
+                                     Progress="{Binding Emi.ProgressRatio}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Paid / Pending summary -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Border Grid.Column="0" Style="{StaticResource CardBorder}" BackgroundColor="{StaticResource IncomeTint}">
+                        <VerticalStackLayout>
+                            <Label Style="{StaticResource CaptionLabel}" Text="PAID" />
+                            <Label FontAttributes="Bold" FontSize="18" TextColor="{StaticResource Income}"
+                                   Text="{Binding PaidAmount, Converter={StaticResource CurrencyConverter}}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="1" Style="{StaticResource CardBorder}" BackgroundColor="{StaticResource ExpenseTint}">
+                        <VerticalStackLayout>
+                            <Label Style="{StaticResource CaptionLabel}" Text="PENDING" />
+                            <Label FontAttributes="Bold" FontSize="18" TextColor="{StaticResource Expense}"
+                                   Text="{Binding PendingAmount, Converter={StaticResource CurrencyConverter}}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- Overdue banner -->
+                <Border Style="{StaticResource CardBorder}" BackgroundColor="{StaticResource ExpenseTint}"
+                        IsVisible="{Binding OverdueCount, Converter={StaticResource CountToBoolConverter}}">
+                    <Label TextColor="{StaticResource Expense}" FontAttributes="Bold" Text="{Binding OverdueText}" />
+                </Border>
+
+                <Button Style="{StaticResource PrimaryButton}" Text="Record Payment" Command="{Binding PayCommand}" />
+
+                <!-- Tab toggle -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8" x:Name="TabToggle">
+                    <Button x:Name="PaymentsTabButton" Grid.Column="0" Text="Payment History"
+                            Style="{StaticResource TextButton}" Clicked="OnPaymentsTabClicked" />
+                    <Button x:Name="ScheduleTabButton" Grid.Column="1" Text="Schedule"
+                            Style="{StaticResource TextButton}" Clicked="OnScheduleTabClicked" />
+                </Grid>
+
+                <!-- Payment history (editable) -->
+                <VerticalStackLayout x:Name="PaymentsSection" Spacing="0">
+                    <CollectionView ItemsSource="{Binding Payments}">
+                        <CollectionView.EmptyView>
+                            <Label Style="{StaticResource CaptionLabel}" Text="No payments recorded yet." HorizontalOptions="Center" Margin="0,20" />
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:EmiPayment">
+                                <SwipeView>
+                                    <SwipeView.RightItems>
+                                        <SwipeItems>
+                                            <SwipeItem Text="Edit"
+                                                       BackgroundColor="{StaticResource Primary}"
+                                                       Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.EditPaymentCommand}"
+                                                       CommandParameter="{Binding .}" />
+                                            <SwipeItem Text="Delete"
+                                                       BackgroundColor="{StaticResource Expense}"
+                                                       Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeletePaymentCommand}"
+                                                       CommandParameter="{Binding .}" />
+                                        </SwipeItems>
+                                    </SwipeView.RightItems>
+                                    <Border Style="{StaticResource ListCardBorder}" Margin="0,4">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                <Label FontAttributes="Bold" Text="{Binding PaymentDate, StringFormat='{0:dd MMM yyyy}'}" />
+                                                <Label Style="{StaticResource CaptionLabel}" Text="{Binding Remarks}"
+                                                       IsVisible="{Binding Remarks, Converter={StaticResource StringNotEmptyConverter}}" />
+                                                <Label Style="{StaticResource CaptionLabel}" TextColor="{StaticResource Expense}"
+                                                       Text="{Binding PenaltyText}"
+                                                       IsVisible="{Binding PenaltyAmount, Converter={StaticResource GreaterThanZeroConverter}}" />
+                                            </VerticalStackLayout>
+                                            <Label Grid.Column="1" FontAttributes="Bold" VerticalOptions="Center"
+                                                   Text="{Binding Amount, Converter={StaticResource CurrencyConverter}}" />
+                                        </Grid>
+                                    </Border>
+                                </SwipeView>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <!-- Month-by-month schedule -->
+                <VerticalStackLayout x:Name="ScheduleSection" Spacing="0" IsVisible="False">
+                    <CollectionView ItemsSource="{Binding Schedule}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:EmiInstallmentScheduleItem">
+                                <Border Style="{StaticResource ListCardBorder}" Margin="0,4">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.PayInstallmentCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                                        <Label Grid.Column="0" FontAttributes="Bold" VerticalOptions="Center"
+                                               Text="{Binding InstallmentNo, StringFormat='#{0}'}" WidthRequest="34" />
+
+                                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                            <Label FontAttributes="Bold" Text="{Binding DueDate, StringFormat='Due {0:dd MMM yyyy}'}" />
+                                            <Label Style="{StaticResource CaptionLabel}"
+                                                   Text="{Binding PaymentDate, StringFormat='Paid {0:dd MMM yyyy}'}"
+                                                   IsVisible="{Binding PaymentDate, Converter={StaticResource IsNotNullConverter}}" />
+                                        </VerticalStackLayout>
+
+                                        <Label Grid.Column="2" VerticalOptions="Center" FontAttributes="Bold"
+                                               Text="{Binding ExpectedAmount, Converter={StaticResource CurrencyConverter}}" />
+
+                                        <Border Grid.Column="3" Style="{StaticResource ChipBorder}" VerticalOptions="Center">
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="Paid">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource IncomeTint}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="Pending">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource PrimaryTint}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="Overdue">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource ExpenseTint}" />
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Label Style="{StaticResource ChipLabel}" Text="{Binding Status}">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="Paid">
+                                                        <Setter Property="TextColor" Value="{StaticResource Income}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="Pending">
+                                                        <Setter Property="TextColor" Value="{StaticResource Primary}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="Overdue">
+                                                        <Setter Property="TextColor" Value="{StaticResource Expense}" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <ActivityIndicator Style="{StaticResource LoadingIndicator}" IsVisible="{Binding IsBusy}" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

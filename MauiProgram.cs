@@ -93,6 +93,7 @@ public static class MauiProgram
         services.AddTransient<EmiListViewModel>();
         services.AddTransient<EmiEditViewModel>();
         services.AddTransient<RecordEmiPaymentViewModel>();
+        services.AddTransient<EmiDetailViewModel>();
 
         services.AddTransient<BorrowLendListViewModel>();
         services.AddTransient<BorrowLendEditViewModel>();
@@ -137,6 +138,7 @@ public static class MauiProgram
         services.AddTransient<EmiListPage>();
         services.AddTransient<EmiEditPage>();
         services.AddTransient<RecordEmiPaymentPage>();
+        services.AddTransient<EmiDetailPage>();
 
         services.AddTransient<BorrowLendListPage>();
         services.AddTransient<BorrowLendEditPage>();

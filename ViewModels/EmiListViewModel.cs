@@ -23,9 +23,11 @@ public partial class EmiListViewModel : BaseViewModel
         await ExecuteAsync(async () =>
         {
             var emis = await _emiService.GetAllAsync(includeCompleted: true);
+            System.Diagnostics.Debug.WriteLine($"[EMI DEBUG] Loaded {emis.Count} EMIs from service");
             Emis.Clear();
             foreach (var e in emis)
                 Emis.Add(e);
+            System.Diagnostics.Debug.WriteLine($"[EMI DEBUG] Emis collection now has {Emis.Count} items");
         });
     }
 
@@ -55,5 +57,12 @@ public partial class EmiListViewModel : BaseViewModel
             await _emiService.SoftDeleteAsync(emi.Id);
             Emis.Remove(emi);
         });
+    }
+
+    [RelayCommand]
+    private static async Task GoToDetailAsync(EmiMaster emi)
+    {
+        var route = nameof(EmiDetailViewModel).Replace("ViewModel", "Page");
+        await Shell.Current.GoToAsync($"{route}?EmiId={emi.Id}");
     }
 }

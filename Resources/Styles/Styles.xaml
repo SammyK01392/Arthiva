@@ -141,6 +141,17 @@
         </Setter>
     </Style>
 
+    <!-- Same look as CardBorder, but no Shadow — use this specifically inside
+         CollectionView.ItemTemplate. On Windows/WinUI, a Border with Shadow
+         inside a CollectionView item renders invisible (known MAUI bug). -->
+    <Style x:Key="ListCardBorder" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
+        <Setter Property="Stroke" Value="{StaticResource Border}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 16" />
+        <Setter Property="Padding" Value="16" />
+    </Style>
+
     <!-- Flat form-field wrapper: same shape as CardBorder but no shadow, used to group inputs -->
     <Style x:Key="FieldGroupBorder" TargetType="Border">
         <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />

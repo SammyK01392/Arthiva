@@ -26,6 +26,21 @@
     <Color x:Key="IncomeTint">#1A16A34A</Color>
     <Color x:Key="ExpenseTint">#1ADC2626</Color>
     <Color x:Key="WarningTint">#1AF59E0B</Color>
+    <!-- Navigation -->
+
+    <Color x:Key="TabBarBackground">#FFFFFF</Color>
+
+    <Color x:Key="TabBarActive">#F97316</Color>
+
+    <Color x:Key="TabBarInactive">#94A3B8</Color>
+
+    <Color x:Key="TabBarBorder">#EEF2F7</Color>
+
+    <Color x:Key="AddButtonBackground">#F97316</Color>
+
+    <Color x:Key="AddButtonPressed">#EA580C</Color>
+
+    <Color x:Key="AddButtonIcon">#FFFFFF</Color>
 
     <!-- Brushes (for properties that need a Brush rather than a Color, e.g. Border/Background) -->
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />
