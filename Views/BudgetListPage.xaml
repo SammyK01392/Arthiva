@@ -9,98 +9,89 @@
     x:DataType="vm:BudgetListViewModel"
     Title="Budgets">
 
-    <Grid>
-    <Grid RowDefinitions="Auto,*" Padding="16,12">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- Windows पर CollectionView.ItemTemplate के अंदर Shadow वाला Border
+                 recycle होने पर corrupt/invisible render देता है, इसलिए list
+                 items के लिए Shadow-रहित variant. Shadow चाहिए हो तो वो सिर्फ
+                 non-virtualized जगह (जैसे detail page) पर CardBorder इस्तेमाल करें. -->
+            <Style x:Key="CardBorderFlat" TargetType="Border" BasedOn="{StaticResource CardBorder}">
+                <Setter Property="Shadow" Value="{x:Null}" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
-        <!-- Month navigation -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
-            <Button Grid.Column="0" Text="&#8249;" Style="{StaticResource SecondaryButton}"
+    <Grid>
+        <Grid RowDefinitions="Auto,*" Padding="16,12">
+
+            <!-- Month navigation -->
+            <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
+                <Button Grid.Column="0" Text="&#8249;" Style="{StaticResource SecondaryButton}"
                     WidthRequest="48" HeightRequest="48" Padding="0"
                     Command="{Binding PreviousMonthCommand}" />
-            <Label Grid.Column="1" Style="{StaticResource SubtitleLabel}" Text="{Binding MonthYearLabel}"
+                <Label Grid.Column="1" Style="{StaticResource SubtitleLabel}" Text="{Binding MonthYearLabel}"
                    HorizontalOptions="Center" VerticalOptions="Center" />
-            <Button Grid.Column="2" Text="&#8250;" Style="{StaticResource SecondaryButton}"
+                <Button Grid.Column="2" Text="&#8250;" Style="{StaticResource SecondaryButton}"
                     WidthRequest="48" HeightRequest="48" Padding="0"
                     Command="{Binding NextMonthCommand}" />
-        </Grid>
+            </Grid>
 
-        <RefreshView Grid.Row="1" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
-            <Grid>
-                <ScrollView>
-                    <VerticalStackLayout Spacing="0">
-                        <CollectionView ItemsSource="{Binding Budgets}">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="vm:BudgetListItem">
-                                    <SwipeView>
-                                        <SwipeView.RightItems>
-                                            <SwipeItems>
-                                                <SwipeItem Text="Edit"
+            <RefreshView Grid.Row="1" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+                <Grid>
+                    <ScrollView>
+                        <VerticalStackLayout Spacing="0">
+                            <CollectionView ItemsSource="{Binding Budgets}">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:BudgetListItem">
+                                        <SwipeView>
+                                            <SwipeView.RightItems>
+                                                <SwipeItems>
+                                                    <SwipeItem Text="Edit"
                                                            BackgroundColor="{StaticResource Primary}"
                                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
                                                            CommandParameter="{Binding .}" />
-                                                <SwipeItem Text="Delete"
+                                                    <SwipeItem Text="Delete"
                                                            BackgroundColor="{StaticResource Expense}"
                                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
                                                            CommandParameter="{Binding .}" />
-                                            </SwipeItems>
-                                        </SwipeView.RightItems>
+                                                </SwipeItems>
+                                            </SwipeView.RightItems>
 
-                                        <Border Style="{StaticResource CardBorder}" Margin="0,6">
-                                            <VerticalStackLayout Spacing="8">
-                                                <Grid ColumnDefinitions="*,Auto">
-                                                    <Label Grid.Column="0" Style="{StaticResource SubtitleLabel}" Text="{Binding CategoryName}" />
-                                                    <Label Grid.Column="1" FontAttributes="Bold">
-                                                        <Label.Text>
-                                                            <MultiBinding StringFormat="{}{0} / {1}">
-                                                                <Binding Path="Budget.SpentAmount" Converter="{StaticResource CurrencyConverter}" />
-                                                                <Binding Path="Budget.BudgetAmount" Converter="{StaticResource CurrencyConverter}" />
-                                                            </MultiBinding>
-                                                        </Label.Text>
-                                                    </Label>
-                                                </Grid>
+                                            <!-- Shadow हटाकर CardBorderFlat: Windows ItemTemplate bug avoid -->
+                                            <Border Style="{StaticResource CardBorderFlat}" Margin="0,6">
+                                                <VerticalStackLayout Spacing="8">
+                                                    <Grid ColumnDefinitions="*,Auto">
+                                                        <Label Grid.Column="0" Style="{StaticResource SubtitleLabel}" Text="{Binding CategoryName}" />
+                                                        <!-- MultiBinding हटाकर single computed property -->
+                                                        <Label Grid.Column="1" FontAttributes="Bold" Text="{Binding AmountProgressText}" />
+                                                    </Grid>
 
-                                                <ProgressBar>
-                                                    <ProgressBar.Progress>
-                                                        <MultiBinding Converter="{StaticResource SpentToBudgetRatioConverter}">
-                                                            <Binding Path="Budget.SpentAmount" />
-                                                            <Binding Path="Budget.BudgetAmount" />
-                                                        </MultiBinding>
-                                                    </ProgressBar.Progress>
-                                                    <ProgressBar.ProgressColor>
-                                                        <MultiBinding Converter="{StaticResource SpentToBudgetColorConverter}">
-                                                            <Binding Path="Budget.SpentAmount" />
-                                                            <Binding Path="Budget.BudgetAmount" />
-                                                        </MultiBinding>
-                                                    </ProgressBar.ProgressColor>
-                                                </ProgressBar>
+                                                    <!-- MultiBinding हटाकर single computed properties -->
+                                                    <ProgressBar Progress="{Binding SpentRatio}"
+                                                             ProgressColor="{Binding SpentRatioColor}" />
 
-                                                <Label Style="{StaticResource CaptionLabel}">
-                                                    <Label.Text>
-                                                        <MultiBinding StringFormat="{}{0} remaining">
-                                                            <Binding Path="Budget.RemainingAmount" Converter="{StaticResource CurrencyConverter}" />
-                                                        </MultiBinding>
-                                                    </Label.Text>
-                                                </Label>
-                                            </VerticalStackLayout>
-                                        </Border>
-                                    </SwipeView>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                    </VerticalStackLayout>
-                </ScrollView>
+                                                    <!-- MultiBinding हटाकर single computed property -->
+                                                    <Label Style="{StaticResource CaptionLabel}" Text="{Binding RemainingText}" />
+                                                </VerticalStackLayout>
+                                            </Border>
+                                        </SwipeView>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </ScrollView>
 
-                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
+                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
                     IsVisible="{Binding Budgets.Count, Converter={StaticResource CountToInverseBoolConverter}}">
-                    <Label Text="No budgets set for this month." Style="{StaticResource BodyLabel}"
+                        <Label Text="No budgets set for this month." Style="{StaticResource BodyLabel}"
                            TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
-                </VerticalStackLayout>
-            </Grid>
-        </RefreshView>
+                    </VerticalStackLayout>
+                </Grid>
+            </RefreshView>
 
-    </Grid>
+        </Grid>
 
         <Button Style="{StaticResource FabButton}" Text="+" Command="{Binding GoToAddCommand}" />
     </Grid>
 
-</ContentPage>
+</ContentPage>  
