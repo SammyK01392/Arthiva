@@ -1,3 +1,5 @@
+using Arthiva.Services;
+
 namespace Arthiva.Views;
 
 public partial class MorePage : ContentPage
@@ -33,4 +35,19 @@ public partial class MorePage : ContentPage
 
     private async void OnComingSoonTapped(object? sender, TappedEventArgs e)
         => await DisplayAlert("Coming Soon", "This feature is under development.", "OK");
+
+    private async void OnShareCrashLogTapped(object? sender, TappedEventArgs e)
+    {
+        if (!CrashLogger.HasLog())
+        {
+            await DisplayAlert("No Crashes", "No crash log found yet.", "OK");
+            return;
+        }
+
+        await Share.Default.RequestAsync(new ShareFileRequest
+        {
+            Title = "Arthiva Crash Log",
+            File = new ShareFile(CrashLogger.FilePath)
+        });
+    }
 }

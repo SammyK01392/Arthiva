@@ -48,4 +48,22 @@ public class Budget
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// "₹1,200.00 / ₹5,000.00" — precomputed to avoid MultiBinding, which
+    /// renders invisible inside CollectionView on Windows/WinUI.
+    /// </summary>
+    public string AmountSummary => $"₹{SpentAmount:N2} / ₹{BudgetAmount:N2}";
+
+    /// <summary>
+    /// Spent/Budget ratio (0.0–1.0) for progress bar binding.
+    /// </summary>
+    public double ProgressRatio => BudgetAmount > 0
+        ? Math.Clamp((double)(SpentAmount / BudgetAmount), 0d, 1d)
+        : 0d;
+
+    /// <summary>
+    /// "₹3,800.00 remaining" — precomputed, no MultiBinding.
+    /// </summary>
+    public string RemainingText => $"₹{RemainingAmount:N2} remaining";
 }

@@ -15,6 +15,22 @@ public class BudgetListItem
 {
     public Budget Budget { get; init; } = null!;
     public string CategoryName { get; init; } = "Unknown";
+
+    /// <summary>
+    /// Income/Warning/Expense brush based on spend ratio — computed here
+    /// (not on Budget) because it needs Application.Current.Resources.
+    /// Avoids MultiBinding + SpentToBudgetColorConverter, which renders
+    /// invisible inside CollectionView on Windows/WinUI.
+    /// </summary>
+    public Color ProgressColorValue
+    {
+        get
+        {
+            var ratio = Budget.ProgressRatio;
+            var key = ratio >= 1.0 ? "ExpenseBrush" : ratio >= 0.8 ? "WarningBrush" : "IncomeBrush";
+            return Application.Current?.Resources[key] as Color ?? Colors.Green;
+        }
+    }
 }
 
 public partial class BudgetListViewModel : BaseViewModel
@@ -54,7 +70,6 @@ public partial class BudgetListViewModel : BaseViewModel
 
             var budgets = await _budgetService.GetByMonthAsync(Month, Year);
 
-            // Keep SpentAmount fresh against actual transactions before displaying.
             foreach (var budget in budgets)
                 await _budgetService.RecalculateSpentAsync(budget.Id, _transactionService);
 

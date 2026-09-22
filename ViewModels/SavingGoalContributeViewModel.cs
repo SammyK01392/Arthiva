@@ -33,6 +33,9 @@ public partial class SavingGoalContributeViewModel : BaseViewModel
     private decimal amount;
 
     [ObservableProperty]
+    private DateTime contributionDate = DateTime.Now;
+
+    [ObservableProperty]
     private string? notes;
 
     [ObservableProperty]
@@ -77,9 +80,9 @@ public partial class SavingGoalContributeViewModel : BaseViewModel
         await ExecuteAsync(async () =>
         {
             if (MovementType == "Contribution")
-                await _savingGoalService.ContributeAsync(Goal.Id, Amount, SelectedAccount?.Id, Notes);
+                await _savingGoalService.ContributeAsync(Goal.Id, Amount, SelectedAccount?.Id, Notes, ContributionDate);
             else
-                await _savingGoalService.WithdrawAsync(Goal.Id, Amount, SelectedAccount?.Id, Notes);
+                await _savingGoalService.WithdrawAsync(Goal.Id, Amount, SelectedAccount?.Id, Notes, ContributionDate);
 
             await Shell.Current.GoToAsync("..");
         });

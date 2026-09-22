@@ -132,6 +132,7 @@
             </VerticalStackLayout>
 
             <!-- App -->
+            <!-- App -->
             <VerticalStackLayout Spacing="1">
                 <Label Style="{StaticResource SectionHeaderLabel}" Text="APP" Margin="4,0,4,4" />
 
@@ -159,7 +160,7 @@
                 </Border>
                 <BoxView Style="{StaticResource Divider}" />
 
-                <Border Style="{StaticResource MenuRowBorder}" StrokeShape="RoundRectangle 0,0,12,12">
+                <Border Style="{StaticResource MenuRowBorder}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnComingSoonTapped" />
                     </Border.GestureRecognizers>
@@ -169,6 +170,20 @@
                         <Label Grid.Column="2" Style="{StaticResource MenuChevronLabel}" />
                     </Grid>
                 </Border>
+                <BoxView Style="{StaticResource Divider}" />
+
+                <!-- NEW: Share Crash Log -->
+                <Border Style="{StaticResource MenuRowBorder}" StrokeShape="RoundRectangle 0,0,12,12">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnShareCrashLogTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <Label Grid.Column="0" Style="{StaticResource MenuIconLabel}" Text="&#128030;" />
+                        <Label Grid.Column="1" Style="{StaticResource MenuTitleLabel}" Text="Share Crash Log" />
+                        <Label Grid.Column="2" Style="{StaticResource MenuChevronLabel}" />
+                    </Grid>
+                </Border>
+
             </VerticalStackLayout>
 
             <Label Style="{StaticResource CaptionLabel}" Text="Arthiva v1.0" HorizontalOptions="Center" Margin="0,10,0,0" />

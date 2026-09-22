@@ -11,6 +11,15 @@ public static class MauiProgram
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
+        AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+     CrashLogger.Log(args.ExceptionObject as Exception, "AppDomain.UnhandledException");
+
+        TaskScheduler.UnobservedTaskException += (sender, args) =>
+        {
+            CrashLogger.Log(args.Exception, "TaskScheduler.UnobservedTaskException");
+            args.SetObserved();
+        };
+
         builder
             .UseMauiApp<App>()
             .ConfigureFonts(fonts =>

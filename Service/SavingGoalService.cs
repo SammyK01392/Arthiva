@@ -59,14 +59,14 @@ public class SavingGoalService : ISavingGoalService
         return await _repo.UpdateAsync(goal);
     }
 
-    public async Task<int> ContributeAsync(int goalId, decimal amount, int? accountId = null, string? notes = null)
-        => await RecordGoalTransactionAsync(goalId, amount, "Contribution", accountId, notes);
+    public async Task<int> ContributeAsync(int goalId, decimal amount, int? accountId = null, string? notes = null, DateTime? transactionDate = null)
+        => await RecordGoalTransactionAsync(goalId, amount, "Contribution", accountId, notes, transactionDate);
 
-    public async Task<int> WithdrawAsync(int goalId, decimal amount, int? accountId = null, string? notes = null)
-        => await RecordGoalTransactionAsync(goalId, amount, "Withdrawal", accountId, notes);
+    public async Task<int> WithdrawAsync(int goalId, decimal amount, int? accountId = null, string? notes = null, DateTime? transactionDate = null)
+        => await RecordGoalTransactionAsync(goalId, amount, "Withdrawal", accountId, notes, transactionDate);
 
     private async Task<int> RecordGoalTransactionAsync(
-        int goalId, decimal amount, string movementType, int? accountId, string? notes)
+        int goalId, decimal amount, string movementType, int? accountId, string? notes, DateTime? transactionDate)
     {
         var goal = await _repo.GetByIdAsync(goalId);
         if (goal is null) return 0;
@@ -87,12 +87,16 @@ public class SavingGoalService : ISavingGoalService
         goal.UpdatedAt = DateTime.UtcNow;
         await _repo.UpdateAsync(goal);
 
+        // Uses the date the person actually chose, falling back to now
+        // only if none was supplied (e.g. called from elsewhere without one).
+        var effectiveDate = transactionDate ?? DateTime.UtcNow;
+
         var goalTxn = new GoalTransaction
         {
             GoalId = goalId,
             Amount = amount,
             TransactionType = movementType,
-            TransactionDate = DateTime.UtcNow,
+            TransactionDate = effectiveDate,
             Notes = notes,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

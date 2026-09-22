@@ -32,6 +32,9 @@
             <Label Style="{StaticResource FormLabel}" Text="AMOUNT" />
             <Entry Style="{StaticResource FormEntry}" Text="{Binding Amount}" Keyboard="Numeric"
                    FontSize="22" FontAttributes="Bold" />
+            <!-- NEW -->
+            <Label Style="{StaticResource FormLabel}" Text="DATE" />
+            <DatePicker Style="{StaticResource FormDatePicker}" Date="{Binding ContributionDate}" />
 
             <Label Style="{StaticResource FormLabel}" Text="VIA ACCOUNT (OPTIONAL)" />
             <Picker Style="{StaticResource FormPicker}" ItemsSource="{Binding Accounts}"

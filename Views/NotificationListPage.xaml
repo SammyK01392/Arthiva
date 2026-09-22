@@ -20,67 +20,67 @@
         </Grid>
 
         <RefreshView Grid.Row="1" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
-            <Grid>
-                <ScrollView>
-                    <VerticalStackLayout Spacing="0">
-                        <CollectionView ItemsSource="{Binding Notifications}">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="models:Notification">
-                                    <SwipeView>
-                                        <SwipeView.RightItems>
-                                            <SwipeItems>
-                                                <SwipeItem Text="Done"
-                                                           BackgroundColor="{StaticResource Income}"
-                                                           Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.MarkCompletedCommand}"
-                                                           CommandParameter="{Binding .}" />
-                                                <SwipeItem Text="Delete"
-                                                           BackgroundColor="{StaticResource Expense}"
-                                                           Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
-                                                           CommandParameter="{Binding .}" />
-                                            </SwipeItems>
-                                        </SwipeView.RightItems>
 
-                                        <Border Style="{StaticResource CardBorder}" Margin="0,6">
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer
-                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.OpenCommand}"
-                                                    CommandParameter="{Binding .}" />
-                                            </Border.GestureRecognizers>
+            <CollectionView ItemsSource="{Binding Notifications}">
 
-                                            <Grid ColumnDefinitions="10,*" ColumnSpacing="10">
-
-                                                <!-- Unread dot -->
-                                                <Ellipse Grid.Column="0" WidthRequest="8" HeightRequest="8"
-                                                         Fill="{StaticResource PrimaryBrush}" VerticalOptions="Start" Margin="0,4,0,0">
-                                                    <Ellipse.Triggers>
-                                                        <DataTrigger TargetType="Ellipse" Binding="{Binding IsRead}" Value="True">
-                                                            <Setter Property="Opacity" Value="0" />
-                                                        </DataTrigger>
-                                                    </Ellipse.Triggers>
-                                                </Ellipse>
-
-                                                <VerticalStackLayout Grid.Column="1" Spacing="4">
-                                                    <Label Style="{StaticResource SubtitleLabel}" Text="{Binding Title}" />
-                                                    <Label Style="{StaticResource BodyLabel}" TextColor="{StaticResource TextSecondary}"
-                                                           Text="{Binding Body}" LineBreakMode="TailTruncation" MaxLines="2" />
-                                                    <Label Style="{StaticResource CaptionLabel}"
-                                                           Text="{Binding ReminderDate, StringFormat='{0:dd MMM, hh:mm tt}'}" />
-                                                </VerticalStackLayout>
-                                            </Grid>
-                                        </Border>
-                                    </SwipeView>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8" Margin="0,60,0,0">
+                        <Label Text="No notifications." Style="{StaticResource BodyLabel}"
+                               TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
                     </VerticalStackLayout>
-                </ScrollView>
+                </CollectionView.EmptyView>
 
-                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
-                    IsVisible="{Binding Notifications.Count, Converter={StaticResource CountToInverseBoolConverter}}">
-                    <Label Text="No notifications." Style="{StaticResource BodyLabel}"
-                           TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
-                </VerticalStackLayout>
-            </Grid>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Notification">
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems>
+                                    <SwipeItem Text="Done"
+                                               BackgroundColor="{StaticResource Income}"
+                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.MarkCompletedCommand}"
+                                               CommandParameter="{Binding .}" />
+                                    <SwipeItem Text="Delete"
+                                               BackgroundColor="{StaticResource Expense}"
+                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                               CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+
+                            <!-- CardBorder → ListCardBorder: Shadow renders invisible inside CollectionView on Windows -->
+                            <Border Style="{StaticResource ListCardBorder}" Margin="0,6">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.OpenCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+
+                                <Grid ColumnDefinitions="10,*" ColumnSpacing="10">
+
+                                    <!-- Unread dot -->
+                                    <Ellipse Grid.Column="0" WidthRequest="8" HeightRequest="8"
+                                             Fill="{StaticResource PrimaryBrush}" VerticalOptions="Start" Margin="0,4,0,0">
+                                        <Ellipse.Triggers>
+                                            <DataTrigger TargetType="Ellipse" Binding="{Binding IsRead}" Value="True">
+                                                <Setter Property="Opacity" Value="0" />
+                                            </DataTrigger>
+                                        </Ellipse.Triggers>
+                                    </Ellipse>
+
+                                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                        <Label Style="{StaticResource SubtitleLabel}" Text="{Binding Title}" />
+                                        <Label Style="{StaticResource BodyLabel}" TextColor="{StaticResource TextSecondary}"
+                                               Text="{Binding Body}" LineBreakMode="TailTruncation" MaxLines="2" />
+                                        <Label Style="{StaticResource CaptionLabel}"
+                                               Text="{Binding ReminderDate, StringFormat='{0:dd MMM, hh:mm tt}'}" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
         </RefreshView>
 
     </Grid>

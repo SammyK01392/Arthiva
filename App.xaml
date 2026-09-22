@@ -26,6 +26,13 @@
             <converters:BorrowLendTypeToColorConverter x:Key="BorrowLendTypeToColorConverter" />
             <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
 
+            <!-- These were missing — same "StaticResource not found" crash that hit
+                 IsNotNullConverter on Android would eventually hit these too. -->
+            <converters:InstallmentRatioConverter x:Key="InstallmentRatioConverter" />
+            <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
+            <converters:SpentToBudgetColorConverter x:Key="SpentToBudgetColorConverter" />
+            <converters:GreaterThanZeroConverter x:Key="GreaterThanZeroConverter" />
+
         </ResourceDictionary>
     </Application.Resources>
 

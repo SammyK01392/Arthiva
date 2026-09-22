@@ -45,4 +45,18 @@ public class SavingGoal
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Saved/Target ratio (0.0–1.0) for progress bar binding — avoids
+    /// MultiBinding, which renders invisible inside CollectionView on
+    /// Windows/WinUI.
+    /// </summary>
+    public double ProgressRatio => TargetAmount > 0
+        ? Math.Clamp((double)(SavedAmount / TargetAmount), 0d, 1d)
+        : 0d;
+
+    /// <summary>
+    /// "of ₹50,000.00" — precomputed to avoid MultiBinding/StringFormat.
+    /// </summary>
+    public string TargetText => $"of ₹{TargetAmount:N2}";
 }
