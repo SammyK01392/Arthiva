@@ -93,6 +93,7 @@ public class TransactionService : ITransactionService
         var transactions = await _repo.FindAsync(t =>
             !t.IsDeleted &&
             t.TransactionType == transactionType &&
+            t.SourceType != "BorrowLend" &&
             t.TransactionDate >= from &&
             t.TransactionDate <= to);
 

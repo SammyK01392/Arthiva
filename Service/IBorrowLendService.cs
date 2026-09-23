@@ -57,4 +57,15 @@ public interface IBorrowLendService
     /// edit to the record's transaction ledger.
     /// </summary>
     Task RecalculateAsync(int borrowLendId);
+    /// <summary>
+    /// Total amount others owe you — sum of PendingAmount across all open
+    /// (not closed, not deleted) records where Type == "Lend".
+    /// </summary>
+    Task<decimal> GetTotalReceivableAsync();
+
+    /// <summary>
+    /// Total amount you owe others — sum of PendingAmount across all open
+    /// (not closed, not deleted) records where Type == "Borrow".
+    /// </summary>
+    Task<decimal> GetTotalPayableAsync();
 }

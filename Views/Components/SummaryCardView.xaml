@@ -5,15 +5,48 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Name="Root">
 
-    <Border Style="{StaticResource CardBorder}">
-        <VerticalStackLayout Spacing="6">
+    <Border StrokeThickness="0" StrokeShape="RoundRectangle 16"
+            BackgroundColor="{StaticResource Surface}"
+            Padding="14,14,14,16">
+        <Border.Shadow>
+            <Shadow Brush="#000000" Offset="0,2" Radius="12" Opacity="0.07" />
+        </Border.Shadow>
 
-            <Label Style="{StaticResource CaptionLabel}"
+        <VerticalStackLayout Spacing="10">
+
+            <!-- SVG Icon inside tinted circle -->
+            <Border WidthRequest="40" HeightRequest="40"
+                    StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                    HorizontalOptions="Start"
+                    BackgroundColor="{Binding IconBackgroundColor, Source={x:Reference Root}}">
+                <Image Source="{Binding IconSource, Source={x:Reference Root}}"
+                       WidthRequest="20" HeightRequest="20"
+                       Aspect="AspectFit"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+
+            <!-- Title -->
+            <Label FontSize="13"
+                   TextColor="{Binding AccentColor, Source={x:Reference Root}}"
+                   FontAttributes="Bold"
                    Text="{Binding CardTitle, Source={x:Reference Root}}" />
 
-            <Label FontSize="20" FontAttributes="Bold"
-                   TextColor="{Binding AccentColor, Source={x:Reference Root}}"
+            <!-- Amount -->
+            <Label FontSize="18" FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimary}"
                    Text="{Binding CardAmount, Source={x:Reference Root}}" />
+
+            <!-- Caption row: optional dot + text -->
+            <HorizontalStackLayout Spacing="5" VerticalOptions="Center"
+                    IsVisible="{Binding CardCaption, Source={x:Reference Root}, Converter={StaticResource StringNotEmptyConverter}}">
+                <Ellipse WidthRequest="6" HeightRequest="6"
+                         Fill="{Binding DotColor, Source={x:Reference Root}}"
+                         VerticalOptions="Center"
+                         IsVisible="{Binding ShowDot, Source={x:Reference Root}}" />
+                <Label FontSize="11" TextColor="{StaticResource TextSecondary}"
+                       VerticalOptions="Center"
+                       Text="{Binding CardCaption, Source={x:Reference Root}}" />
+            </HorizontalStackLayout>
 
         </VerticalStackLayout>
     </Border>

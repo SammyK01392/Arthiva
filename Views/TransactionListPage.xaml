@@ -7,100 +7,296 @@
     xmlns:vm="clr-namespace:Arthiva.ViewModels"
     xmlns:models="clr-namespace:Arthiva.Models"
     x:DataType="vm:TransactionListViewModel"
-    Title="Transactions">
+    Title="Transactions"
+    BackgroundColor="{StaticResource Background}">
 
     <Grid>
-    <Grid RowDefinitions="Auto,*" Padding="16,12">
+        <Grid RowDefinitions="Auto,Auto,*" Padding="16,12,16,0">
 
-        <!-- Filter chips: All / Income / Expense -->
-        <HorizontalStackLayout Grid.Row="0" Spacing="8" Margin="0,0,0,12"
-                                BindableLayout.ItemsSource="{Binding FilterOptions}">
-            <BindableLayout.ItemTemplate>
-                <DataTemplate x:DataType="x:String">
-                    <Border Style="{StaticResource ChipBorder}">
-                        <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SelectedFilter}" Value="{Binding .}">
-                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
-                            </DataTrigger>
-                        </Border.Triggers>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer
-                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SetFilterCommand}"
-                                CommandParameter="{Binding .}" />
-                        </Border.GestureRecognizers>
-                        <Label Style="{StaticResource ChipLabel}" Text="{Binding .}" TextColor="{StaticResource TextPrimary}" />
-                    </Border>
-                </DataTemplate>
-            </BindableLayout.ItemTemplate>
-        </HorizontalStackLayout>
+            <!-- ============================================ -->
+            <!-- ROW 0: Modern Filter Chips                    -->
+            <!-- ============================================ -->
+            <Border Grid.Row="0"
+                    StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                    BackgroundColor="{StaticResource Surface}"
+                    Padding="4" Margin="0,0,0,14">
+                <Border.Shadow>
+                    <Shadow Brush="#000000" Offset="0,2" Radius="10" Opacity="0.05" />
+                </Border.Shadow>
 
-        <RefreshView Grid.Row="1" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
-            <Grid>
-                <CollectionView ItemsSource="{Binding Transactions}">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:Transaction">
-                            <SwipeView>
-                                <SwipeView.RightItems>
-                                    <SwipeItems>
-                                        <SwipeItem Text="Delete"
-                                                   BackgroundColor="{StaticResource Expense}"
-                                                   Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
-                                                   CommandParameter="{Binding .}" />
-                                    </SwipeItems>
-                                </SwipeView.RightItems>
-
-                                <Grid Padding="4,10">
-                                    <Grid.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
-                                            CommandParameter="{Binding .}" />
-                                    </Grid.GestureRecognizers>
-
-                                    <!-- Inlined row (no custom ContentView) -->
-                                    <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="12">
-                                        <Border Grid.Column="0" WidthRequest="44" HeightRequest="44"
-                                                StrokeThickness="0" StrokeShape="RoundRectangle 22"
-                                                BackgroundColor="{StaticResource PrimaryTint}"
-                                                VerticalOptions="Center">
-                                            <Label Text="₹" FontSize="18" TextColor="{StaticResource Primary}"
-                                                   HorizontalOptions="Center" VerticalOptions="Center" />
-                                        </Border>
-
-                                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                            <Label Style="{StaticResource BodyLabel}" FontAttributes="Bold"
-                                                   Text="{Binding Description, TargetNullValue='Transaction'}"
-                                                   LineBreakMode="TailTruncation" />
-                                            <Label Style="{StaticResource CaptionLabel}"
-                                                   Text="{Binding TransactionDate, StringFormat='{0:dd MMM, hh:mm tt}'}" />
-                                            <Label Style="{StaticResource CaptionLabel}" Text="{Binding TransactionType}" />
-                                        </VerticalStackLayout>
-
-                                        <Label Grid.Column="2" VerticalOptions="Center"
-                                               FontSize="15" FontAttributes="Bold"
-                                               Text="{Binding Amount, StringFormat='₹{0:N2}'}" />
-                                    </Grid>
-                                </Grid>
-                            </SwipeView>
+                <HorizontalStackLayout Spacing="2"
+                                        BindableLayout.ItemsSource="{Binding FilterOptions}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <Border StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                    Padding="18,9">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border"
+                                                 Binding="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SelectedFilter}"
+                                                 Value="{Binding .}">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SetFilterCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding .}" FontSize="13" FontAttributes="Bold"
+                                       VerticalOptions="Center" HorizontalOptions="Center"
+                                       TextColor="{StaticResource TextPrimary}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label"
+                                                     Binding="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SelectedFilter}"
+                                                     Value="{Binding .}">
+                                            <Setter Property="TextColor" Value="White" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
                         </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                    </BindableLayout.ItemTemplate>
+                </HorizontalStackLayout>
+            </Border>
 
-                <!-- Inlined empty state (no custom ContentView) -->
-                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
-                    IsVisible="{Binding Transactions.Count, Converter={StaticResource CountToInverseBoolConverter}}">
-                    <Label Text="No transactions found." Style="{StaticResource BodyLabel}"
-                           TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
-                </VerticalStackLayout>
+            <!-- ============================================ -->
+            <!-- ROW 1: Summary Strip (Total In / Out)          -->
+            <!-- ============================================ -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,0,0,12">
 
-                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Expense}"
-                       IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}"
-                       HorizontalOptions="Center" VerticalOptions="Center" Margin="20" />
+                <!-- Income -->
+                <Border Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 12"
+                        BackgroundColor="#E8F5E9" Padding="14,10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Border Grid.Column="0" WidthRequest="30" HeightRequest="30"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 15"
+                                BackgroundColor="#C8E6C9" VerticalOptions="Center">
+                            <Image Source="icon_arrow_up_green.png"
+                                   WidthRequest="14" HeightRequest="14"
+                                   Aspect="AspectFit"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                            <Label Text="Total In" FontSize="10" FontAttributes="Bold"
+                                   TextColor="#00B368" />
+                            <Label Text="{Binding TotalIncome, StringFormat='₹{0:N0}'}"
+                                   FontSize="15" FontAttributes="Bold"
+                                   TextColor="#007A47" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Expense -->
+                <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 12"
+                        BackgroundColor="#FFEBEE" Padding="14,10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Border Grid.Column="0" WidthRequest="30" HeightRequest="30"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 15"
+                                BackgroundColor="#FFCDD2" VerticalOptions="Center">
+                            <Image Source="icon_arrow_down_red.png"
+                                   WidthRequest="14" HeightRequest="14"
+                                   Aspect="AspectFit"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                            <Label Text="Total Out" FontSize="10" FontAttributes="Bold"
+                                   TextColor="#E53935" />
+                            <Label Text="{Binding TotalExpense, StringFormat='₹{0:N0}'}"
+                                   FontSize="15" FontAttributes="Bold"
+                                   TextColor="#B71C1C" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
             </Grid>
-        </RefreshView>
 
+            <!-- ============================================ -->
+            <!-- ROW 2: Transaction List                       -->
+            <!-- ============================================ -->
+            <RefreshView Grid.Row="2" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+                <Grid>
+                    <CollectionView ItemsSource="{Binding Transactions}"
+                                    Margin="0,0,0,90">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Transaction">
+                                <SwipeView>
+                                    <SwipeView.RightItems>
+                                        <SwipeItems Mode="Reveal">
+                                            <SwipeItem
+                                                BackgroundColor="#E53935"
+                                                IconImageSource="icon_delete_white.png"
+                                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </SwipeItems>
+                                    </SwipeView.RightItems>
+
+                                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                                            BackgroundColor="{StaticResource Surface}"
+                                            Padding="12">
+                                        <Border.Shadow>
+                                            <Shadow Brush="#000000" Offset="0,1" Radius="8" Opacity="0.05" />
+                                        </Border.Shadow>
+
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+
+                                        <Grid ColumnDefinitions="46,*,Auto" ColumnSpacing="12">
+
+                                            <!-- Icon -->
+                                            <Border Grid.Column="0" WidthRequest="46" HeightRequest="46"
+                                                    StrokeThickness="0" StrokeShape="RoundRectangle 23"
+                                                    VerticalOptions="Center">
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding TransactionType}" Value="Income">
+                                                        <Setter Property="BackgroundColor" Value="#E8F5E9" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding TransactionType}" Value="Expense">
+                                                        <Setter Property="BackgroundColor" Value="#FFEBEE" />
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+                                                <Image Aspect="AspectFit"
+                                                       WidthRequest="20" HeightRequest="20"
+                                                       HorizontalOptions="Center" VerticalOptions="Center">
+                                                    <Image.Triggers>
+                                                        <DataTrigger TargetType="Image" Binding="{Binding TransactionType}" Value="Income">
+                                                            <Setter Property="Source" Value="icon_arrow_up_green.png" />
+                                                        </DataTrigger>
+                                                        <DataTrigger TargetType="Image" Binding="{Binding TransactionType}" Value="Expense">
+                                                            <Setter Property="Source" Value="icon_arrow_down_red.png" />
+                                                        </DataTrigger>
+                                                    </Image.Triggers>
+                                                </Image>
+                                            </Border>
+
+                                            <!-- Description + meta -->
+                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="3">
+                                                <Label FontSize="14" FontAttributes="Bold"
+                                                       TextColor="{StaticResource TextPrimary}"
+                                                       Text="{Binding Description, TargetNullValue='Transaction'}"
+                                                       LineBreakMode="TailTruncation" />
+
+                                                <HorizontalStackLayout Spacing="6">
+                                                    <!-- Type pill -->
+                                                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 8"
+                                                            Padding="7,2" VerticalOptions="Center">
+                                                        <Border.Triggers>
+                                                            <DataTrigger TargetType="Border" Binding="{Binding TransactionType}" Value="Income">
+                                                                <Setter Property="BackgroundColor" Value="#E8F5E9" />
+                                                            </DataTrigger>
+                                                            <DataTrigger TargetType="Border" Binding="{Binding TransactionType}" Value="Expense">
+                                                                <Setter Property="BackgroundColor" Value="#FFEBEE" />
+                                                            </DataTrigger>
+                                                        </Border.Triggers>
+                                                        <Label FontSize="9" FontAttributes="Bold"
+                                                               VerticalOptions="Center"
+                                                               Text="{Binding TransactionType}">
+                                                            <Label.Triggers>
+                                                                <DataTrigger TargetType="Label" Binding="{Binding TransactionType}" Value="Income">
+                                                                    <Setter Property="TextColor" Value="#00B368" />
+                                                                </DataTrigger>
+                                                                <DataTrigger TargetType="Label" Binding="{Binding TransactionType}" Value="Expense">
+                                                                    <Setter Property="TextColor" Value="#E53935" />
+                                                                </DataTrigger>
+                                                            </Label.Triggers>
+                                                        </Label>
+                                                    </Border>
+
+                                                    <Label FontSize="11" VerticalOptions="Center"
+                                                           TextColor="{StaticResource TextSecondary}"
+                                                           Text="{Binding TransactionDate, StringFormat='{0:dd MMM, hh:mm tt}'}" />
+                                                </HorizontalStackLayout>
+                                            </VerticalStackLayout>
+
+                                            <!-- Amount -->
+                                            <Label Grid.Column="2" VerticalOptions="Center"
+                                                   FontSize="16" FontAttributes="Bold"
+                                                   Text="{Binding Amount, StringFormat='₹{0:N2}'}">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding TransactionType}" Value="Income">
+                                                        <Setter Property="TextColor" Value="#00B368" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding TransactionType}" Value="Expense">
+                                                        <Setter Property="TextColor" Value="#E53935" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </Grid>
+                                    </Border>
+                                </SwipeView>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <!-- Empty State -->
+                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center"
+                                         Spacing="14" Padding="32"
+                                         IsVisible="{Binding Transactions.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                        <Border WidthRequest="90" HeightRequest="90"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 45"
+                                BackgroundColor="{StaticResource PrimaryTint}"
+                                HorizontalOptions="Center">
+                            <Image Source="icon_receipt_gray.png"
+                                   WidthRequest="44" HeightRequest="44"
+                                   Aspect="AspectFit"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <Label Text="No transactions yet"
+                               FontSize="17" FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}"
+                               HorizontalOptions="Center" />
+                        <Label Text="Tap the + button to record your first transaction"
+                               FontSize="12"
+                               TextColor="{StaticResource TextSecondary}"
+                               HorizontalTextAlignment="Center"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+
+                    <!-- Error -->
+                    <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}"
+                            StrokeThickness="0" StrokeShape="RoundRectangle 12"
+                            BackgroundColor="#FFEBEE"
+                            Padding="14" Margin="16"
+                            VerticalOptions="End" HorizontalOptions="Center">
+                        <Label Text="{Binding ErrorMessage}" FontSize="12"
+                               TextColor="#E53935"
+                               HorizontalTextAlignment="Center" />
+                    </Border>
+                </Grid>
+            </RefreshView>
+        </Grid>
+
+        <!-- ============================================ -->
+        <!-- FAB: Floating Add Button                     -->
+        <!-- ============================================ -->
+        <Border x:Name="FabButton"
+                WidthRequest="60" HeightRequest="60"
+                StrokeThickness="0" StrokeShape="RoundRectangle 30"
+                HorizontalOptions="End" VerticalOptions="End"
+                Margin="0,0,20,20">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#FF8A00" Offset="0.0" />
+                    <GradientStop Color="#FF5500" Offset="1.0" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Border.Shadow>
+                <Shadow Brush="#FF5500" Offset="0,6" Radius="16" Opacity="0.4" />
+            </Border.Shadow>
+
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnFabTapped" />
+            </Border.GestureRecognizers>
+
+            <Label Text="+" FontSize="32" FontAttributes="Bold"
+                   TextColor="White"
+                   HorizontalOptions="Center" VerticalOptions="Center"
+                   TranslationY="-2" />
+        </Border>
     </Grid>
-
-        <Button Style="{StaticResource FabButton}" Text="+" Command="{Binding GoToAddCommand}" />
-    </Grid>
-
 </ContentPage>

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Arthiva.Models;
@@ -12,6 +13,11 @@ public partial class DashboardViewModel : BaseViewModel
     private readonly ITransactionService _transactionService;
     private readonly IBillService _billService;
     private readonly IEmiService _emiService;
+    private readonly IBorrowLendService _borrowLendService;
+    private readonly IUserProfileService _userProfileService;
+
+    [ObservableProperty]
+    private string userName = "there";
 
     [ObservableProperty]
     private decimal totalBalance;
@@ -25,6 +31,32 @@ public partial class DashboardViewModel : BaseViewModel
     [ObservableProperty]
     private decimal monthSaving;
 
+    [ObservableProperty]
+    private int incomeTransactionCount;
+
+    [ObservableProperty]
+    private int expenseTransactionCount;
+
+    [ObservableProperty]
+    private decimal totalReceivable;
+
+    [ObservableProperty]
+    private decimal totalPayable;
+
+    public decimal NetBorrowLend => TotalReceivable - TotalPayable;
+    public string GreetingPrefix
+    {
+        get
+        {
+            var hour = DateTime.Now.Hour;
+            return hour switch
+            {
+                < 12 => "Good Morning",
+                < 17 => "Good Afternoon",
+                _ => "Good Evening"
+            };
+        }
+    }
     public ObservableCollection<Transaction> RecentTransactions { get; } = new();
 
     public ObservableCollection<Bill> UpcomingBills { get; } = new();
@@ -35,12 +67,16 @@ public partial class DashboardViewModel : BaseViewModel
         IAccountService accountService,
         ITransactionService transactionService,
         IBillService billService,
-        IEmiService emiService)
+        IEmiService emiService,
+        IBorrowLendService borrowLendService,
+        IUserProfileService userProfileService)
     {
         _accountService = accountService;
         _transactionService = transactionService;
         _billService = billService;
         _emiService = emiService;
+        _borrowLendService = borrowLendService;
+        _userProfileService = userProfileService;
         Title = "Dashboard";
     }
 
@@ -49,6 +85,9 @@ public partial class DashboardViewModel : BaseViewModel
     {
         await ExecuteAsync(async () =>
         {
+            var profile = await _userProfileService.GetProfileAsync();
+            UserName = string.IsNullOrWhiteSpace(profile?.FullName) ? "there" : profile.FullName.Split(' ')[0];
+
             TotalBalance = await _accountService.GetTotalBalanceAsync();
 
             var from = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
@@ -57,6 +96,14 @@ public partial class DashboardViewModel : BaseViewModel
             MonthIncome = await _transactionService.GetTotalByTypeAsync("Income", from, to);
             MonthExpense = await _transactionService.GetTotalByTypeAsync("Expense", from, to);
             MonthSaving = MonthIncome - MonthExpense;
+
+            var monthTransactions = await _transactionService.GetByDateRangeAsync(from, to);
+            IncomeTransactionCount = monthTransactions.Count(t => t.TransactionType == "Income");
+            ExpenseTransactionCount = monthTransactions.Count(t => t.TransactionType == "Expense");
+
+            TotalReceivable = await _borrowLendService.GetTotalReceivableAsync();
+            TotalPayable = await _borrowLendService.GetTotalPayableAsync();
+            OnPropertyChanged(nameof(NetBorrowLend));
 
             var recent = await _transactionService.GetAllAsync();
             RecentTransactions.Clear();
@@ -74,4 +121,5 @@ public partial class DashboardViewModel : BaseViewModel
                 ActiveEmis.Add(e);
         });
     }
+
 }

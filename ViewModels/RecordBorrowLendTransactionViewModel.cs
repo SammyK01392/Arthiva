@@ -53,7 +53,7 @@ public partial class RecordBorrowLendTransactionViewModel : BaseViewModel
 
     public ObservableCollection<Account> Accounts { get; } = new();
 
-    public List<string> MovementTypes { get; } = new();
+    public ObservableCollection<string> MovementTypes { get; } = new();
 
     public List<string> PaymentMethods { get; } = new() { "Cash", "UPI", "Bank Transfer" };
 
@@ -79,12 +79,15 @@ public partial class RecordBorrowLendTransactionViewModel : BaseViewModel
             var contact = await _contactService.GetByIdAsync(Record.ContactId);
             ContactName = contact?.Name ?? "Unknown";
 
+           
             MovementTypes.Clear();
-            // "Return"/"Receive"/"PartialReturn" close the balance; the same
-            // Type name as the record allows recording an additional advance.
-            MovementTypes.AddRange(Record.Type == "Lend"
+            var types = Record.Type == "Lend"
                 ? new[] { "Receive", "PartialReturn", "Lend" }
-                : new[] { "Return", "PartialReturn", "Borrow" });
+                : new[] { "Return", "PartialReturn", "Borrow" };
+            foreach (var t in types)
+                MovementTypes.Add(t);
+
+            MovementType = MovementTypes.First();
 
             MovementType = MovementTypes.First();
 

@@ -209,4 +209,16 @@ public class BorrowLendService : IBorrowLendService
         borrowLend.UpdatedAt = DateTime.UtcNow;
         await _repo.UpdateAsync(borrowLend);
     }
+
+    public async Task<decimal> GetTotalReceivableAsync()
+    {
+        var records = await _repo.FindAsync(b => !b.IsDeleted && !b.IsClosed && b.Type == "Lend");
+        return records.Sum(b => b.PendingAmount);
+    }
+
+    public async Task<decimal> GetTotalPayableAsync()
+    {
+        var records = await _repo.FindAsync(b => !b.IsDeleted && !b.IsClosed && b.Type == "Borrow");
+        return records.Sum(b => b.PendingAmount);
+    }
 }

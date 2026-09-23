@@ -17,6 +17,20 @@ public partial class TransactionListViewModel : BaseViewModel
     [ObservableProperty]
     private string selectedFilter = "All"; // All / Income / Expense
 
+    // NAYA: Summary strip ke liye
+    [ObservableProperty]
+    private decimal totalIncome;
+
+    [ObservableProperty]
+    private decimal totalExpense;
+
+    // NAYA: Count bhi (agar future mein chahiye)
+    [ObservableProperty]
+    private int incomeCount;
+
+    [ObservableProperty]
+    private int expenseCount;
+
     partial void OnSelectedFilterChanged(string value)
         => ApplyFilter();
 
@@ -34,8 +48,26 @@ public partial class TransactionListViewModel : BaseViewModel
         await ExecuteAsync(async () =>
         {
             _allTransactions = await _transactionService.GetAllAsync();
+
+            // Summary totals — poore dataset se (filter se independent)
+            RecalculateTotals();
+
             ApplyFilter();
         });
+    }
+
+    private void RecalculateTotals()
+    {
+        TotalIncome = _allTransactions
+            .Where(t => t.TransactionType == "Income")
+            .Sum(t => t.Amount);
+
+        TotalExpense = _allTransactions
+            .Where(t => t.TransactionType == "Expense")
+            .Sum(t => t.Amount);
+
+        IncomeCount = _allTransactions.Count(t => t.TransactionType == "Income");
+        ExpenseCount = _allTransactions.Count(t => t.TransactionType == "Expense");
     }
 
     private void ApplyFilter()
@@ -55,7 +87,8 @@ public partial class TransactionListViewModel : BaseViewModel
 
     [RelayCommand]
     private static async Task GoToAddAsync()
-        => await Shell.Current.GoToAsync(nameof(AddEditTransactionViewModel).Replace("ViewModel", "Page"));
+        => await Shell.Current.GoToAsync(
+            nameof(AddEditTransactionViewModel).Replace("ViewModel", "Page"));
 
     [RelayCommand]
     private static async Task GoToEditAsync(Transaction transaction)
@@ -72,6 +105,9 @@ public partial class TransactionListViewModel : BaseViewModel
             await _transactionService.DeleteTransactionAsync(transaction.Id);
             _allTransactions.Remove(transaction);
             Transactions.Remove(transaction);
+
+            // Totals recalculate karo deletion ke baad
+            RecalculateTotals();
         });
     }
 }
