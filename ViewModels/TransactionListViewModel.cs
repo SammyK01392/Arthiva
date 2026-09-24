@@ -15,26 +15,25 @@ public partial class TransactionListViewModel : BaseViewModel
     public ObservableCollection<Transaction> Transactions { get; } = new();
 
     [ObservableProperty]
-    private string selectedFilter = "All"; // All / Income / Expense
+    private string selectedFilter = "All"; // All / Income / Expense / Borrow / Lend
 
-    // NAYA: Summary strip ke liye
-    [ObservableProperty]
-    private decimal totalIncome;
+    // Regular income / expense totals
+    [ObservableProperty] private decimal totalIncome;
+    [ObservableProperty] private decimal totalExpense;
 
-    [ObservableProperty]
-    private decimal totalExpense;
+    // Borrow / Lend totals (separate)
+    [ObservableProperty] private decimal borrowTotal;
+    [ObservableProperty] private decimal lendTotal;
 
-    // NAYA: Count bhi (agar future mein chahiye)
-    [ObservableProperty]
-    private int incomeCount;
+    [ObservableProperty] private int incomeCount;
+    [ObservableProperty] private int expenseCount;
+    [ObservableProperty] private int borrowCount;
+    [ObservableProperty] private int lendCount;
 
-    [ObservableProperty]
-    private int expenseCount;
+    partial void OnSelectedFilterChanged(string value) => ApplyFilter();
 
-    partial void OnSelectedFilterChanged(string value)
-        => ApplyFilter();
-
-    public List<string> FilterOptions { get; } = new() { "All", "Income", "Expense" };
+    public List<string> FilterOptions { get; } =
+        new() { "All", "Income", "Expense", "Borrow", "Lend" };
 
     public TransactionListViewModel(ITransactionService transactionService)
     {
@@ -48,33 +47,62 @@ public partial class TransactionListViewModel : BaseViewModel
         await ExecuteAsync(async () =>
         {
             _allTransactions = await _transactionService.GetAllAsync();
-
-            // Summary totals — poore dataset se (filter se independent)
             RecalculateTotals();
-
             ApplyFilter();
         });
     }
 
+    // ─────────────────────────────────────────────────────────
+    //  Classification helpers — SourceType + TransactionType
+    // ─────────────────────────────────────────────────────────
+    //  Regular Income     : Type = "Income"  & SourceType != "BorrowLend"
+    //  Regular Expense    : Type = "Expense" & SourceType != "BorrowLend"
+    //  Borrow             : SourceType = "BorrowLend" & Type = "Income"   (money aa raha)
+    //  Lend               : SourceType = "BorrowLend" & Type = "Expense"  (money ja raha)
+    // ─────────────────────────────────────────────────────────
+
+    private static bool IsBorrowLend(Transaction t)
+        => string.Equals(t.SourceType, "BorrowLend", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsIncome(Transaction t)
+        => !IsBorrowLend(t)
+        && string.Equals(t.TransactionType, "Income", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsExpense(Transaction t)
+        => !IsBorrowLend(t)
+        && string.Equals(t.TransactionType, "Expense", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsBorrow(Transaction t)
+        => IsBorrowLend(t)
+        && string.Equals(t.TransactionType, "Income", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsLend(Transaction t)
+        => IsBorrowLend(t)
+        && string.Equals(t.TransactionType, "Expense", StringComparison.OrdinalIgnoreCase);
+
     private void RecalculateTotals()
     {
-        TotalIncome = _allTransactions
-            .Where(t => t.TransactionType == "Income")
-            .Sum(t => t.Amount);
+        TotalIncome = _allTransactions.Where(IsIncome).Sum(t => t.Amount);
+        TotalExpense = _allTransactions.Where(IsExpense).Sum(t => t.Amount);
+        IncomeCount = _allTransactions.Count(IsIncome);
+        ExpenseCount = _allTransactions.Count(IsExpense);
 
-        TotalExpense = _allTransactions
-            .Where(t => t.TransactionType == "Expense")
-            .Sum(t => t.Amount);
-
-        IncomeCount = _allTransactions.Count(t => t.TransactionType == "Income");
-        ExpenseCount = _allTransactions.Count(t => t.TransactionType == "Expense");
+        BorrowTotal = _allTransactions.Where(IsBorrow).Sum(t => t.Amount);
+        LendTotal = _allTransactions.Where(IsLend).Sum(t => t.Amount);
+        BorrowCount = _allTransactions.Count(IsBorrow);
+        LendCount = _allTransactions.Count(IsLend);
     }
 
     private void ApplyFilter()
     {
-        var filtered = SelectedFilter == "All"
-            ? _allTransactions
-            : _allTransactions.Where(t => t.TransactionType == SelectedFilter).ToList();
+        var filtered = SelectedFilter switch
+        {
+            "Income" => _allTransactions.Where(IsIncome),
+            "Expense" => _allTransactions.Where(IsExpense),
+            "Borrow" => _allTransactions.Where(IsBorrow),
+            "Lend" => _allTransactions.Where(IsLend),
+            _ => _allTransactions.AsEnumerable()
+        };
 
         Transactions.Clear();
         foreach (var t in filtered)
@@ -82,8 +110,7 @@ public partial class TransactionListViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void SetFilter(string filter)
-        => SelectedFilter = filter;
+    private void SetFilter(string filter) => SelectedFilter = filter;
 
     [RelayCommand]
     private static async Task GoToAddAsync()
@@ -105,8 +132,6 @@ public partial class TransactionListViewModel : BaseViewModel
             await _transactionService.DeleteTransactionAsync(transaction.Id);
             _allTransactions.Remove(transaction);
             Transactions.Remove(transaction);
-
-            // Totals recalculate karo deletion ke baad
             RecalculateTotals();
         });
     }

@@ -32,7 +32,10 @@
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
             <converters:SpentToBudgetColorConverter x:Key="SpentToBudgetColorConverter" />
             <converters:GreaterThanZeroConverter x:Key="GreaterThanZeroConverter" />
+            <converters:StringEmptyConverter x:Key="StringEmptyConverter" />
 
+            <converters:HexToColorConverter x:Key="HexToColorConverter" />
+            <converters:HexToTintConverter  x:Key="HexToTintConverter" />
         </ResourceDictionary>
     </Application.Resources>
 

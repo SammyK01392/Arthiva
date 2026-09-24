@@ -196,4 +196,62 @@ public class GreaterThanZeroConverter : IValueConverter
         => throw new NotSupportedException();
 
 
+}/// <summary>String is null/whitespace -> bool (true when it's EMPTY). Inverse of StringNotEmptyConverter.</summary>
+public class StringEmptyConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => string.IsNullOrWhiteSpace(value as string);
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+/// <summary>Hex string (#RRGGBB or #AARRGGBB) -> MAUI Color.</summary>
+public class HexToColorConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is not string hex || string.IsNullOrWhiteSpace(hex))
+            return Colors.Transparent;
+
+        try
+        {
+            return Color.FromArgb(hex);
+        }
+        catch
+        {
+            return Colors.Transparent;
+        }
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+/// <summary>Same hex -> same color but with alpha overlay (default 20%). Use ConverterParameter="30" for 30% opacity.</summary>
+public class HexToTintConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is not string hex || string.IsNullOrWhiteSpace(hex))
+            return Colors.Transparent;
+
+        try
+        {
+            var color = Color.FromArgb(hex);
+            var alphaPercent = 20; // default
+
+            if (parameter is string s && int.TryParse(s, out var p))
+                alphaPercent = Math.Clamp(p, 0, 100);
+
+            return color.WithAlpha(alphaPercent / 100f);
+        }
+        catch
+        {
+            return Colors.Transparent;
+        }
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
 }

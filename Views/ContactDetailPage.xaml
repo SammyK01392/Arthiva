@@ -7,115 +7,682 @@
     xmlns:vm="clr-namespace:Arthiva.ViewModels"
     xmlns:models="clr-namespace:Arthiva.Models"
     x:DataType="vm:ContactDetailViewModel"
-    Title="{Binding Title}">
+    Title="{Binding Title}"
+    BackgroundColor="#FFF8F2">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="Primary">#FF6B00</Color>
+            <Color x:Key="PrimaryTint">#FFF1E3</Color>
+            <Color x:Key="PageBg">#FFF8F2</Color>
+            <Color x:Key="CardBg">#FFFFFF</Color>
+            <Color x:Key="CardStroke">#F4EBE1</Color>
+            <Color x:Key="TrackMuted">#F4EDE6</Color>
+            <Color x:Key="TextPrimary">#1A1410</Color>
+            <Color x:Key="TextSecondary">#7A6B5E</Color>
+            <Color x:Key="TextTertiary">#A89A8C</Color>
+            <Color x:Key="Lend">#0FA968</Color>
+            <Color x:Key="LendTint">#E3F7EE</Color>
+            <Color x:Key="Borrow">#E63946</Color>
+            <Color x:Key="BorrowTint">#FDECEE</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Share" Command="{Binding ShareReportCommand}" />
     </ContentPage.ToolbarItems>
 
-    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding AppearingCommand}">
+    <RefreshView IsRefreshing="{Binding IsBusy}"
+                 Command="{Binding AppearingCommand}"
+                 RefreshColor="{StaticResource Primary}">
         <ScrollView>
-            <VerticalStackLayout Padding="16" Spacing="16">
+            <VerticalStackLayout Spacing="0">
 
-                <!-- Contact header -->
-                <Border StrokeThickness="0" StrokeShape="RoundRectangle 16"
-                        BackgroundColor="{StaticResource Primary}" Padding="18">
-                    <VerticalStackLayout Spacing="2">
-                        <Label Text="{Binding Contact.Name}" TextColor="{StaticResource TextOnPrimary}"
-                               FontSize="22" FontAttributes="Bold" />
-                        <Label Text="{Binding Contact.Mobile}" TextColor="{StaticResource TextOnPrimary}"
-                               Opacity="0.9" FontSize="13"
-                               IsVisible="{Binding Contact.Mobile, Converter={StaticResource StringNotEmptyConverter}}" />
-                        <Label Text="{Binding Contact.Email}" TextColor="{StaticResource TextOnPrimary}"
-                               Opacity="0.9" FontSize="13"
-                               IsVisible="{Binding Contact.Email, Converter={StaticResource StringNotEmptyConverter}}" />
-                    </VerticalStackLayout>
-                </Border>
+                <!-- ═══════════════════════════════════════════════════ -->
+                <!--  PREMIUM HEADER with WAVE EFFECT                    -->
+                <!-- ═══════════════════════════════════════════════════ -->
+                <Grid>
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#3D1E00" Offset="0.0" />
+                            <GradientStop Color="#B84500" Offset="0.55" />
+                            <GradientStop Color="#FF6B00" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Grid.Background>
 
-                <!-- Net summary -->
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                    <Border Grid.Column="0" Style="{StaticResource CardBorder}">
-                        <VerticalStackLayout Spacing="4">
-                            <Label Style="{StaticResource CaptionLabel}" Text="You'll Receive" />
-                            <Label FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Income}"
-                                   Text="{Binding TotalYouWillReceive, StringFormat='₹{0:N2}'}" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Grid.Column="1" Style="{StaticResource CardBorder}">
-                        <VerticalStackLayout Spacing="4">
-                            <Label Style="{StaticResource CaptionLabel}" Text="You Owe" />
-                            <Label FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Expense}"
-                                   Text="{Binding TotalYouOwe, StringFormat='₹{0:N2}'}" />
-                        </VerticalStackLayout>
-                    </Border>
-                </Grid>
+                    <!-- ═══ Decorative layer with WAVES ═══ -->
+                    <Grid InputTransparent="True">
 
-                <Border Style="{StaticResource CardBorder}" BackgroundColor="{StaticResource PrimaryTint}">
-                    <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
-                        <Label Style="{StaticResource CaptionLabel}" Text="NET BALANCE" HorizontalOptions="Center" />
-                        <Label FontSize="22" FontAttributes="Bold" HorizontalOptions="Center"
-                               Text="{Binding NetBalanceLabel}"
-                               TextColor="{Binding NetBalanceColor}" />
-                    </VerticalStackLayout>
-                </Border>
+                        <!-- Glow circles -->
+                        <Ellipse WidthRequest="140" HeightRequest="140"
+                                 Fill="#30FFB37A"
+                                 HorizontalOptions="Start" VerticalOptions="Start"
+                                 TranslationX="-50" TranslationY="-50" />
 
-                <!-- Open records -->
-                <Label Style="{StaticResource SectionHeaderLabel}" Text="RECORDS" />
-                <CollectionView ItemsSource="{Binding Records}">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:BorrowLend">
-                            <Border Style="{StaticResource CardBorder}" Margin="0,6">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer
-                                        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToRecordTransactionCommand}"
-                                        CommandParameter="{Binding .}" />
-                                </Border.GestureRecognizers>
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                        <Label Style="{StaticResource BodyLabel}" FontAttributes="Bold" Text="{Binding Type}" />
-                                        <Label Style="{StaticResource CaptionLabel}"
-                                               Text="{Binding GivenDate, StringFormat='Since {0:dd MMM yyyy}'}" />
-                                        <Label Style="{StaticResource CaptionLabel}" Text="{Binding Status}" />
-                                    </VerticalStackLayout>
-                                    <Label Grid.Column="1" VerticalOptions="Center" FontAttributes="Bold"
-                                           Text="{Binding PendingAmount, StringFormat='₹{0:N2}'}" />
+                        <Ellipse WidthRequest="180" HeightRequest="180"
+                                 Fill="#40FF8A1E"
+                                 HorizontalOptions="End" VerticalOptions="End"
+                                 TranslationX="70" TranslationY="70" />
+
+                        <!-- ══════ UNIQUE WAVE EFFECT (3 layered) ══════ -->
+
+                        <!-- Wave 1 - deepest, lowest opacity -->
+                        <Path Stroke="#18FFFFFF"
+                              StrokeThickness="1.2"
+                              Fill="Transparent"
+                              Aspect="None"
+                              HorizontalOptions="Fill"
+                              VerticalOptions="End"
+                              HeightRequest="60"
+                              Data="M0,30 C 80,10 160,50 240,30 C 320,10 400,50 480,30 C 560,10 640,50 720,30 C 760,20 780,35 800,25 L 800,60 L 0,60 Z" />
+
+                        <!-- Wave 2 - middle -->
+                        <Path Stroke="#28FFFFFF"
+                              StrokeThickness="1.5"
+                              Fill="Transparent"
+                              Aspect="None"
+                              HorizontalOptions="Fill"
+                              VerticalOptions="End"
+                              HeightRequest="60"
+                              Data="M0,42 C 80,22 160,62 240,42 C 320,22 400,62 480,42 C 560,22 640,62 720,42 C 760,32 780,47 800,37 L 800,60 L 0,60 Z" />
+
+                        <!-- Wave 3 - front, brightest -->
+                        <Path Stroke="#40FFFFFF"
+                              StrokeThickness="1.8"
+                              Fill="Transparent"
+                              Aspect="None"
+                              HorizontalOptions="Fill"
+                              VerticalOptions="End"
+                              HeightRequest="60"
+                              Data="M0,54 C 80,34 160,74 240,54 C 320,34 400,74 480,54 C 560,34 640,74 720,54 C 760,44 780,59 800,49 L 800,60 L 0,60 Z" />
+
+                        <!-- Accent arc + dots -->
+                        <Path Stroke="#28FFFFFF" StrokeThickness="1.4" Fill="Transparent"
+                              HorizontalOptions="End" VerticalOptions="Center"
+                              TranslationX="25"
+                              Data="M0,0 C 50,35 50,120 0,155" />
+
+                        <HorizontalStackLayout Spacing="6"
+                                               HorizontalOptions="End"
+                                               VerticalOptions="Start"
+                                               Margin="0,24,24,0">
+                            <Ellipse WidthRequest="3" HeightRequest="3" Fill="#66FFB37A" />
+                            <Ellipse WidthRequest="3" HeightRequest="3" Fill="#40FFFFFF" />
+                            <Ellipse WidthRequest="3" HeightRequest="3" Fill="#40FFFFFF" />
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                    <!-- ═══ Header content ═══ -->
+                    <Grid Padding="20,20,20,32"
+                          ColumnDefinitions="Auto,*"
+                          ColumnSpacing="16">
+
+                        <!-- ══ AVATAR: Profile Image OR Initial ══ -->
+                        <Border Grid.Column="0"
+                                WidthRequest="72" HeightRequest="72"
+                                StrokeThickness="3"
+                                Stroke="#FFE0C2"
+                                VerticalOptions="Start"
+                                StrokeShape="RoundRectangle 36"
+                                BackgroundColor="Transparent">
+                            <Border.Shadow>
+                                <Shadow Brush="#000000" Offset="0,4" Radius="12" Opacity="0.25" />
+                            </Border.Shadow>
+
+                            <Border WidthRequest="64" HeightRequest="64"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 32">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#FF8A1E" Offset="0.0" />
+                                        <GradientStop Color="#FF5500" Offset="1.0" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+
+                                <Grid>
+
+                                    <!-- Profile Image (visible when set) -->
+                                    <Image Source="{Binding Contact.ProfileImage}"
+                                           Aspect="AspectFill"
+                                           HorizontalOptions="Fill"
+                                           VerticalOptions="Fill"
+                                           IsVisible="{Binding Contact.ProfileImage, Converter={StaticResource StringNotEmptyConverter}}" />
+
+                                    <!-- Initial fallback (visible when no image) -->
+                                    <Label Text="{Binding Contact.Initial}"
+                                           FontSize="26"
+                                           FontAttributes="Bold"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"
+                                           HorizontalTextAlignment="Center"
+                                           MaxLines="1"
+                                           LineBreakMode="NoWrap"
+                                           TextColor="White"
+                                           IsVisible="{Binding Contact.ProfileImage, Converter={StaticResource StringEmptyConverter}}" />
                                 </Grid>
                             </Border>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                        </Border>
 
-                <!-- Full history -->
-                <Label Style="{StaticResource SectionHeaderLabel}" Text="HISTORY" />
-                <Label Style="{StaticResource CaptionLabel}" Text="Swipe an entry to delete it if it was entered incorrectly." />
-                <CollectionView ItemsSource="{Binding History}">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:ContactHistoryItem">
-                            <SwipeView>
-                                <SwipeView.RightItems>
-                                    <SwipeItems>
-                                        <SwipeItem Text="Delete"
-                                                   BackgroundColor="{StaticResource Expense}"
-                                                   IsVisible="{Binding IsDeletable}"
-                                                   Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteHistoryItemCommand}"
-                                                   CommandParameter="{Binding .}" />
-                                    </SwipeItems>
-                                </SwipeView.RightItems>
-                                <Grid ColumnDefinitions="*,Auto" Padding="0,8">
-                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                        <Label Style="{StaticResource BodyLabel}" FontAttributes="Bold" Text="{Binding MovementLabel}" />
-                                        <Label Style="{StaticResource CaptionLabel}" Text="{Binding Date, StringFormat='{0:dd MMM yyyy}'}" />
+                        <!-- ══ NAME + CONTACT INFO ══ -->
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="6"
+                                             VerticalOptions="Center">
+
+                            <Label Text="{Binding Contact.Name}"
+                                   FontSize="22"
+                                   FontAttributes="Bold"
+                                   LineBreakMode="TailTruncation"
+                                   MaxLines="1"
+                                   TextColor="White" />
+
+                            <!-- Mobile -->
+                            <HorizontalStackLayout Spacing="6"
+                                                   IsVisible="{Binding Contact.Mobile, Converter={StaticResource StringNotEmptyConverter}}">
+                                <Path WidthRequest="12" HeightRequest="12"
+                                      Aspect="Uniform"
+                                      Fill="Transparent"
+                                      Stroke="#FFE0C2"
+                                      StrokeThickness="2"
+                                      StrokeLineCap="Round"
+                                      StrokeLineJoin="Round"
+                                      VerticalOptions="Center"
+                                      Data="M4,4 L8,4 L10,9 L7,11 C8,14 10,16 13,17 L15,14 L20,16 L20,20 C20,20.6 19.6,21 19,21 C10,21 3,14 3,5 C3,4.4 3.4,4 4,4 Z" />
+
+                                <Label FontSize="12"
+                                       TextColor="#FFD9B8"
+                                       VerticalOptions="Center"
+                                       Text="{Binding Contact.Mobile}" />
+                            </HorizontalStackLayout>
+
+                            <!-- Email -->
+                            <HorizontalStackLayout Spacing="6"
+                                                   IsVisible="{Binding Contact.Email, Converter={StaticResource StringNotEmptyConverter}}">
+                                <Path WidthRequest="12" HeightRequest="12"
+                                      Aspect="Uniform"
+                                      Fill="Transparent"
+                                      Stroke="#FFE0C2"
+                                      StrokeThickness="2"
+                                      StrokeLineCap="Round"
+                                      StrokeLineJoin="Round"
+                                      VerticalOptions="Center"
+                                      Data="M4,6 L4,18 L20,18 L20,6 Z M4,6 L12,13 L20,6" />
+
+                                <Label FontSize="12"
+                                       TextColor="#FFD9B8"
+                                       VerticalOptions="Center"
+                                       LineBreakMode="TailTruncation"
+                                       Text="{Binding Contact.Email}" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Grid>
+
+                <!-- ═══════════ CONTENT SHEET ═══════════ -->
+                <Border Margin="0,-16,0,0"
+                        StrokeThickness="0"
+                        BackgroundColor="{StaticResource PageBg}"
+                        StrokeShape="RoundRectangle 28,28,0,0">
+                    <VerticalStackLayout Padding="16,22,16,20" Spacing="16">
+
+                        <!-- ═══ NET SUMMARY (2 cards) ═══ -->
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+
+                            <!-- YOU'LL RECEIVE -->
+                            <Border Grid.Column="0"
+                                    Padding="14,12"
+                                    StrokeThickness="1"
+                                    Stroke="{StaticResource CardStroke}"
+                                    StrokeShape="RoundRectangle 16"
+                                    BackgroundColor="{StaticResource CardBg}">
+                                <Border.Shadow>
+                                    <Shadow Brush="#3D1E00" Offset="0,4" Radius="12" Opacity="0.06" />
+                                </Border.Shadow>
+
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                    <Border Grid.Column="0"
+                                            WidthRequest="36" HeightRequest="36"
+                                            StrokeThickness="0"
+                                            VerticalOptions="Center"
+                                            StrokeShape="RoundRectangle 18"
+                                            BackgroundColor="{StaticResource LendTint}">
+                                        <Path WidthRequest="14" HeightRequest="14"
+                                              Aspect="Uniform"
+                                              Fill="Transparent"
+                                              Stroke="{StaticResource Lend}"
+                                              StrokeThickness="2.4"
+                                              StrokeLineCap="Round"
+                                              StrokeLineJoin="Round"
+                                              HorizontalOptions="Center"
+                                              VerticalOptions="Center"
+                                              Data="M12,4 L12,20 M6,14 L12,20 L18,14" />
+                                    </Border>
+
+                                    <VerticalStackLayout Grid.Column="1"
+                                                         Spacing="2"
+                                                         VerticalOptions="Center">
+                                        <Label FontSize="9"
+                                               CharacterSpacing="1.2"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource TextTertiary}"
+                                               Text="YOU'LL RECEIVE" />
+                                        <Label FontSize="15"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource Lend}"
+                                               Text="{Binding TotalYouWillReceive, StringFormat='₹{0:N0}'}" />
                                     </VerticalStackLayout>
-                                    <Label Grid.Column="1" VerticalOptions="Center" FontAttributes="Bold"
-                                           Text="{Binding Amount, StringFormat='₹{0:N2}'}" />
                                 </Grid>
-                            </SwipeView>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                            </Border>
 
-                <Button Style="{StaticResource PrimaryButton}" Text="Share Report" Command="{Binding ShareReportCommand}" Margin="0,10" />
+                            <!-- YOU OWE -->
+                            <Border Grid.Column="1"
+                                    Padding="14,12"
+                                    StrokeThickness="1"
+                                    Stroke="{StaticResource CardStroke}"
+                                    StrokeShape="RoundRectangle 16"
+                                    BackgroundColor="{StaticResource CardBg}">
+                                <Border.Shadow>
+                                    <Shadow Brush="#3D1E00" Offset="0,4" Radius="12" Opacity="0.06" />
+                                </Border.Shadow>
 
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                    <Border Grid.Column="0"
+                                            WidthRequest="36" HeightRequest="36"
+                                            StrokeThickness="0"
+                                            VerticalOptions="Center"
+                                            StrokeShape="RoundRectangle 18"
+                                            BackgroundColor="{StaticResource BorrowTint}">
+                                        <Path WidthRequest="14" HeightRequest="14"
+                                              Aspect="Uniform"
+                                              Fill="Transparent"
+                                              Stroke="{StaticResource Borrow}"
+                                              StrokeThickness="2.4"
+                                              StrokeLineCap="Round"
+                                              StrokeLineJoin="Round"
+                                              HorizontalOptions="Center"
+                                              VerticalOptions="Center"
+                                              Data="M12,20 L12,4 M6,10 L12,4 L18,10" />
+                                    </Border>
+
+                                    <VerticalStackLayout Grid.Column="1"
+                                                         Spacing="2"
+                                                         VerticalOptions="Center">
+                                        <Label FontSize="9"
+                                               CharacterSpacing="1.2"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource TextTertiary}"
+                                               Text="YOU OWE" />
+                                        <Label FontSize="15"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource Borrow}"
+                                               Text="{Binding TotalYouOwe, StringFormat='₹{0:N0}'}" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </Grid>
+
+                        <!-- ═══ NET BALANCE HERO CARD ═══ -->
+                        <Border Padding="20,18"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 18">
+                            <Border.Shadow>
+                                <Shadow Brush="#3D1E00" Offset="0,6" Radius="16" Opacity="0.08" />
+                            </Border.Shadow>
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#FFF8F2" Offset="0.0" />
+                                    <GradientStop Color="#FFEFE3" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+
+                                <Border Grid.Column="0"
+                                        WidthRequest="44" HeightRequest="44"
+                                        StrokeThickness="0"
+                                        VerticalOptions="Center"
+                                        StrokeShape="RoundRectangle 14"
+                                        BackgroundColor="{StaticResource CardBg}">
+                                    <Path WidthRequest="22" HeightRequest="22"
+                                          Aspect="Uniform"
+                                          Fill="Transparent"
+                                          Stroke="{StaticResource Primary}"
+                                          StrokeThickness="2"
+                                          StrokeLineCap="Round"
+                                          StrokeLineJoin="Round"
+                                          HorizontalOptions="Center"
+                                          VerticalOptions="Center"
+                                          Data="M12,3 L12,21 M5,21 L19,21 M5,8 L12,3 L19,8 M3,14 L7,14 M17,14 L21,14 M3,14 L5,8 M7,14 L5,8 M17,14 L19,8 M21,14 L19,8" />
+                                </Border>
+
+                                <VerticalStackLayout Grid.Column="1"
+                                                     Spacing="2"
+                                                     VerticalOptions="Center">
+                                    <Label FontSize="9.5"
+                                           CharacterSpacing="1.5"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource TextTertiary}"
+                                           Text="NET BALANCE" />
+                                    <Label FontSize="11"
+                                           TextColor="{StaticResource TextSecondary}"
+                                           Text="Overall position with this contact" />
+                                </VerticalStackLayout>
+
+                                <Label Grid.Column="2"
+                                       FontSize="22"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       HorizontalTextAlignment="End"
+                                       Text="{Binding NetBalanceLabel}"
+                                       TextColor="{Binding NetBalanceColor}" />
+                            </Grid>
+                        </Border>
+
+                        <!-- ═══ RECORDS SECTION ═══ -->
+                        <VerticalStackLayout Spacing="10" Margin="0,4,0,0">
+
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <Border Grid.Column="0"
+                                        WidthRequest="4" HeightRequest="18"
+                                        StrokeThickness="0"
+                                        VerticalOptions="Center"
+                                        StrokeShape="RoundRectangle 2"
+                                        BackgroundColor="{StaticResource Primary}" />
+
+                                <Label Grid.Column="1"
+                                       Text="RECORDS"
+                                       FontSize="12"
+                                       CharacterSpacing="1.5"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       Margin="8,0,0,0"
+                                       TextColor="{StaticResource TextPrimary}" />
+
+                                <Border Grid.Column="2"
+                                        Padding="8,2"
+                                        StrokeThickness="0"
+                                        VerticalOptions="Center"
+                                        StrokeShape="RoundRectangle 7"
+                                        BackgroundColor="{StaticResource PrimaryTint}">
+                                    <Label FontSize="10"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource Primary}"
+                                           Text="{Binding Records.Count}" />
+                                </Border>
+                            </Grid>
+
+                            <CollectionView ItemsSource="{Binding Records}">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
+                                </CollectionView.ItemsLayout>
+
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:BorrowLend">
+
+                                        <Border StrokeThickness="0"
+                                                StrokeShape="RoundRectangle 14"
+                                                Margin="0,0,0,8">
+                                            <Border.Shadow>
+                                                <Shadow Brush="#3D1E00" Offset="0,3" Radius="10" Opacity="0.05" />
+                                            </Border.Shadow>
+
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToRecordTransactionCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+
+                                            <Grid ColumnDefinitions="4,*,Auto"
+                                                  BackgroundColor="{StaticResource CardBg}"
+                                                  Padding="10">
+
+                                                <BoxView Grid.Column="0"
+                                                         Color="{StaticResource Borrow}"
+                                                         VerticalOptions="Fill">
+                                                    <BoxView.Triggers>
+                                                        <DataTrigger TargetType="BoxView"
+                                                                     Binding="{Binding Type}" Value="Lend">
+                                                            <Setter Property="Color" Value="{StaticResource Lend}" />
+                                                        </DataTrigger>
+                                                    </BoxView.Triggers>
+                                                </BoxView>
+
+                                                <VerticalStackLayout Grid.Column="1"
+                                                                     Margin="10,0,0,0"
+                                                                     Spacing="4"
+                                                                     VerticalOptions="Center">
+
+                                                    <HorizontalStackLayout Spacing="6">
+                                                        <Path WidthRequest="9" HeightRequest="9"
+                                                              Aspect="Uniform"
+                                                              Fill="Transparent"
+                                                              Stroke="{StaticResource Lend}"
+                                                              StrokeThickness="2.6"
+                                                              StrokeLineCap="Round"
+                                                              StrokeLineJoin="Round"
+                                                              VerticalOptions="Center"
+                                                              Data="M12,4 L12,20 M6,14 L12,20 L18,14">
+                                                            <Path.Triggers>
+                                                                <DataTrigger TargetType="Path"
+                                                                             Binding="{Binding Type}" Value="Borrow">
+                                                                    <Setter Property="Stroke" Value="{StaticResource Borrow}" />
+                                                                    <Setter Property="Data" Value="M12,20 L12,4 M6,10 L12,4 L18,10" />
+                                                                </DataTrigger>
+                                                            </Path.Triggers>
+                                                        </Path>
+
+                                                        <Label FontSize="13"
+                                                               FontAttributes="Bold"
+                                                               VerticalOptions="Center"
+                                                               TextColor="{StaticResource TextPrimary}"
+                                                               Text="{Binding Type}" />
+                                                    </HorizontalStackLayout>
+
+                                                    <HorizontalStackLayout Spacing="6">
+                                                        <Label FontSize="10.5"
+                                                               TextColor="{StaticResource TextSecondary}"
+                                                               Text="{Binding GivenDate, StringFormat='Since {0:dd MMM yyyy}'}" />
+
+                                                        <BoxView WidthRequest="3" HeightRequest="3"
+                                                                 CornerRadius="1.5"
+                                                                 VerticalOptions="Center"
+                                                                 Color="{StaticResource TextTertiary}" />
+
+                                                        <Label FontSize="10.5"
+                                                               FontAttributes="Bold"
+                                                               TextColor="{StaticResource Primary}"
+                                                               Text="{Binding Status}" />
+                                                    </HorizontalStackLayout>
+                                                </VerticalStackLayout>
+
+                                                <Label Grid.Column="2"
+                                                       FontSize="14"
+                                                       FontAttributes="Bold"
+                                                       VerticalOptions="Center"
+                                                       HorizontalTextAlignment="End"
+                                                       TextColor="{StaticResource Lend}"
+                                                       Text="{Binding PendingAmount, StringFormat='₹{0:N0}'}">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label"
+                                                                     Binding="{Binding Type}" Value="Borrow">
+                                                            <Setter Property="TextColor" Value="{StaticResource Borrow}" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+
+                        <!-- ═══ HISTORY SECTION ═══ -->
+                        <VerticalStackLayout Spacing="10" Margin="0,8,0,0">
+
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <Border Grid.Column="0"
+                                        WidthRequest="4" HeightRequest="18"
+                                        StrokeThickness="0"
+                                        VerticalOptions="Center"
+                                        StrokeShape="RoundRectangle 2"
+                                        BackgroundColor="{StaticResource TextTertiary}" />
+
+                                <Label Grid.Column="1"
+                                       Text="HISTORY"
+                                       FontSize="12"
+                                       CharacterSpacing="1.5"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       Margin="8,0,0,0"
+                                       TextColor="{StaticResource TextPrimary}" />
+
+                                <Border Grid.Column="2"
+                                        Padding="8,2"
+                                        StrokeThickness="0"
+                                        VerticalOptions="Center"
+                                        StrokeShape="RoundRectangle 7"
+                                        BackgroundColor="{StaticResource TrackMuted}">
+                                    <Label FontSize="10"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource TextSecondary}"
+                                           Text="{Binding History.Count}" />
+                                </Border>
+                            </Grid>
+
+                            <Label FontSize="10.5"
+                                   TextColor="{StaticResource TextTertiary}"
+                                   Text="Swipe an entry to delete if entered incorrectly." />
+
+                            <Border StrokeThickness="1"
+                                    Stroke="{StaticResource CardStroke}"
+                                    StrokeShape="RoundRectangle 14"
+                                    BackgroundColor="{StaticResource CardBg}">
+                                <Border.Shadow>
+                                    <Shadow Brush="#3D1E00" Offset="0,3" Radius="10" Opacity="0.05" />
+                                </Border.Shadow>
+
+                                <CollectionView ItemsSource="{Binding History}">
+                                    <CollectionView.ItemsLayout>
+                                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
+                                    </CollectionView.ItemsLayout>
+
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ContactHistoryItem">
+
+                                            <SwipeView>
+                                                <SwipeView.RightItems>
+                                                    <SwipeItems Mode="Execute">
+                                                        <SwipeItem Text="Delete"
+                                                                   BackgroundColor="{StaticResource Borrow}"
+                                                                   IsVisible="{Binding IsDeletable}"
+                                                                   Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteHistoryItemCommand}"
+                                                                   CommandParameter="{Binding .}" />
+                                                    </SwipeItems>
+                                                </SwipeView.RightItems>
+
+                                                <Grid ColumnDefinitions="Auto,*,Auto"
+                                                      Padding="12,10"
+                                                      ColumnSpacing="10">
+
+                                                    <Border Grid.Column="0"
+                                                            WidthRequest="30" HeightRequest="30"
+                                                            StrokeThickness="0"
+                                                            VerticalOptions="Center"
+                                                            StrokeShape="RoundRectangle 15"
+                                                            BackgroundColor="{StaticResource PrimaryTint}">
+                                                        <Path WidthRequest="12" HeightRequest="12"
+                                                              Aspect="Uniform"
+                                                              Fill="Transparent"
+                                                              Stroke="{StaticResource Primary}"
+                                                              StrokeThickness="2.2"
+                                                              StrokeLineCap="Round"
+                                                              StrokeLineJoin="Round"
+                                                              HorizontalOptions="Center"
+                                                              VerticalOptions="Center"
+                                                              Data="M12,20 L12,4 M6,10 L12,4 L18,10" />
+                                                    </Border>
+
+                                                    <VerticalStackLayout Grid.Column="1"
+                                                                         Spacing="2"
+                                                                         VerticalOptions="Center">
+                                                        <Label FontSize="12.5"
+                                                               FontAttributes="Bold"
+                                                               TextColor="{StaticResource TextPrimary}"
+                                                               Text="{Binding MovementLabel}" />
+
+                                                        <Label FontSize="10.5"
+                                                               TextColor="{StaticResource TextTertiary}"
+                                                               Text="{Binding Date, StringFormat='{0:dd MMM yyyy}'}" />
+                                                    </VerticalStackLayout>
+
+                                                    <Label Grid.Column="2"
+                                                           FontSize="13"
+                                                           FontAttributes="Bold"
+                                                           VerticalOptions="Center"
+                                                           HorizontalTextAlignment="End"
+                                                           TextColor="{StaticResource TextPrimary}"
+                                                           Text="{Binding Amount, StringFormat='₹{0:N0}'}" />
+                                                </Grid>
+                                            </SwipeView>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- ═══ SHARE REPORT BUTTON with SEND ICON ═══ -->
+                        <Border HeightRequest="60"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 18"
+                                Margin="0,12,0,8">
+                            <Border.Shadow>
+                                <Shadow Brush="#FF6B00" Offset="0,8" Radius="18" Opacity="0.45" />
+                            </Border.Shadow>
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#FF8A1E" Offset="0.0" />
+                                    <GradientStop Color="#FF5500" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ShareReportCommand}" />
+                            </Border.GestureRecognizers>
+
+                            <Grid ColumnDefinitions="Auto,*,Auto" Padding="20,0,20,0">
+
+                                <!-- LEFT: Share SVG (3-dot material) -->
+                                <Path Grid.Column="0"
+                                      WidthRequest="24" HeightRequest="24"
+                                      Aspect="Uniform"
+                                      Fill="White"
+                                      VerticalOptions="Center"
+                                      Data="M18,16.08 C17.24,16.08 16.56,16.38 16.04,16.85 L8.91,12.7 C8.96,12.47 9,12.24 9,12 C9,11.76 8.96,11.53 8.91,11.3 L15.96,7.19 C16.5,7.69 17.21,8 18,8 C19.66,8 21,6.66 21,5 C21,3.34 19.66,2 18,2 C16.34,2 15,3.34 15,5 C15,5.24 15.04,5.47 15.09,5.7 L8.04,9.81 C7.5,9.31 6.79,9 6,9 C4.34,9 3,10.34 3,12 C3,13.66 4.34,15 6,15 C6.79,15 7.5,14.69 8.04,14.19 L15.16,18.34 C15.11,18.55 15.08,18.77 15.08,18.99 C15.08,20.6 16.39,21.91 18,21.91 C19.61,21.91 20.92,20.6 20.92,18.99 C20.92,17.38 19.61,16.08 18,16.08 Z" />
+
+                                <!-- CENTER: text -->
+                                <VerticalStackLayout Grid.Column="1"
+                                                     Spacing="1"
+                                                     VerticalOptions="Center"
+                                                     Margin="14,0,14,0">
+                                    <Label Text="Share Report"
+                                           FontSize="14.5"
+                                           FontAttributes="Bold"
+                                           TextColor="White" />
+                                    <Label Text="Send as PDF"
+                                           FontSize="10.5"
+                                           TextColor="#FFD9B8" />
+                                </VerticalStackLayout>
+
+                                <!-- RIGHT: Send icon (paper plane) -->
+                                <Path Grid.Column="2"
+                                      WidthRequest="20" HeightRequest="20"
+                                      Aspect="Uniform"
+                                      Fill="White"
+                                      VerticalOptions="Center"
+                                      Data="M2.01,21 L23,12 L2.01,3 L2,10 L17,12 L2,14 Z" />
+                            </Grid>
+                        </Border>
+
+                    </VerticalStackLayout>
+                </Border>
             </VerticalStackLayout>
         </ScrollView>
     </RefreshView>

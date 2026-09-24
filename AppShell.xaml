@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-
 <Shell
     x:Class="Arthiva.AppShell"
     x:Name="RootShell"
@@ -24,77 +23,15 @@
         </ResourceDictionary>
     </Shell.Resources>
 
-    <!-- ===================================================== -->
-    <!-- TOP APP BAR                                            -->
-    <!-- ===================================================== -->
-
-    <!-- ===================================================== -->
-    <!-- TOP APP BAR (Updated to match image)                   -->
-    <!-- ===================================================== -->
-
-    <Shell.TitleView>
-        <Grid Padding="16,0,16,0" ColumnDefinitions="*,Auto" HeightRequest="64">
-
-            <!-- Left: Logo + App name -->
-            <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
-                <Grid WidthRequest="36" HeightRequest="36">
-                    <Label Text="A" FontSize="28" FontAttributes="Bold"
-                           TextColor="#FF6B00"
-                           VerticalOptions="Center" HorizontalOptions="Center" />
-                    <Label Text="🌱" FontSize="14"
-                           HorizontalOptions="End" VerticalOptions="Start"
-                           TranslationY="-2" TranslationX="6" />
-                </Grid>
-                <VerticalStackLayout Spacing="1" VerticalOptions="Center">
-                    <Label Text="Arthiva" FontSize="20" FontAttributes="Bold" TextColor="#1A2B4C" />
-                    <Label Text="Plan • Save • Grow" FontSize="11" TextColor="#6B7A90" />
-                </VerticalStackLayout>
-            </HorizontalStackLayout>
-
-            <!-- Right: Bell + Avatar -->
-            <HorizontalStackLayout Grid.Column="1" Spacing="12" VerticalOptions="Center">
-
-                <Grid WidthRequest="40" HeightRequest="40">
-                    <Grid.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnBellTapped" />
-                    </Grid.GestureRecognizers>
-
-                    <Border BackgroundColor="#F5F7FA" StrokeThickness="0"
-                            StrokeShape="RoundRectangle 20"
-                            WidthRequest="40" HeightRequest="40">
-                        <Image Source="icon_bell_dark.png"
-                               WidthRequest="20" HeightRequest="20"
-                               Aspect="AspectFit"
-                               HorizontalOptions="Center" VerticalOptions="Center" />
-                    </Border>
-
-                    <Border IsVisible="{Binding UnreadNotificationCount, Source={x:Reference RootShell}, Converter={StaticResource LocalIntGreaterThanZeroConverter}}"
-                            BackgroundColor="#FF3B30" StrokeThickness="0"
-                            StrokeShape="RoundRectangle 10"
-                            WidthRequest="18" HeightRequest="18"
-                            HorizontalOptions="End" VerticalOptions="Start"
-                            TranslationX="2" TranslationY="-2">
-                        <Label Text="{Binding UnreadNotificationCount, Source={x:Reference RootShell}}"
-                               TextColor="White" FontSize="10" FontAttributes="Bold"
-                               HorizontalOptions="Center" VerticalOptions="Center" />
-                    </Border>
-                </Grid>
-
-                <Border WidthRequest="40" HeightRequest="40" StrokeThickness="0"
-                        StrokeShape="RoundRectangle 20" BackgroundColor="#E3F2FD">
-                    <Label Text="{Binding UserInitials, Source={x:Reference RootShell}}"
-                           FontSize="14" FontAttributes="Bold" TextColor="#1E88E5"
-                           HorizontalOptions="Center" VerticalOptions="Center" />
-                </Border>
-            </HorizontalStackLayout>
-        </Grid>
-    </Shell.TitleView>
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!--  ULTRA PREMIUM TOP APP BAR                          -->
+    <!-- ═══════════════════════════════════════════════════ -->
 
 
-    <!-- ===================================================== -->
-    <!-- BOTTOM NAVIGATION                                      -->
-    <!-- ===================================================== -->
 
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!--  BOTTOM NAVIGATION                                  -->
+    <!-- ═══════════════════════════════════════════════════ -->
     <TabBar>
 
         <ShellContent
@@ -108,13 +45,6 @@
             Icon="tab_transactions.png"
             ContentTemplate="{DataTemplate views:TransactionListPage}"
             Route="TransactionListPage" />
-
-        <!-- Converters — available by key in every page's bindings 
-        <ShellContent
-            Title="Add"
-            Icon="tab_add.png"
-            ContentTemplate="{DataTemplate views:AddEditTransactionPage}"
-            Route="AddEditTransactionPage" /> -->
 
         <ShellContent
             Title="Accounts"

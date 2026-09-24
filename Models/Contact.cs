@@ -43,4 +43,17 @@ public class Contact
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    // ⬇️ NAYA: computed property (not persisted)
+    /// <summary>First letter of name for avatar fallback.</summary>
+    [Ignore]
+    public string Initial =>
+        string.IsNullOrWhiteSpace(Name)
+            ? "?"
+            : Name.Trim()[0].ToString().ToUpper();
+
+    // ⬇️ NAYA: has profile image helper
+    [Ignore]
+    public bool HasProfileImage =>
+        !string.IsNullOrWhiteSpace(ProfileImage);
 }

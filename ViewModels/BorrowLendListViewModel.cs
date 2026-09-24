@@ -18,6 +18,10 @@ public class BorrowLendListItem
 {
     public BorrowLend Record { get; init; } = null!;
     public string ContactName { get; init; } = "Unknown";
+    public string ContactInitial =>
+    string.IsNullOrWhiteSpace(ContactName)
+        ? "?"
+        : ContactName.Trim()[0].ToString().ToUpper();
 }
 
 public partial class BorrowLendListViewModel : BaseViewModel

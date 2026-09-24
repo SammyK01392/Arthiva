@@ -6,91 +6,436 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:Arthiva.ViewModels"
     xmlns:models="clr-namespace:Arthiva.Models"
-    xmlns:components="clr-namespace:Arthiva.Views.Components"
     x:DataType="vm:SavingGoalListViewModel"
-    Title="Saving Goals">
+    Title="Saving Goals"
+    BackgroundColor="#FFF8F2">
 
-    <Grid RowDefinitions="*">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="Primary">#FF6B00</Color>
+            <Color x:Key="PrimaryTint">#FFF1E3</Color>
+            <Color x:Key="PageBg">#FFF8F2</Color>
+            <Color x:Key="CardBg">#FFFFFF</Color>
+            <Color x:Key="CardStroke">#F4EBE1</Color>
+            <Color x:Key="TrackMuted">#F4EDE6</Color>
+            <Color x:Key="TextPrimary">#1A1410</Color>
+            <Color x:Key="TextSecondary">#7A6B5E</Color>
+            <Color x:Key="TextTertiary">#A89A8C</Color>
+            <Color x:Key="Success">#0FA968</Color>
+            <Color x:Key="SuccessTint">#E3F7EE</Color>
+            <Color x:Key="SuccessDeep">#C6EFDC</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
-        <RefreshView Grid.Row="0" IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+    <Grid>
 
-            <CollectionView ItemsSource="{Binding Goals}" Margin="16,8,16,0">
+        <Grid RowDefinitions="Auto,*">
 
-                <CollectionView.EmptyView>
-                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8" Margin="0,60,0,0">
-                        <Label Text="No saving goals yet. Tap + Add to start one." Style="{StaticResource BodyLabel}"
-                               TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
+            <!-- ═══════════ COMPACT PREMIUM HEADER ═══════════ -->
+            <Grid Grid.Row="0">
+                <Grid.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#3D1E00" Offset="0.0" />
+                        <GradientStop Color="#B84500" Offset="0.55" />
+                        <GradientStop Color="#FF6B00" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Grid.Background>
+
+                <!-- Decorative SVG layer -->
+                <Grid InputTransparent="True">
+                    <Ellipse WidthRequest="100" HeightRequest="100"
+                             Fill="#30FFB37A"
+                             HorizontalOptions="Start" VerticalOptions="Start"
+                             TranslationX="-40" TranslationY="-40" />
+
+                    <Ellipse WidthRequest="140" HeightRequest="140"
+                             Fill="#40FF8A1E"
+                             HorizontalOptions="End" VerticalOptions="End"
+                             TranslationX="60" TranslationY="60" />
+
+                    <Path Stroke="#28FFFFFF" StrokeThickness="1.2" Fill="Transparent"
+                          HorizontalOptions="End" VerticalOptions="Center"
+                          TranslationX="20"
+                          Data="M0,0 C 40,30 40,100 0,130" />
+
+                    <HorizontalStackLayout Spacing="6"
+                                           HorizontalOptions="Start"
+                                           VerticalOptions="Start"
+                                           Margin="20,18,0,0">
+                        <Ellipse WidthRequest="3" HeightRequest="3" Fill="#66FFB37A" />
+                        <Ellipse WidthRequest="3" HeightRequest="3" Fill="#40FFFFFF" />
+                        <Ellipse WidthRequest="3" HeightRequest="3" Fill="#40FFFFFF" />
+                    </HorizontalStackLayout>
+                </Grid>
+
+                <!-- Header content -->
+                <Grid Padding="20,16,20,18" ColumnDefinitions="*,Auto">
+
+                    <VerticalStackLayout Grid.Column="0" Spacing="3">
+
+                        <Border Padding="7,3"
+                                StrokeThickness="0"
+                                HorizontalOptions="Start"
+                                StrokeShape="RoundRectangle 6"
+                                BackgroundColor="#40FF5500">
+                            <HorizontalStackLayout Spacing="4">
+                                <Ellipse WidthRequest="4" HeightRequest="4"
+                                         Fill="#FFE0C2"
+                                         VerticalOptions="Center" />
+                                <Label Text="SAVINGS HUB"
+                                       FontSize="8.5"
+                                       CharacterSpacing="1.8"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       TextColor="#FFE0C2" />
+                            </HorizontalStackLayout>
+                        </Border>
+
+                        <Label Text="Saving Goals"
+                               FontSize="22"
+                               FontAttributes="Bold"
+                               Margin="0,4,0,0"
+                               TextColor="White" />
+
+                        <HorizontalStackLayout Spacing="5">
+                            <Label Text="Plan your dreams,"
+                                   FontSize="11"
+                                   TextColor="#FFD9B8" />
+                            <Label Text="save step by step"
+                                   FontSize="11"
+                                   FontAttributes="Bold"
+                                   TextColor="#FFE0C2" />
+                        </HorizontalStackLayout>
                     </VerticalStackLayout>
-                </CollectionView.EmptyView>
 
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:SavingGoal">
-                        <SwipeView>
-                            <SwipeView.RightItems>
-                                <SwipeItems>
-                                    <SwipeItem Text="Edit"
-                                               BackgroundColor="{StaticResource Primary}"
-                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
-                                               CommandParameter="{Binding .}" />
-                                    <SwipeItem Text="Delete"
-                                               BackgroundColor="{StaticResource Expense}"
-                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
-                                               CommandParameter="{Binding .}" />
-                                </SwipeItems>
-                            </SwipeView.RightItems>
+                    <!-- ══ Premium Piggy Bank SVG badge ══ -->
+                    <Border Grid.Column="1"
+                            WidthRequest="42" HeightRequest="42"
+                            StrokeThickness="1"
+                            Stroke="#30FFFFFF"
+                            VerticalOptions="Center"
+                            StrokeShape="RoundRectangle 13"
+                            BackgroundColor="#30FFFFFF">
+                        <Path WidthRequest="20" HeightRequest="20"
+                              Aspect="Uniform"
+                              Fill="Transparent"
+                              Stroke="White"
+                              StrokeThickness="1.7"
+                              StrokeLineCap="Round"
+                              StrokeLineJoin="Round"
+                              HorizontalOptions="Center"
+                              VerticalOptions="Center"
+                              Data="M12,3 L15,3 L15,5 M9,3 L9,5 M19,9 L21,9 M19,13 L21,13 M19,17 L21,17 M5,7 L19,7 C19.6,7 20,7.4 20,8 L20,18 C20,18.6 19.6,19 19,19 L5,19 C4.4,19 4,18.6 4,18 L4,8 C4,7.4 4.4,7 5,7 Z M8,11 L10,11 M14,11 L16,11" />
+                    </Border>
+                </Grid>
+            </Grid>
 
-                            <!-- CardBorder → ListCardBorder: Shadow renders invisible
-                                 inside CollectionView on Windows/WinUI -->
-                            <Border Style="{StaticResource ListCardBorder}" Margin="0,6">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer
-                                        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToContributeCommand}"
-                                        CommandParameter="{Binding .}" />
-                                </Border.GestureRecognizers>
+            <!-- ═══════════ CONTENT SHEET ═══════════ -->
+            <Border Grid.Row="1" Margin="0,-14,0,0"
+                    StrokeThickness="0" BackgroundColor="{StaticResource PageBg}"
+                    StrokeShape="RoundRectangle 28,28,0,0">
+                <Grid RowDefinitions="*">
 
-                                <VerticalStackLayout Spacing="8">
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <Label Grid.Column="0" Style="{StaticResource SubtitleLabel}" Text="{Binding Name}" />
-                                        <Border Grid.Column="1" Style="{StaticResource ChipBorder}"
-                                                BackgroundColor="{StaticResource IncomeTint}"
-                                                IsVisible="{Binding IsCompleted}">
-                                            <Label Style="{StaticResource ChipLabel}" TextColor="{StaticResource Income}" Text="Completed" />
+                    <RefreshView Grid.Row="0"
+                                 IsRefreshing="{Binding IsBusy}"
+                                 Command="{Binding LoadCommand}"
+                                 RefreshColor="{StaticResource Primary}">
+                        <Grid>
+                            <CollectionView ItemsSource="{Binding Goals}"
+                                            SelectionMode="None"
+                                            VerticalScrollBarVisibility="Never"
+                                            Margin="16,20,16,0">
+
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
+                                </CollectionView.ItemsLayout>
+
+                                <CollectionView.EmptyView>
+                                    <VerticalStackLayout Padding="32" Spacing="12"
+                                                         HorizontalOptions="Center"
+                                                         VerticalOptions="Center"
+                                                         Margin="0,60,0,0">
+                                        <Border WidthRequest="80" HeightRequest="80"
+                                                StrokeThickness="0" HorizontalOptions="Center"
+                                                StrokeShape="RoundRectangle 26"
+                                                BackgroundColor="{StaticResource PrimaryTint}">
+                                            <!-- Piggy bank SVG -->
+                                            <Path WidthRequest="36" HeightRequest="36"
+                                                  Aspect="Uniform"
+                                                  Fill="Transparent"
+                                                  Stroke="{StaticResource Primary}"
+                                                  StrokeThickness="2"
+                                                  StrokeLineCap="Round"
+                                                  StrokeLineJoin="Round"
+                                                  HorizontalOptions="Center"
+                                                  VerticalOptions="Center"
+                                                  Data="M12,3 L15,3 L15,5 M9,3 L9,5 M19,9 L21,9 M19,13 L21,13 M19,17 L21,17 M5,7 L19,7 C19.6,7 20,7.4 20,8 L20,18 C20,18.6 19.6,19 19,19 L5,19 C4.4,19 4,18.6 4,18 L4,8 C4,7.4 4.4,7 5,7 Z M8,11 L10,11 M14,11 L16,11" />
                                         </Border>
-                                    </Grid>
+                                        <Label Text="No saving goals yet" FontSize="16"
+                                               FontAttributes="Bold" HorizontalOptions="Center"
+                                               TextColor="{StaticResource TextPrimary}" />
+                                        <Label Text="Tap + to start your first goal."
+                                               FontSize="12.5" HorizontalOptions="Center"
+                                               HorizontalTextAlignment="Center"
+                                               TextColor="{StaticResource TextSecondary}" />
+                                    </VerticalStackLayout>
+                                </CollectionView.EmptyView>
 
-                                    <Label Style="{StaticResource CaptionLabel}"
-                                           Text="{Binding TargetDate, StringFormat='Target: {0:dd MMM yyyy}'}"
-                                           IsVisible="{Binding TargetDate, Converter={StaticResource IsNotNullConverter}}" />
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:SavingGoal">
 
-                                    <!-- MultiBinding removed — uses precomputed ProgressRatio -->
-                                    <ProgressBar ProgressColor="{StaticResource Primary}"
-                                                 Progress="{Binding ProgressRatio}" />
+                                        <SwipeView Margin="0,0,0,10">
+                                            <SwipeView.RightItems>
+                                                <SwipeItems Mode="Execute">
+                                                    <SwipeItem Text="Edit"
+                                                               BackgroundColor="{StaticResource Primary}"
+                                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
+                                                               CommandParameter="{Binding .}" />
+                                                    <SwipeItem Text="Delete"
+                                                               BackgroundColor="#E63946"
+                                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                                               CommandParameter="{Binding .}" />
+                                                </SwipeItems>
+                                            </SwipeView.RightItems>
 
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <Label Grid.Column="0" Style="{StaticResource CaptionLabel}"
-                                               Text="{Binding SavedAmount, Converter={StaticResource CurrencyConverter}}" />
-                                        <!-- MultiBinding removed — uses precomputed TargetText -->
-                                        <Label Grid.Column="1" Style="{StaticResource CaptionLabel}" Text="{Binding TargetText}" />
-                                    </Grid>
-                                </VerticalStackLayout>
-                            </Border>
-                        </SwipeView>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
+                                            <!-- ══════════════════════════════════════ -->
+                                            <!--  PREMIUM SAVING GOAL CARD              -->
+                                            <!-- ══════════════════════════════════════ -->
+                                            <Border StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 16">
+                                                <Border.Shadow>
+                                                    <Shadow Brush="#3D1E00" Offset="0,5" Radius="14" Opacity="0.07" />
+                                                </Border.Shadow>
 
-            </CollectionView>
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToContributeCommand}"
+                                                        CommandParameter="{Binding .}" />
+                                                </Border.GestureRecognizers>
 
-        </RefreshView>
+                                                <Grid ColumnDefinitions="5,*"
+                                                      BackgroundColor="{StaticResource CardBg}">
 
-        <Button
-            Grid.Row="0"
-            Style="{StaticResource FabButton}"
-            Text="+"
-            Command="{Binding GoToAddCommand}"
-            HorizontalOptions="End"
-            VerticalOptions="End"
-            Margin="0,0,20,20" />
+                                                    <!-- ══ LEFT ACCENT (Green if completed / Orange else) ══ -->
+                                                    <BoxView Grid.Column="0"
+                                                             Color="{StaticResource Primary}"
+                                                             VerticalOptions="Fill">
+                                                        <BoxView.Triggers>
+                                                            <DataTrigger TargetType="BoxView"
+                                                                         Binding="{Binding IsCompleted}" Value="True">
+                                                                <Setter Property="Color" Value="{StaticResource Success}" />
+                                                            </DataTrigger>
+                                                        </BoxView.Triggers>
+                                                    </BoxView>
+
+                                                    <!-- ══ MAIN CONTENT ══ -->
+                                                    <VerticalStackLayout Grid.Column="1"
+                                                                         Padding="14,12"
+                                                                         Spacing="10">
+
+                                                        <!-- ── Top: icon + name + status ── -->
+                                                        <Grid ColumnDefinitions="44,*,Auto"
+                                                              ColumnSpacing="12">
+
+                                                            <!-- Icon (gradient) -->
+                                                            <Border Grid.Column="0"
+                                                                    WidthRequest="44" HeightRequest="44"
+                                                                    StrokeThickness="0"
+                                                                    VerticalOptions="Center"
+                                                                    StrokeShape="RoundRectangle 12">
+                                                                <Border.Background>
+                                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                        <GradientStop Color="{StaticResource PrimaryTint}" Offset="0.0" />
+                                                                        <GradientStop Color="#FFE0C2" Offset="1.0" />
+                                                                    </LinearGradientBrush>
+                                                                </Border.Background>
+                                                                <Border.Triggers>
+                                                                    <DataTrigger TargetType="Border"
+                                                                                 Binding="{Binding IsCompleted}" Value="True">
+                                                                        <Setter Property="Background">
+                                                                            <Setter.Value>
+                                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                                    <GradientStop Color="{StaticResource SuccessTint}" Offset="0.0" />
+                                                                                    <GradientStop Color="{StaticResource SuccessDeep}" Offset="1.0" />
+                                                                                </LinearGradientBrush>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                    </DataTrigger>
+                                                                </Border.Triggers>
+
+                                                                <!-- Target/Trophy SVG -->
+                                                                <Path WidthRequest="20" HeightRequest="20"
+                                                                      Aspect="Uniform"
+                                                                      Fill="Transparent"
+                                                                      Stroke="{StaticResource Primary}"
+                                                                      StrokeThickness="1.9"
+                                                                      StrokeLineCap="Round"
+                                                                      StrokeLineJoin="Round"
+                                                                      HorizontalOptions="Center"
+                                                                      VerticalOptions="Center"
+                                                                      Data="M12,3 A9,9 0 1,1 3,12 A9,9 0 0,1 12,3 Z M12,7 A5,5 0 1,1 7,12 A5,5 0 0,1 12,7 Z M12,10 A2,2 0 1,1 10,12 A2,2 0 0,1 12,10 Z">
+                                                                    <Path.Triggers>
+                                                                        <DataTrigger TargetType="Path"
+                                                                                     Binding="{Binding IsCompleted}" Value="True">
+                                                                            <Setter Property="Stroke" Value="{StaticResource Success}" />
+                                                                        </DataTrigger>
+                                                                    </Path.Triggers>
+                                                                </Path>
+                                                            </Border>
+
+                                                            <!-- Name + target date -->
+                                                            <VerticalStackLayout Grid.Column="1"
+                                                                                 Spacing="3"
+                                                                                 VerticalOptions="Center">
+                                                                <Label FontSize="14.5" FontAttributes="Bold"
+                                                                       LineBreakMode="TailTruncation" MaxLines="1"
+                                                                       TextColor="{StaticResource TextPrimary}"
+                                                                       Text="{Binding Name, TargetNullValue='Saving Goal'}" />
+
+                                                                <HorizontalStackLayout Spacing="5">
+                                                                    <Path WidthRequest="11" HeightRequest="11"
+                                                                          Aspect="Uniform"
+                                                                          Fill="Transparent"
+                                                                          Stroke="{StaticResource TextTertiary}"
+                                                                          StrokeThickness="2"
+                                                                          StrokeLineCap="Round"
+                                                                          StrokeLineJoin="Round"
+                                                                          VerticalOptions="Center"
+                                                                          Data="M5,7 L5,19 L19,19 L19,7 Z M5,10 L19,10 M9,3 L9,7 M15,3 L15,7" />
+
+                                                                    <Label FontSize="10.5"
+                                                                           TextColor="{StaticResource TextSecondary}"
+                                                                           VerticalOptions="Center"
+                                                                           Text="{Binding TargetDate, StringFormat='Target: {0:dd MMM yyyy}'}"
+                                                                           IsVisible="{Binding TargetDate, Converter={StaticResource IsNotNullConverter}}" />
+                                                                </HorizontalStackLayout>
+                                                            </VerticalStackLayout>
+
+                                                            <!-- Status pill -->
+                                                            <Border Grid.Column="2"
+                                                                    Padding="8,3"
+                                                                    StrokeThickness="0"
+                                                                    VerticalOptions="Start"
+                                                                    StrokeShape="RoundRectangle 7"
+                                                                    IsVisible="{Binding IsCompleted}"
+                                                                    BackgroundColor="{StaticResource SuccessTint}">
+                                                                <HorizontalStackLayout Spacing="5">
+                                                                    <Ellipse WidthRequest="5" HeightRequest="5"
+                                                                             Fill="{StaticResource Success}"
+                                                                             VerticalOptions="Center" />
+                                                                    <Label FontSize="9.5" FontAttributes="Bold"
+                                                                           VerticalOptions="Center"
+                                                                           TextColor="{StaticResource Success}"
+                                                                           Text="Completed" />
+                                                                </HorizontalStackLayout>
+                                                            </Border>
+                                                        </Grid>
+
+                                                        <!-- ── Progress bar with % ── -->
+                                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                                            <Border Grid.Column="0"
+                                                                    HeightRequest="8"
+                                                                    StrokeThickness="0"
+                                                                    VerticalOptions="Center"
+                                                                    BackgroundColor="{StaticResource TrackMuted}"
+                                                                    StrokeShape="RoundRectangle 4">
+                                                                <ProgressBar
+                                                                    HeightRequest="8"
+                                                                    BackgroundColor="Transparent"
+                                                                    ProgressColor="{StaticResource Primary}"
+                                                                    Progress="{Binding ProgressRatio}">
+                                                                    <ProgressBar.Triggers>
+                                                                        <DataTrigger TargetType="ProgressBar"
+                                                                                     Binding="{Binding IsCompleted}" Value="True">
+                                                                            <Setter Property="ProgressColor" Value="{StaticResource Success}" />
+                                                                        </DataTrigger>
+                                                                    </ProgressBar.Triggers>
+                                                                </ProgressBar>
+                                                            </Border>
+
+                                                            <Label Grid.Column="1"
+                                                                   FontSize="11"
+                                                                   FontAttributes="Bold"
+                                                                   VerticalOptions="Center"
+                                                                   TextColor="{StaticResource TextPrimary}"
+                                                                   Text="{Binding ProgressRatio, StringFormat='{0:P0}'}" />
+                                                        </Grid>
+
+                                                        <!-- ── Bottom: saved amount + target ── -->
+                                                        <Grid ColumnDefinitions="*,Auto">
+                                                            <HorizontalStackLayout Grid.Column="0"
+                                                                                   Spacing="6"
+                                                                                   VerticalOptions="Center">
+                                                                <!-- Coin SVG -->
+                                                                <Path WidthRequest="12" HeightRequest="12"
+                                                                      Aspect="Uniform"
+                                                                      Fill="Transparent"
+                                                                      Stroke="{StaticResource Primary}"
+                                                                      StrokeThickness="2"
+                                                                      StrokeLineCap="Round"
+                                                                      StrokeLineJoin="Round"
+                                                                      VerticalOptions="Center"
+                                                                      Data="M12,4 A8,8 0 1,1 4,12 A8,8 0 0,1 12,4 Z M12,8 L12,16 M9,10 L15,10 M9,14 L15,14" />
+
+                                                                <Label FontSize="12"
+                                                                       FontAttributes="Bold"
+                                                                       VerticalOptions="Center"
+                                                                       TextColor="{StaticResource Primary}"
+                                                                       Text="{Binding SavedAmount, Converter={StaticResource CurrencyConverter}}" />
+
+                                                                <Label FontSize="11"
+                                                                       VerticalOptions="Center"
+                                                                       TextColor="{StaticResource TextTertiary}"
+                                                                       Text="{Binding TargetText}" />
+                                                            </HorizontalStackLayout>
+                                                        </Grid>
+                                                    </VerticalStackLayout>
+                                                </Grid>
+                                            </Border>
+                                        </SwipeView>
+
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+
+                                <CollectionView.Footer>
+                                    <BoxView HeightRequest="110" Color="Transparent" />
+                                </CollectionView.Footer>
+                            </CollectionView>
+                        </Grid>
+                    </RefreshView>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ═══════════ FAB ═══════════ -->
+        <Border WidthRequest="58"
+                HeightRequest="58"
+                StrokeThickness="0"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                Margin="0,0,20,24"
+                StrokeShape="RoundRectangle 29">
+            <Border.Shadow>
+                <Shadow Brush="#FF6B00" Offset="0,8" Radius="18" Opacity="0.50" />
+            </Border.Shadow>
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#FF8A1E" Offset="0.0" />
+                    <GradientStop Color="#FF5500" Offset="1.0" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding GoToAddCommand}" />
+            </Border.GestureRecognizers>
+            <Path WidthRequest="20" HeightRequest="20"
+                  Aspect="Uniform"
+                  Stroke="White"
+                  StrokeThickness="2.8"
+                  StrokeLineCap="Round"
+                  HorizontalOptions="Center"
+                  VerticalOptions="Center"
+                  Data="M12,4 L12,20 M4,12 L20,12" />
+        </Border>
 
     </Grid>
-
 </ContentPage>
