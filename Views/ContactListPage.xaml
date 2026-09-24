@@ -107,7 +107,7 @@
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
 
-                    <!-- ══ Premium People SVG badge ══ -->
+                    <!-- People SVG badge -->
                     <Border Grid.Column="1"
                             WidthRequest="42" HeightRequest="42"
                             StrokeThickness="1"
@@ -135,7 +135,7 @@
                     StrokeShape="RoundRectangle 28,28,0,0">
                 <Grid RowDefinitions="Auto,*">
 
-                    <!-- ═══ PREMIUM SEARCH BAR ═══ -->
+                    <!-- ═══ SEARCH BAR ═══ -->
                     <Border Grid.Row="0"
                             Margin="16,18,16,12"
                             Padding="0"
@@ -150,7 +150,6 @@
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10"
                               Padding="14,4">
 
-                            <!-- Search SVG icon -->
                             <Path Grid.Column="0"
                                   WidthRequest="16" HeightRequest="16"
                                   Aspect="Uniform"
@@ -162,7 +161,6 @@
                                   VerticalOptions="Center"
                                   Data="M11,11 L20,20 M5,11 C5,14.3 7.7,17 11,17 C14.3,17 17,14.3 17,11 C17,7.7 14.3,5 11,5 C7.7,5 5,7.7 5,11 Z" />
 
-                            <!-- Entry (custom styled) -->
                             <Entry Grid.Column="1"
                                    Placeholder="Search contacts..."
                                    PlaceholderColor="{StaticResource TextTertiary}"
@@ -173,7 +171,6 @@
                                    VerticalOptions="Center"
                                    HeightRequest="44" />
 
-                            <!-- Clear button (visible when search has text) -->
                             <Border Grid.Column="2"
                                     WidthRequest="26" HeightRequest="26"
                                     StrokeThickness="0"
@@ -216,21 +213,100 @@
                                     <DataTemplate x:DataType="models:Contact">
 
                                         <SwipeView Margin="0,0,0,10">
+
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- LEFT SWIPE (finger →) → EDIT (Orange)    -->
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <SwipeView.LeftItems>
+                                                <SwipeItems Mode="Reveal"
+                                                            SwipeBehaviorOnInvoked="Close">
+
+                                                    <SwipeItemView>
+                                                        <Grid WidthRequest="88"
+                                                              BackgroundColor="#FF6B00">
+                                                            <Grid.GestureRecognizers>
+                                                                <TapGestureRecognizer
+                                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            </Grid.GestureRecognizers>
+
+                                                            <VerticalStackLayout
+                                                                VerticalOptions="Center"
+                                                                HorizontalOptions="Center"
+                                                                Spacing="6">
+                                                                <Border WidthRequest="36" HeightRequest="36"
+                                                                        StrokeThickness="0"
+                                                                        StrokeShape="RoundRectangle 18"
+                                                                        BackgroundColor="#33FFFFFF"
+                                                                        HorizontalOptions="Center">
+                                                                    <Path WidthRequest="18" HeightRequest="18"
+                                                                          Aspect="Uniform"
+                                                                          Fill="Transparent"
+                                                                          Stroke="White"
+                                                                          StrokeThickness="2"
+                                                                          StrokeLineCap="Round"
+                                                                          StrokeLineJoin="Round"
+                                                                          HorizontalOptions="Center"
+                                                                          VerticalOptions="Center"
+                                                                          Data="M14.06,9 L15,9.94 L5.92,19 H5 V18.08 L14.06,9 M17.66,3 C17.41,3 17.15,3.1 16.96,3.29 L15.13,5.12 L18.88,8.87 L20.71,7.04 C21.1,6.65 21.1,6.02 20.71,5.63 L18.37,3.29 C18.17,3.09 17.92,3 17.66,3 M14.06,6.19 L3,17.25 V21 H6.75 L17.81,9.94 L14.06,6.19 Z" />
+                                                                </Border>
+                                                                <Label Text="Edit"
+                                                                       FontSize="11"
+                                                                       FontAttributes="Bold"
+                                                                       TextColor="White"
+                                                                       HorizontalOptions="Center" />
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </SwipeItemView>
+
+                                                </SwipeItems>
+                                            </SwipeView.LeftItems>
+
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- RIGHT SWIPE (finger ←) → DELETE (Red)     -->
+                                            <!-- ══════════════════════════════════════════ -->
                                             <SwipeView.RightItems>
-                                                <SwipeItems Mode="Execute">
-                                                    <SwipeItem Text="Edit"
-                                                               BackgroundColor="{StaticResource Primary}"
-                                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
-                                                               CommandParameter="{Binding .}" />
-                                                    <SwipeItem Text="Delete"
-                                                               BackgroundColor="#E63946"
-                                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
-                                                               CommandParameter="{Binding .}" />
+                                                <SwipeItems Mode="Reveal"
+                                                            SwipeBehaviorOnInvoked="Close">
+
+                                                    <SwipeItemView>
+                                                        <Grid WidthRequest="88"
+                                                              BackgroundColor="#E63946">
+                                                            <Grid.GestureRecognizers>
+                                                                <TapGestureRecognizer
+                                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            </Grid.GestureRecognizers>
+
+                                                            <VerticalStackLayout
+                                                                VerticalOptions="Center"
+                                                                HorizontalOptions="Center"
+                                                                Spacing="6">
+                                                                <Border WidthRequest="36" HeightRequest="36"
+                                                                        StrokeThickness="0"
+                                                                        StrokeShape="RoundRectangle 18"
+                                                                        BackgroundColor="#33FFFFFF"
+                                                                        HorizontalOptions="Center">
+                                                                    <Image Source="icon_delete_white.png"
+                                                                           WidthRequest="18" HeightRequest="18"
+                                                                           Aspect="AspectFit"
+                                                                           HorizontalOptions="Center"
+                                                                           VerticalOptions="Center" />
+                                                                </Border>
+                                                                <Label Text="Delete"
+                                                                       FontSize="11"
+                                                                       FontAttributes="Bold"
+                                                                       TextColor="White"
+                                                                       HorizontalOptions="Center" />
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </SwipeItemView>
+
                                                 </SwipeItems>
                                             </SwipeView.RightItems>
 
                                             <!-- ══════════════════════════════════════ -->
-                                            <!--  PREMIUM CONTACT CARD                  -->
+                                            <!-- PREMIUM CONTACT CARD                   -->
                                             <!-- ══════════════════════════════════════ -->
                                             <Border StrokeThickness="0"
                                                     StrokeShape="RoundRectangle 16">
@@ -249,103 +325,115 @@
                                                       ColumnSpacing="12"
                                                       BackgroundColor="{StaticResource CardBg}">
 
-                                                    <!-- ══ AVATAR CIRCLE (initials) ══ -->
-                                                    <Border Grid.Column="0"
-                                                            WidthRequest="46" HeightRequest="46"
-                                                            StrokeThickness="0"
-                                                            VerticalOptions="Center"
-                                                            StrokeShape="RoundRectangle 23">
-                                                        <Border.Background>
-                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                                <GradientStop Color="#FF8A1E" Offset="0.0" />
-                                                                <GradientStop Color="#FF5500" Offset="1.0" />
-                                                            </LinearGradientBrush>
-                                                        </Border.Background>
+                                                    <!-- Left accent bar -->
+                                                    <BoxView Grid.Column="0"
+                                                             WidthRequest="4"
+                                                             Color="{StaticResource Primary}"
+                                                             VerticalOptions="Fill" />
 
-                                                        <Label Text="{Binding Name, Converter={StaticResource InitialsConverter}}"
-                                                               FontSize="17"
-                                                               FontAttributes="Bold"
-                                                               HorizontalOptions="Center"
-                                                               VerticalOptions="Center"
-                                                               TextColor="White" />
-                                                    </Border>
+                                                    <!-- MAIN CONTENT -->
+                                                    <Grid Grid.Column="1"
+                                                          ColumnDefinitions="Auto,*,Auto"
+                                                          ColumnSpacing="12">
 
-                                                    <!-- ══ NAME + META ══ -->
-                                                    <VerticalStackLayout Grid.Column="1"
-                                                                         Spacing="3"
-                                                                         VerticalOptions="Center">
+                                                        <!-- Avatar -->
+                                                        <Border Grid.Column="0"
+                                                                WidthRequest="46" HeightRequest="46"
+                                                                StrokeThickness="0"
+                                                                VerticalOptions="Center"
+                                                                StrokeShape="RoundRectangle 23">
+                                                            <Border.Background>
+                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                    <GradientStop Color="#FF8A1E" Offset="0.0" />
+                                                                    <GradientStop Color="#FF5500" Offset="1.0" />
+                                                                </LinearGradientBrush>
+                                                            </Border.Background>
 
-                                                        <Label FontSize="14.5"
-                                                               FontAttributes="Bold"
-                                                               LineBreakMode="TailTruncation"
-                                                               MaxLines="1"
-                                                               TextColor="{StaticResource TextPrimary}"
-                                                               Text="{Binding Name, TargetNullValue='Contact'}" />
+                                                            <Label Text="{Binding Name, Converter={StaticResource InitialsConverter}}"
+                                                                   FontSize="17"
+                                                                   FontAttributes="Bold"
+                                                                   HorizontalOptions="Center"
+                                                                   VerticalOptions="Center"
+                                                                   TextColor="White" />
+                                                        </Border>
 
-                                                        <!-- Mobile with phone SVG -->
-                                                        <HorizontalStackLayout Spacing="5"
-                                                                               IsVisible="{Binding Mobile, Converter={StaticResource StringNotEmptyConverter}}">
-                                                            <Path WidthRequest="10" HeightRequest="10"
+                                                        <!-- Name + meta -->
+                                                        <VerticalStackLayout Grid.Column="1"
+                                                                             Spacing="3"
+                                                                             VerticalOptions="Center">
+
+                                                            <Label FontSize="14.5"
+                                                                   FontAttributes="Bold"
+                                                                   LineBreakMode="TailTruncation"
+                                                                   MaxLines="1"
+                                                                   TextColor="{StaticResource TextPrimary}"
+                                                                   Text="{Binding Name, TargetNullValue='Contact'}" />
+
+                                                            <!-- Mobile -->
+                                                            <HorizontalStackLayout Spacing="5"
+                                                                                   IsVisible="{Binding Mobile, Converter={StaticResource StringNotEmptyConverter}}">
+                                                                <Path WidthRequest="10" HeightRequest="10"
+                                                                      Aspect="Uniform"
+                                                                      Fill="Transparent"
+                                                                      Stroke="{StaticResource TextTertiary}"
+                                                                      StrokeThickness="2"
+                                                                      StrokeLineCap="Round"
+                                                                      StrokeLineJoin="Round"
+                                                                      VerticalOptions="Center"
+                                                                      Data="M4,4 L8,4 L10,9 L7,11 C8,14 10,16 13,17 L15,14 L20,16 L20,20 C20,20.6 19.6,21 19,21 C10,21 3,14 3,5 C3,4.4 3.4,4 4,4 Z" />
+
+                                                                <Label FontSize="11"
+                                                                       TextColor="{StaticResource TextSecondary}"
+                                                                       VerticalOptions="Center"
+                                                                       Text="{Binding Mobile}" />
+                                                            </HorizontalStackLayout>
+
+                                                            <!-- Type chip -->
+                                                            <Border Padding="6,2"
+                                                                    StrokeThickness="0"
+                                                                    HorizontalOptions="Start"
+                                                                    BackgroundColor="{StaticResource PrimaryTint}"
+                                                                    StrokeShape="RoundRectangle 6">
+                                                                <Label FontSize="9.5"
+                                                                       FontAttributes="Bold"
+                                                                       TextColor="{StaticResource Primary}"
+                                                                       Text="{Binding ContactType}" />
+                                                            </Border>
+                                                        </VerticalStackLayout>
+
+                                                        <!-- Favorite star -->
+                                                        <Border Grid.Column="2"
+                                                                WidthRequest="34" HeightRequest="34"
+                                                                StrokeThickness="0"
+                                                                VerticalOptions="Center"
+                                                                StrokeShape="RoundRectangle 17"
+                                                                BackgroundColor="Transparent">
+                                                            <Border.GestureRecognizers>
+                                                                <TapGestureRecognizer
+                                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.ToggleFavoriteCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            </Border.GestureRecognizers>
+
+                                                            <Path WidthRequest="18" HeightRequest="18"
                                                                   Aspect="Uniform"
                                                                   Fill="Transparent"
                                                                   Stroke="{StaticResource TextTertiary}"
                                                                   StrokeThickness="2"
                                                                   StrokeLineCap="Round"
                                                                   StrokeLineJoin="Round"
+                                                                  HorizontalOptions="Center"
                                                                   VerticalOptions="Center"
-                                                                  Data="M4,4 L8,4 L10,9 L7,11 C8,14 10,16 13,17 L15,14 L20,16 L20,20 C20,20.6 19.6,21 19,21 C10,21 3,14 3,5 C3,4.4 3.4,4 4,4 Z" />
-
-                                                            <Label FontSize="11"
-                                                                   TextColor="{StaticResource TextSecondary}"
-                                                                   VerticalOptions="Center"
-                                                                   Text="{Binding Mobile}" />
-                                                        </HorizontalStackLayout>
-
-                                                        <!-- Contact type chip -->
-                                                        <Border Padding="6,2"
-                                                                StrokeThickness="0"
-                                                                HorizontalOptions="Start"
-                                                                BackgroundColor="{StaticResource PrimaryTint}"
-                                                                StrokeShape="RoundRectangle 6">
-                                                            <Label FontSize="9.5"
-                                                                   FontAttributes="Bold"
-                                                                   TextColor="{StaticResource Primary}"
-                                                                   Text="{Binding ContactType}" />
+                                                                  Data="M12,3 L14.6,9 L21,9.6 L16.2,13.9 L17.6,20.2 L12,17 L6.4,20.2 L7.8,13.9 L3,9.6 L9.4,9 Z">
+                                                                <Path.Triggers>
+                                                                    <DataTrigger TargetType="Path"
+                                                                                 Binding="{Binding IsFavorite}" Value="True">
+                                                                        <Setter Property="Fill" Value="{StaticResource Star}" />
+                                                                        <Setter Property="Stroke" Value="{StaticResource Star}" />
+                                                                    </DataTrigger>
+                                                                </Path.Triggers>
+                                                            </Path>
                                                         </Border>
-                                                    </VerticalStackLayout>
-
-                                                    <!-- ══ FAVORITE STAR SVG ══ -->
-                                                    <Border Grid.Column="2"
-                                                            WidthRequest="34" HeightRequest="34"
-                                                            StrokeThickness="0"
-                                                            VerticalOptions="Center"
-                                                            StrokeShape="RoundRectangle 17"
-                                                            BackgroundColor="Transparent">
-                                                        <Border.GestureRecognizers>
-                                                            <TapGestureRecognizer
-                                                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.ToggleFavoriteCommand}"
-                                                                CommandParameter="{Binding .}" />
-                                                        </Border.GestureRecognizers>
-
-                                                        <Path WidthRequest="18" HeightRequest="18"
-                                                              Aspect="Uniform"
-                                                              Fill="Transparent"
-                                                              Stroke="{StaticResource TextTertiary}"
-                                                              StrokeThickness="2"
-                                                              StrokeLineCap="Round"
-                                                              StrokeLineJoin="Round"
-                                                              HorizontalOptions="Center"
-                                                              VerticalOptions="Center"
-                                                              Data="M12,3 L14.6,9 L21,9.6 L16.2,13.9 L17.6,20.2 L12,17 L6.4,20.2 L7.8,13.9 L3,9.6 L9.4,9 Z">
-                                                            <Path.Triggers>
-                                                                <DataTrigger TargetType="Path"
-                                                                             Binding="{Binding IsFavorite}" Value="True">
-                                                                    <Setter Property="Fill" Value="{StaticResource Star}" />
-                                                                    <Setter Property="Stroke" Value="{StaticResource Star}" />
-                                                                </DataTrigger>
-                                                            </Path.Triggers>
-                                                        </Path>
-                                                    </Border>
+                                                    </Grid>
                                                 </Grid>
                                             </Border>
                                         </SwipeView>
@@ -357,7 +445,7 @@
                                 </CollectionView.Footer>
                             </CollectionView>
 
-                            <!-- ═══ Empty state ═══ -->
+                            <!-- Empty state -->
                             <VerticalStackLayout Padding="32"
                                                  Spacing="12"
                                                  HorizontalOptions="Center"

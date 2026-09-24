@@ -108,7 +108,7 @@
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
 
-                    <!-- ══ Premium Piggy Bank SVG badge ══ -->
+                    <!-- Piggy Bank SVG badge -->
                     <Border Grid.Column="1"
                             WidthRequest="42" HeightRequest="42"
                             StrokeThickness="1"
@@ -159,7 +159,6 @@
                                                 StrokeThickness="0" HorizontalOptions="Center"
                                                 StrokeShape="RoundRectangle 26"
                                                 BackgroundColor="{StaticResource PrimaryTint}">
-                                            <!-- Piggy bank SVG -->
                                             <Path WidthRequest="36" HeightRequest="36"
                                                   Aspect="Uniform"
                                                   Fill="Transparent"
@@ -185,28 +184,108 @@
                                     <DataTemplate x:DataType="models:SavingGoal">
 
                                         <SwipeView Margin="0,0,0,10">
+
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- LEFT SWIPE (finger →) → EDIT (Orange)    -->
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <SwipeView.LeftItems>
+                                                <SwipeItems Mode="Reveal"
+                                                            SwipeBehaviorOnInvoked="Close">
+
+                                                    <SwipeItemView>
+                                                        <Grid WidthRequest="88"
+                                                              BackgroundColor="#FF6B00">
+                                                            <Grid.GestureRecognizers>
+                                                                <TapGestureRecognizer
+                                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            </Grid.GestureRecognizers>
+
+                                                            <VerticalStackLayout
+                                                                VerticalOptions="Center"
+                                                                HorizontalOptions="Center"
+                                                                Spacing="6">
+                                                                <Border WidthRequest="36" HeightRequest="36"
+                                                                        StrokeThickness="0"
+                                                                        StrokeShape="RoundRectangle 18"
+                                                                        BackgroundColor="#33FFFFFF"
+                                                                        HorizontalOptions="Center">
+                                                                    <Path WidthRequest="18" HeightRequest="18"
+                                                                          Aspect="Uniform"
+                                                                          Fill="Transparent"
+                                                                          Stroke="White"
+                                                                          StrokeThickness="2"
+                                                                          StrokeLineCap="Round"
+                                                                          StrokeLineJoin="Round"
+                                                                          HorizontalOptions="Center"
+                                                                          VerticalOptions="Center"
+                                                                          Data="M14.06,9 L15,9.94 L5.92,19 H5 V18.08 L14.06,9 M17.66,3 C17.41,3 17.15,3.1 16.96,3.29 L15.13,5.12 L18.88,8.87 L20.71,7.04 C21.1,6.65 21.1,6.02 20.71,5.63 L18.37,3.29 C18.17,3.09 17.92,3 17.66,3 M14.06,6.19 L3,17.25 V21 H6.75 L17.81,9.94 L14.06,6.19 Z" />
+                                                                </Border>
+                                                                <Label Text="Edit"
+                                                                       FontSize="11"
+                                                                       FontAttributes="Bold"
+                                                                       TextColor="White"
+                                                                       HorizontalOptions="Center" />
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </SwipeItemView>
+
+                                                </SwipeItems>
+                                            </SwipeView.LeftItems>
+
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- RIGHT SWIPE (finger ←) → DELETE (Red)     -->
+                                            <!-- ══════════════════════════════════════════ -->
                                             <SwipeView.RightItems>
-                                                <SwipeItems Mode="Execute">
-                                                    <SwipeItem Text="Edit"
-                                                               BackgroundColor="{StaticResource Primary}"
-                                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
-                                                               CommandParameter="{Binding .}" />
-                                                    <SwipeItem Text="Delete"
-                                                               BackgroundColor="#E63946"
-                                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
-                                                               CommandParameter="{Binding .}" />
+                                                <SwipeItems Mode="Reveal"
+                                                            SwipeBehaviorOnInvoked="Close">
+
+                                                    <SwipeItemView>
+                                                        <Grid WidthRequest="88"
+                                                              BackgroundColor="#E63946">
+                                                            <Grid.GestureRecognizers>
+                                                                <TapGestureRecognizer
+                                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            </Grid.GestureRecognizers>
+
+                                                            <VerticalStackLayout
+                                                                VerticalOptions="Center"
+                                                                HorizontalOptions="Center"
+                                                                Spacing="6">
+                                                                <Border WidthRequest="36" HeightRequest="36"
+                                                                        StrokeThickness="0"
+                                                                        StrokeShape="RoundRectangle 18"
+                                                                        BackgroundColor="#33FFFFFF"
+                                                                        HorizontalOptions="Center">
+                                                                    <Image Source="icon_delete_white.png"
+                                                                           WidthRequest="18" HeightRequest="18"
+                                                                           Aspect="AspectFit"
+                                                                           HorizontalOptions="Center"
+                                                                           VerticalOptions="Center" />
+                                                                </Border>
+                                                                <Label Text="Delete"
+                                                                       FontSize="11"
+                                                                       FontAttributes="Bold"
+                                                                       TextColor="White"
+                                                                       HorizontalOptions="Center" />
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </SwipeItemView>
+
                                                 </SwipeItems>
                                             </SwipeView.RightItems>
 
-                                            <!-- ══════════════════════════════════════ -->
-                                            <!--  PREMIUM SAVING GOAL CARD              -->
-                                            <!-- ══════════════════════════════════════ -->
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- PREMIUM SAVING GOAL CARD                  -->
+                                            <!-- ══════════════════════════════════════════ -->
                                             <Border StrokeThickness="0"
                                                     StrokeShape="RoundRectangle 16">
                                                 <Border.Shadow>
                                                     <Shadow Brush="#3D1E00" Offset="0,5" Radius="14" Opacity="0.07" />
                                                 </Border.Shadow>
 
+                                                <!-- Windows right-click menu -->
                                                 <Border.GestureRecognizers>
                                                     <TapGestureRecognizer
                                                         Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToContributeCommand}"
@@ -216,7 +295,7 @@
                                                 <Grid ColumnDefinitions="5,*"
                                                       BackgroundColor="{StaticResource CardBg}">
 
-                                                    <!-- ══ LEFT ACCENT (Green if completed / Orange else) ══ -->
+                                                    <!-- LEFT ACCENT -->
                                                     <BoxView Grid.Column="0"
                                                              Color="{StaticResource Primary}"
                                                              VerticalOptions="Fill">
@@ -228,12 +307,12 @@
                                                         </BoxView.Triggers>
                                                     </BoxView>
 
-                                                    <!-- ══ MAIN CONTENT ══ -->
+                                                    <!-- MAIN CONTENT -->
                                                     <VerticalStackLayout Grid.Column="1"
                                                                          Padding="14,12"
                                                                          Spacing="10">
 
-                                                        <!-- ── Top: icon + name + status ── -->
+                                                        <!-- Top: icon + name + status -->
                                                         <Grid ColumnDefinitions="44,*,Auto"
                                                               ColumnSpacing="12">
 
@@ -263,7 +342,7 @@
                                                                     </DataTrigger>
                                                                 </Border.Triggers>
 
-                                                                <!-- Target/Trophy SVG -->
+                                                                <!-- Target SVG -->
                                                                 <Path WidthRequest="20" HeightRequest="20"
                                                                       Aspect="Uniform"
                                                                       Fill="Transparent"
@@ -331,7 +410,7 @@
                                                             </Border>
                                                         </Grid>
 
-                                                        <!-- ── Progress bar with % ── -->
+                                                        <!-- Progress bar with % -->
                                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                                             <Border Grid.Column="0"
                                                                     HeightRequest="8"
@@ -361,12 +440,11 @@
                                                                    Text="{Binding ProgressRatio, StringFormat='{0:P0}'}" />
                                                         </Grid>
 
-                                                        <!-- ── Bottom: saved amount + target ── -->
+                                                        <!-- Bottom: saved amount + target -->
                                                         <Grid ColumnDefinitions="*,Auto">
                                                             <HorizontalStackLayout Grid.Column="0"
                                                                                    Spacing="6"
                                                                                    VerticalOptions="Center">
-                                                                <!-- Coin SVG -->
                                                                 <Path WidthRequest="12" HeightRequest="12"
                                                                       Aspect="Uniform"
                                                                       Fill="Transparent"

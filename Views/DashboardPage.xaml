@@ -13,33 +13,33 @@
 
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
         <ScrollView>
-            <VerticalStackLayout Padding="16" Spacing="16"
+            <VerticalStackLayout Padding="18,16,18,24" Spacing="18"
                                  MaximumWidthRequest="500"
                                  HorizontalOptions="Center">
 
                 <!-- Greeting (animated) -->
-                <VerticalStackLayout x:Name="GreetingSection" Spacing="2" Margin="0,8,0,4"
+                <VerticalStackLayout x:Name="GreetingSection" Spacing="3" Margin="0,4,0,4"
                                      Opacity="0" TranslationY="20">
-                    <Label FontSize="14" TextColor="{StaticResource TextSecondary}"
+                    <Label FontSize="13" TextColor="{StaticResource TextSecondary}"
                            Text="{Binding GreetingPrefix, StringFormat='{0},'}" />
-                    <Label FontSize="26" FontAttributes="Bold" TextColor="#1A2B4C">
+                    <Label FontSize="24" FontAttributes="Bold" TextColor="#1A2B4C">
                         <Label.Text>
                             <MultiBinding StringFormat="{}{0} 👋">
                                 <Binding Path="UserName" />
                             </MultiBinding>
                         </Label.Text>
                     </Label>
-                    <Label FontSize="13" TextColor="{StaticResource TextSecondary}"
+                    <Label FontSize="12" TextColor="{StaticResource TextSecondary}"
                            Text="Small steps today, big dreams tomorrow." />
                 </VerticalStackLayout>
 
                 <!-- ============================================== -->
-                <!-- TOTAL BALANCE CARD (animated)                  -->
+                <!-- TOTAL BALANCE CARD                              -->
                 <!-- ============================================== -->
                 <Border x:Name="BalanceCard" StrokeThickness="0" StrokeShape="RoundRectangle 20"
                         Padding="0" Opacity="0" TranslationY="30">
                     <Border.Shadow>
-                        <Shadow Brush="#FF5500" Offset="0,8" Radius="20" Opacity="0.28" />
+                        <Shadow Brush="#FF5500" Offset="0,6" Radius="16" Opacity="0.25" />
                     </Border.Shadow>
 
                     <Grid>
@@ -50,7 +50,7 @@
                             </LinearGradientBrush>
                         </Grid.Background>
 
-                        <!-- Decorative Waves (animated) -->
+                        <!-- Decorative Waves -->
                         <shapes:Path x:Name="Wave1"
                                      Data="M0,80 C100,30 200,110 320,50 C400,10 460,60 500,40 L500,200 L0,200 Z"
                                      Fill="#15FFFFFF" Aspect="Fill"
@@ -60,52 +60,62 @@
                                      Fill="#22FFFFFF" Aspect="Fill"
                                      HorizontalOptions="Fill" VerticalOptions="End" />
 
-                        <VerticalStackLayout Padding="20,20,20,18" Spacing="8">
+                        <VerticalStackLayout Padding="18,18,18,18" Spacing="12">
 
-                            <!-- Title + Eye (tappable to hide/show balance) -->
-                            <Grid ColumnDefinitions="Auto,Auto,Auto">
-                                <Label Grid.Column="0" Text="Total Balance" TextColor="White"
-                                       Opacity="0.92" FontSize="14" VerticalOptions="Center" />
-                                <Image x:Name="EyeIcon" Grid.Column="1" Source="icon_eye.png"
+                            <!-- Title + Eye -->
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <Label Text="Total Balance" TextColor="White"
+                                       Opacity="0.92" FontSize="13" VerticalOptions="Center" />
+                                <Image x:Name="EyeIcon" Source="icon_eye.png"
                                        WidthRequest="16" HeightRequest="16"
-                                       Margin="8,0,0,0" VerticalOptions="Center" Opacity="0.9">
+                                       Aspect="AspectFit"
+                                       VerticalOptions="Center" Opacity="0.9">
                                     <Image.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="OnEyeIconTapped" />
                                     </Image.GestureRecognizers>
                                 </Image>
-                            </Grid>
+                            </HorizontalStackLayout>
 
-                            <!-- Wallet icon + Amount (with count-up) -->
-                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14" Margin="0,4,0,0">
-                                <Border Grid.Column="0" WidthRequest="52" HeightRequest="52"
-                                        StrokeThickness="0" StrokeShape="RoundRectangle 26"
+                            <!-- Wallet icon + Amount -->
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Border Grid.Column="0" WidthRequest="46" HeightRequest="46"
+                                        StrokeThickness="0" StrokeShape="RoundRectangle 23"
                                         BackgroundColor="#33FFFFFF" VerticalOptions="Center">
                                     <Image Source="icon_wallet.png"
-                                           WidthRequest="26" HeightRequest="26"
+                                           WidthRequest="22" HeightRequest="22"
                                            Aspect="AspectFit"
                                            HorizontalOptions="Center" VerticalOptions="Center" />
                                 </Border>
                                 <Label x:Name="BalanceAmountLabel" Grid.Column="1"
                                        Text="₹0.00"
-                                       TextColor="White" FontSize="34" FontAttributes="Bold"
+                                       TextColor="White"
+                                       FontSize="28"
+                                       FontAttributes="Bold"
+                                       LineBreakMode="NoWrap"
                                        VerticalOptions="Center" />
                             </Grid>
 
-                            <!-- Subtitle + Button (tappable) -->
-                            <Grid ColumnDefinitions="*,Auto" Margin="0,10,0,0">
-                                <Label Grid.Column="0" Text="Across all accounts" FontSize="12"
-                                       TextColor="White" Opacity="0.9" VerticalOptions="Center" />
+                            <!-- Subtitle + Button -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"
+                                  Margin="0,4,0,0">
+                                <Label Grid.Column="0" Text="Across all accounts"
+                                       FontSize="11"
+                                       TextColor="White" Opacity="0.85"
+                                       VerticalOptions="Center" />
                                 <Border x:Name="ViewAccountsButton" Grid.Column="1"
                                         StrokeThickness="0" StrokeShape="RoundRectangle 18"
-                                        BackgroundColor="#44FFFFFF" Padding="14,8">
+                                        BackgroundColor="#44FFFFFF" Padding="12,7">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="OnViewAccountsTapped" />
                                     </Border.GestureRecognizers>
-                                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
-                                        <Label Text="View Accounts" FontSize="12" FontAttributes="Bold"
-                                               TextColor="White" VerticalOptions="Center" />
+                                    <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                                        <Label Text="View Accounts" FontSize="11"
+                                               FontAttributes="Bold"
+                                               TextColor="White"
+                                               VerticalOptions="Center" />
                                         <Image Source="icon_chevron_white.png"
-                                               WidthRequest="12" HeightRequest="12"
+                                               WidthRequest="10" HeightRequest="10"
+                                               Aspect="AspectFit"
                                                VerticalOptions="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
@@ -117,7 +127,8 @@
                 <!-- ============================================== -->
                 <!-- SUMMARY CARDS (animated cascade)               -->
                 <!-- ============================================== -->
-                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto"
+                      ColumnSpacing="12" RowSpacing="12">
 
                     <components:SummaryCardView x:Name="CardIncome"
                         Grid.Row="0" Grid.Column="0"
@@ -159,7 +170,7 @@
                 </Grid>
 
                 <!-- ============================================== -->
-                <!-- BORROW - LEND (tappable + animated)            -->
+                <!-- BORROW - LEND                                   -->
                 <!-- ============================================== -->
                 <Border x:Name="BorrowLendCard"
                         StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="16"
@@ -177,36 +188,45 @@
                         <Shadow Brush="#FF7A00" Offset="0,4" Radius="14" Opacity="0.10" />
                     </Border.Shadow>
 
-                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="14">
-                        <Border Grid.Column="0" WidthRequest="46" HeightRequest="46"
-                                StrokeThickness="0" StrokeShape="RoundRectangle 23"
-                                BackgroundColor="#FFE0B2">
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+                        <Border Grid.Column="0" WidthRequest="44" HeightRequest="44"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 22"
+                                BackgroundColor="#FFE0B2"
+                                VerticalOptions="Center">
                             <Image Source="icon_users_orange.png"
-                                   WidthRequest="24" HeightRequest="24"
+                                   WidthRequest="22" HeightRequest="22"
                                    Aspect="AspectFit"
                                    HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
 
-                        <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
-                            <Label FontSize="15" FontAttributes="Bold"
+                        <VerticalStackLayout Grid.Column="1" Spacing="3"
+                                             VerticalOptions="Center">
+                            <Label FontSize="14" FontAttributes="Bold"
                                    Text="Borrow - Lend"
-                                   TextColor="#1A2B4C" />
-                            <Label FontSize="11" TextColor="#6B7A90"
-                                   Text="Track what you owe and what you're owed" />
+                                   TextColor="#1A2B4C"
+                                   LineBreakMode="TailTruncation" />
+                            <Label FontSize="10"
+                                   TextColor="#6B7A90"
+                                   LineBreakMode="TailTruncation"
+                                   MaxLines="1"
+                                   Text="Track what you owe and you're owed" />
                         </VerticalStackLayout>
 
-                        <Label Grid.Column="2" FontSize="17" FontAttributes="Bold"
-                               TextColor="#FF7A00" VerticalOptions="Center"
+                        <Label Grid.Column="2" FontSize="15" FontAttributes="Bold"
+                               TextColor="#FF7A00"
+                               VerticalOptions="Center"
+                               LineBreakMode="NoWrap"
                                Text="{Binding NetBorrowLend, Converter={StaticResource CurrencyConverter}}" />
 
                         <Image Grid.Column="3" Source="icon_chevron_orange.png"
-                               WidthRequest="14" HeightRequest="14"
+                               WidthRequest="12" HeightRequest="12"
+                               Aspect="AspectFit"
                                VerticalOptions="Center" />
                     </Grid>
                 </Border>
 
                 <!-- ============================================== -->
-                <!-- RECENT TRANSACTIONS                            -->
+                <!-- RECENT TRANSACTIONS                             -->
                 <!-- ============================================== -->
                 <Border x:Name="RecentTransactionsCard"
                         Style="{StaticResource CardBorder}" Padding="4,0,4,12"
@@ -219,16 +239,16 @@
                     <VerticalStackLayout Spacing="0">
 
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="12,14,12,8">
-                            <Border Grid.Column="0" WidthRequest="34" HeightRequest="34"
-                                    StrokeThickness="0" StrokeShape="RoundRectangle 17"
+                            <Border Grid.Column="0" WidthRequest="32" HeightRequest="32"
+                                    StrokeThickness="0" StrokeShape="RoundRectangle 16"
                                     BackgroundColor="#E3F2FD" VerticalOptions="Center">
                                 <Image Source="icon_calendar_blue.png"
-                                       WidthRequest="18" HeightRequest="18"
+                                       WidthRequest="16" HeightRequest="16"
                                        Aspect="AspectFit"
                                        HorizontalOptions="Center" VerticalOptions="Center" />
                             </Border>
                             <Label Grid.Column="1" Text="Recent Transactions"
-                                   FontSize="15" FontAttributes="Bold"
+                                   FontSize="14" FontAttributes="Bold"
                                    TextColor="{StaticResource TextPrimary}"
                                    VerticalOptions="Center" />
                         </Grid>
@@ -236,9 +256,9 @@
                         <CollectionView ItemsSource="{Binding RecentTransactions}">
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="models:Transaction">
-                                    <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="12" Padding="12,10">
-                                        <Border Grid.Column="0" WidthRequest="44" HeightRequest="44"
-                                                StrokeThickness="0" StrokeShape="RoundRectangle 22"
+                                    <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="10" Padding="12,10">
+                                        <Border Grid.Column="0" WidthRequest="40" HeightRequest="40"
+                                                StrokeThickness="0" StrokeShape="RoundRectangle 20"
                                                 VerticalOptions="Center">
                                             <Border.Triggers>
                                                 <DataTrigger TargetType="Border" Binding="{Binding TransactionType}" Value="Income">
@@ -248,7 +268,7 @@
                                                     <Setter Property="BackgroundColor" Value="#FFEBEE" />
                                                 </DataTrigger>
                                             </Border.Triggers>
-                                            <Image Aspect="AspectFit" WidthRequest="20" HeightRequest="20"
+                                            <Image Aspect="AspectFit" WidthRequest="18" HeightRequest="18"
                                                    HorizontalOptions="Center" VerticalOptions="Center">
                                                 <Image.Triggers>
                                                     <DataTrigger TargetType="Image" Binding="{Binding TransactionType}" Value="Income">
@@ -262,15 +282,19 @@
                                         </Border>
 
                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                            <Label Style="{StaticResource BodyLabel}" FontAttributes="Bold"
+                                            <Label FontSize="13" FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextPrimary}"
                                                    Text="{Binding Description, TargetNullValue='Transaction'}"
-                                                   LineBreakMode="TailTruncation" />
-                                            <Label Style="{StaticResource CaptionLabel}"
+                                                   LineBreakMode="TailTruncation"
+                                                   MaxLines="1" />
+                                            <Label FontSize="10"
+                                                   TextColor="{StaticResource TextSecondary}"
                                                    Text="{Binding TransactionDate, StringFormat='{0:dd MMM, hh:mm tt}'}" />
                                         </VerticalStackLayout>
 
                                         <Label Grid.Column="2" VerticalOptions="Center"
-                                               FontSize="15" FontAttributes="Bold"
+                                               FontSize="14" FontAttributes="Bold"
+                                               LineBreakMode="NoWrap"
                                                Text="{Binding ., Converter={StaticResource TransactionAmountTextConverter}}">
                                             <Label.Triggers>
                                                 <DataTrigger TargetType="Label" Binding="{Binding TransactionType}" Value="Income">
@@ -303,14 +327,14 @@
                 <VerticalStackLayout Spacing="8" HorizontalOptions="Center" Padding="0,24"
                     IsVisible="{Binding RecentTransactions.Count, Converter={StaticResource CountToInverseBoolConverter}}">
                     <Label Text="No transactions yet. Tap Add to record one."
-                           Style="{StaticResource BodyLabel}" TextColor="{StaticResource TextSecondary}"
+                           FontSize="13" TextColor="{StaticResource TextSecondary}"
                            HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
 
                 <!-- ============================================== -->
-                <!-- UPCOMING BILLS + ACTIVE EMIs                   -->
+                <!-- UPCOMING BILLS + ACTIVE EMIs                    -->
                 <!-- ============================================== -->
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="10" RowDefinitions="Auto" Margin="0,0,0,16">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowDefinitions="Auto" Margin="0,0,0,16">
 
                     <!-- Upcoming Bills -->
                     <Border x:Name="BillsCard" Grid.Column="0"
@@ -323,31 +347,37 @@
 
                         <VerticalStackLayout Spacing="0">
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Margin="0,0,0,8">
-                                <Border Grid.Column="0" WidthRequest="32" HeightRequest="32"
-                                        StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                                <Border Grid.Column="0" WidthRequest="30" HeightRequest="30"
+                                        StrokeThickness="0" StrokeShape="RoundRectangle 15"
                                         BackgroundColor="#E3F2FD">
                                     <Image Source="icon_calendar_blue.png"
-                                           WidthRequest="16" HeightRequest="16"
+                                           WidthRequest="14" HeightRequest="14"
                                            Aspect="AspectFit"
                                            HorizontalOptions="Center" VerticalOptions="Center" />
                                 </Border>
-                                <Label Grid.Column="1" Text="Upcoming Bills" FontSize="13" FontAttributes="Bold"
-                                       TextColor="{StaticResource TextPrimary}" VerticalOptions="Center" />
+                                <Label Grid.Column="1" Text="Upcoming Bills" FontSize="12" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextPrimary}"
+                                       VerticalOptions="Center"
+                                       LineBreakMode="TailTruncation" />
                             </Grid>
 
                             <CollectionView ItemsSource="{Binding UpcomingBills}">
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="models:Bill">
                                         <VerticalStackLayout Spacing="2" Margin="0,6">
-                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                                <Label Grid.Column="0" FontSize="13" FontAttributes="Bold"
-                                                       Text="{Binding Name}" VerticalOptions="Center" />
-                                                <Label Grid.Column="1" FontSize="13" FontAttributes="Bold"
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                                                <Label Grid.Column="0" FontSize="12" FontAttributes="Bold"
+                                                       TextColor="{StaticResource TextPrimary}"
+                                                       LineBreakMode="TailTruncation"
+                                                       Text="{Binding Name}"
+                                                       VerticalOptions="Center" />
+                                                <Label Grid.Column="1" FontSize="12" FontAttributes="Bold"
                                                        TextColor="#E53935"
+                                                       LineBreakMode="NoWrap"
                                                        Text="{Binding Amount, Converter={StaticResource CurrencyConverter}}"
                                                        VerticalOptions="Center" />
                                             </Grid>
-                                            <Label FontSize="11" TextColor="{StaticResource TextSecondary}"
+                                            <Label FontSize="10" TextColor="{StaticResource TextSecondary}"
                                                    Text="{Binding DueDate, StringFormat='Due {0:dd MMM}'}" />
                                         </VerticalStackLayout>
                                     </DataTemplate>
@@ -378,30 +408,36 @@
 
                         <VerticalStackLayout Spacing="0">
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Margin="0,0,0,8">
-                                <Border Grid.Column="0" WidthRequest="32" HeightRequest="32"
-                                        StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                                <Border Grid.Column="0" WidthRequest="30" HeightRequest="30"
+                                        StrokeThickness="0" StrokeShape="RoundRectangle 15"
                                         BackgroundColor="#E3F2FD">
                                     <Image Source="icon_card_blue.png"
-                                           WidthRequest="16" HeightRequest="16"
+                                           WidthRequest="14" HeightRequest="14"
                                            Aspect="AspectFit"
                                            HorizontalOptions="Center" VerticalOptions="Center" />
                                 </Border>
-                                <Label Grid.Column="1" Text="Active EMIs" FontSize="13" FontAttributes="Bold"
-                                       TextColor="{StaticResource TextPrimary}" VerticalOptions="Center" />
+                                <Label Grid.Column="1" Text="Active EMIs" FontSize="12" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextPrimary}"
+                                       VerticalOptions="Center"
+                                       LineBreakMode="TailTruncation" />
                             </Grid>
 
                             <CollectionView ItemsSource="{Binding ActiveEmis}">
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="models:EmiMaster">
                                         <VerticalStackLayout Spacing="2" Margin="0,6">
-                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                                <Label Grid.Column="0" FontSize="13" FontAttributes="Bold"
-                                                       Text="{Binding Title}" VerticalOptions="Center" />
-                                                <Label Grid.Column="1" FontSize="13" FontAttributes="Bold"
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                                                <Label Grid.Column="0" FontSize="12" FontAttributes="Bold"
+                                                       TextColor="{StaticResource TextPrimary}"
+                                                       LineBreakMode="TailTruncation"
+                                                       Text="{Binding Title}"
+                                                       VerticalOptions="Center" />
+                                                <Label Grid.Column="1" FontSize="12" FontAttributes="Bold"
+                                                       LineBreakMode="NoWrap"
                                                        Text="{Binding EmiAmount, Converter={StaticResource CurrencyConverter}}"
                                                        VerticalOptions="Center" />
                                             </Grid>
-                                            <Label FontSize="11" TextColor="{StaticResource TextSecondary}">
+                                            <Label FontSize="10" TextColor="{StaticResource TextSecondary}">
                                                 <Label.Text>
                                                     <MultiBinding StringFormat="{}{0} of {1} paid">
                                                         <Binding Path="PaidInstallment" />

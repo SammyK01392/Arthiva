@@ -7,13 +7,20 @@
     xmlns:views="clr-namespace:Arthiva.Views"
     xmlns:converters="clr-namespace:Arthiva.Converters"
     FlyoutBehavior="Disabled"
+
     Shell.NavBarIsVisible="True"
     Shell.NavBarHasShadow="False"
+
+    Shell.BackgroundColor="#F25C00"
+    Shell.ForegroundColor="White"
+    Shell.DisabledColor="#80FFFFFF"
+    Shell.UnselectedColor="#CCFFFFFF"
+
     Shell.TabBarBackgroundColor="{StaticResource Surface}"
     Shell.TabBarForegroundColor="{StaticResource Primary}"
     Shell.TabBarUnselectedColor="{StaticResource TextSecondary}"
     Shell.TabBarTitleColor="{StaticResource Primary}"
-    BackgroundColor="{StaticResource Background}"
+
     Title="Arthiva">
 
     <Shell.Resources>
@@ -24,9 +31,104 @@
     </Shell.Resources>
 
     <!-- ═══════════════════════════════════════════════════ -->
-    <!--  ULTRA PREMIUM TOP APP BAR                          -->
+    <!--  PREMIUM TOP APP BAR                                -->
     <!-- ═══════════════════════════════════════════════════ -->
+    <Shell.TitleView>
+        <Grid RowDefinitions="*,1" HeightRequest="56">
 
+            <Grid Grid.Row="0"
+                  Padding="18,0,12,0"
+                  ColumnDefinitions="*,Auto">
+
+                <!-- Orange gradient -->
+                <Grid.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#FF7A00" Offset="0.0" />
+                        <GradientStop Color="#F25C00" Offset="0.55" />
+                        <GradientStop Color="#D14A00" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Grid.Background>
+
+                <Ellipse WidthRequest="90" HeightRequest="90"
+                         Fill="#20FFFFFF"
+                         HorizontalOptions="End"
+                         VerticalOptions="Center"
+                         TranslationX="35"
+                         InputTransparent="True" />
+
+                <!-- Title — white -->
+                <Label Grid.Column="0"
+                       Text="{Binding CurrentPageTitle, Source={x:Reference RootShell}}"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       CharacterSpacing="-0.3"
+                       TextColor="White"
+                       VerticalOptions="Center" />
+
+                <!-- Bell -->
+                <Grid Grid.Column="1"
+                      WidthRequest="44"
+                      HeightRequest="44"
+                      HorizontalOptions="End"
+                      VerticalOptions="Center">
+
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnBellTapped" />
+                    </Grid.GestureRecognizers>
+
+                    <Border BackgroundColor="#30FFFFFF"
+                            Stroke="#50FFFFFF"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 20"
+                            WidthRequest="40"
+                            HeightRequest="40"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center">
+
+                        <Path WidthRequest="18" HeightRequest="18"
+                              Aspect="Uniform"
+                              Fill="Transparent"
+                              Stroke="White"
+                              StrokeThickness="2"
+                              StrokeLineCap="Round"
+                              StrokeLineJoin="Round"
+                              HorizontalOptions="Center"
+                              VerticalOptions="Center"
+                              Data="M18,8 C18,4.7 15.3,2 12,2 C8.7,2 6,4.7 6,8 C6,15 3,17 3,17 L21,17 C21,17 18,15 18,8 Z M13.7,21 C13.3,21.7 12.7,22 12,22 C11.3,22 10.7,21.7 10.3,21" />
+                    </Border>
+
+                    <Border IsVisible="{Binding UnreadNotificationCount,
+                                Source={x:Reference RootShell},
+                                Converter={StaticResource LocalIntGreaterThanZeroConverter}}"
+                            BackgroundColor="{StaticResource Expense}"
+                            Stroke="White"
+                            StrokeThickness="2"
+                            StrokeShape="RoundRectangle 9"
+                            WidthRequest="18"
+                            HeightRequest="18"
+                            HorizontalOptions="End"
+                            VerticalOptions="Start"
+                            TranslationX="-1"
+                            TranslationY="1"
+                            Padding="0">
+
+                        <Label Text="{Binding UnreadNotificationCount,
+                                    Source={x:Reference RootShell}}"
+                               TextColor="White"
+                               FontSize="9"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               VerticalTextAlignment="Center"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <BoxView Grid.Row="1" HeightRequest="1"
+                     Color="#C44000" />
+        </Grid>
+    </Shell.TitleView>
 
 
     <!-- ═══════════════════════════════════════════════════ -->

@@ -39,23 +39,48 @@
                             <DataTemplate x:DataType="models:Account">
                                 <SwipeView>
 
-                                    <!-- ══ SWIPE ACTIONS ══ -->
-                                    <SwipeView.RightItems>
-                                        <SwipeItems Mode="Execute">
+                                    <!-- ══════════════════════════════════════ -->
+                                    <!-- LEFT SWIPE — DELETE ONLY               -->
+                                    <!-- ══════════════════════════════════════ -->
+                                    <SwipeView.LeftItems>
+                                        <SwipeItems Mode="Reveal"
+                                                    SwipeBehaviorOnInvoked="Close">
 
-                                            <!-- Set Default (Orange) -->
-                                            <SwipeItem Text="Set Default"
-                                                       BackgroundColor="#FF8A00"
-                                                       Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SetDefaultCommand}"
-                                                       CommandParameter="{Binding .}" />
+                                            <SwipeItemView>
+                                                <Grid WidthRequest="88"
+                                                      BackgroundColor="#E63946">
+                                                    <Grid.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Grid.GestureRecognizers>
 
-                                            <!-- Delete (Red) -->
-                                            <SwipeItem Text="Delete"
-                                                       BackgroundColor="#E63946"
-                                                       Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
-                                                       CommandParameter="{Binding .}" />
+                                                    <VerticalStackLayout
+                                                        VerticalOptions="Center"
+                                                        HorizontalOptions="Center"
+                                                        Spacing="6">
+                                                        <Border WidthRequest="36" HeightRequest="36"
+                                                                StrokeThickness="0"
+                                                                StrokeShape="RoundRectangle 18"
+                                                                BackgroundColor="#33FFFFFF"
+                                                                HorizontalOptions="Center">
+                                                            <Image Source="icon_delete_white.png"
+                                                                   WidthRequest="18" HeightRequest="18"
+                                                                   Aspect="AspectFit"
+                                                                   HorizontalOptions="Center"
+                                                                   VerticalOptions="Center" />
+                                                        </Border>
+                                                        <Label Text="Delete"
+                                                               FontSize="11"
+                                                               FontAttributes="Bold"
+                                                               TextColor="White"
+                                                               HorizontalOptions="Center" />
+                                                    </VerticalStackLayout>
+                                                </Grid>
+                                            </SwipeItemView>
+
                                         </SwipeItems>
-                                    </SwipeView.RightItems>
+                                    </SwipeView.LeftItems>
 
                                     <!-- ════════════════════════════════════ -->
                                     <!-- PREMIUM GRADIENT CARD                -->
@@ -65,6 +90,7 @@
                                             <Shadow Brush="#000000" Offset="0,8" Radius="18" Opacity="0.18" />
                                         </Border.Shadow>
 
+                                        <!-- Windows right-click menu -->
                                         <Grid x:Name="CardBackground">
                                             <!-- Default Gradient (Blue) -->
                                             <Grid.Background>

@@ -187,26 +187,108 @@
                                     <DataTemplate x:DataType="models:EmiMaster">
 
                                         <SwipeView Margin="0,0,0,12">
+
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- LEFT SWIPE (finger →) → PAY (Green)      -->
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <SwipeView.LeftItems>
+                                                <SwipeItems Mode="Reveal"
+                                                            SwipeBehaviorOnInvoked="Close">
+
+                                                    <SwipeItemView>
+                                                        <Grid WidthRequest="88"
+                                                              BackgroundColor="#0FA968">
+                                                            <Grid.GestureRecognizers>
+                                                                <TapGestureRecognizer
+                                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToPayCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            </Grid.GestureRecognizers>
+
+                                                            <VerticalStackLayout
+                                                                VerticalOptions="Center"
+                                                                HorizontalOptions="Center"
+                                                                Spacing="6">
+                                                                <Border WidthRequest="36" HeightRequest="36"
+                                                                        StrokeThickness="0"
+                                                                        StrokeShape="RoundRectangle 18"
+                                                                        BackgroundColor="#33FFFFFF"
+                                                                        HorizontalOptions="Center">
+                                                                    <Path WidthRequest="18" HeightRequest="18"
+                                                                          Aspect="Uniform"
+                                                                          Fill="Transparent"
+                                                                          Stroke="White"
+                                                                          StrokeThickness="2.4"
+                                                                          StrokeLineCap="Round"
+                                                                          StrokeLineJoin="Round"
+                                                                          HorizontalOptions="Center"
+                                                                          VerticalOptions="Center"
+                                                                          Data="M6,10 L12,4 L18,10 M12,4 L12,20" />
+                                                                </Border>
+                                                                <Label Text="Pay"
+                                                                       FontSize="11"
+                                                                       FontAttributes="Bold"
+                                                                       TextColor="White"
+                                                                       HorizontalOptions="Center" />
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </SwipeItemView>
+
+                                                </SwipeItems>
+                                            </SwipeView.LeftItems>
+
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- RIGHT SWIPE (finger ←) → DELETE (Red)     -->
+                                            <!-- ══════════════════════════════════════════ -->
                                             <SwipeView.RightItems>
-                                                <SwipeItems Mode="Reveal">
-                                                    <SwipeItem Text="Pay"
-                                                               BackgroundColor="{StaticResource Completed}"
-                                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToPayCommand}"
-                                                               CommandParameter="{Binding .}" />
-                                                    <SwipeItem Text="Delete"
-                                                               BackgroundColor="#E63946"
-                                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
-                                                               CommandParameter="{Binding .}" />
+                                                <SwipeItems Mode="Reveal"
+                                                            SwipeBehaviorOnInvoked="Close">
+
+                                                    <SwipeItemView>
+                                                        <Grid WidthRequest="88"
+                                                              BackgroundColor="#E63946">
+                                                            <Grid.GestureRecognizers>
+                                                                <TapGestureRecognizer
+                                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            </Grid.GestureRecognizers>
+
+                                                            <VerticalStackLayout
+                                                                VerticalOptions="Center"
+                                                                HorizontalOptions="Center"
+                                                                Spacing="6">
+                                                                <Border WidthRequest="36" HeightRequest="36"
+                                                                        StrokeThickness="0"
+                                                                        StrokeShape="RoundRectangle 18"
+                                                                        BackgroundColor="#33FFFFFF"
+                                                                        HorizontalOptions="Center">
+                                                                    <Image Source="icon_delete_white.png"
+                                                                           WidthRequest="18" HeightRequest="18"
+                                                                           Aspect="AspectFit"
+                                                                           HorizontalOptions="Center"
+                                                                           VerticalOptions="Center" />
+                                                                </Border>
+                                                                <Label Text="Delete"
+                                                                       FontSize="11"
+                                                                       FontAttributes="Bold"
+                                                                       TextColor="White"
+                                                                       HorizontalOptions="Center" />
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </SwipeItemView>
+
                                                 </SwipeItems>
                                             </SwipeView.RightItems>
 
-                                            <!-- PREMIUM EMI CARD -->
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- PREMIUM EMI CARD                          -->
+                                            <!-- ══════════════════════════════════════════ -->
                                             <Border StrokeThickness="0"
                                                     StrokeShape="RoundRectangle 18">
                                                 <Border.Shadow>
                                                     <Shadow Brush="#3D1E00" Offset="0,6" Radius="16" Opacity="0.08" />
                                                 </Border.Shadow>
 
+                                                <!-- Windows right-click menu -->
                                                 <Border.GestureRecognizers>
                                                     <TapGestureRecognizer
                                                         Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToDetailCommand}"

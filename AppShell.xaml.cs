@@ -5,6 +5,10 @@ namespace Arthiva;
 
 public partial class AppShell : Shell
 {
+    // ═══════════════════════════════════════════════════
+    //  BINDABLE PROPERTIES
+    // ═══════════════════════════════════════════════════
+
     public static readonly BindableProperty UnreadNotificationCountProperty =
         BindableProperty.Create(
             nameof(UnreadNotificationCount),
@@ -18,7 +22,6 @@ public partial class AppShell : Shell
         set => SetValue(UnreadNotificationCountProperty, value);
     }
 
-    // Naya BindableProperty UserInitials ke liye
     public static readonly BindableProperty UserInitialsProperty =
         BindableProperty.Create(
             nameof(UserInitials),
@@ -31,6 +34,24 @@ public partial class AppShell : Shell
         get => (string)GetValue(UserInitialsProperty);
         set => SetValue(UserInitialsProperty, value);
     }
+
+    // ⬇️ NAYA: Current page title for premium title bar
+    public static readonly BindableProperty CurrentPageTitleProperty =
+        BindableProperty.Create(
+            nameof(CurrentPageTitle),
+            typeof(string),
+            typeof(AppShell),
+            "Dashboard");
+
+    public string CurrentPageTitle
+    {
+        get => (string)GetValue(CurrentPageTitleProperty);
+        set => SetValue(CurrentPageTitleProperty, value);
+    }
+
+    // ═══════════════════════════════════════════════════
+    //  SERVICES
+    // ═══════════════════════════════════════════════════
 
     private readonly INotificationService _notificationService;
     private readonly IUserProfileService _userProfileService;
@@ -50,11 +71,60 @@ public partial class AppShell : Shell
         {
             await RefreshUnreadCountAsync();
             await LoadUserInitialsAsync();
+            UpdatePageTitle(Current?.CurrentState?.Location?.OriginalString);
         };
 
-        Navigated += async (_, _) =>
+        Navigated += async (_, e) =>
+        {
             await RefreshUnreadCountAsync();
+            UpdatePageTitle(e.Current?.Location?.OriginalString);
+        };
     }
+
+    // ═══════════════════════════════════════════════════
+    //  PAGE TITLE (route → premium title)
+    // ═══════════════════════════════════════════════════
+
+    private void UpdatePageTitle(string? route)
+    {
+        if (string.IsNullOrEmpty(route)) return;
+
+        CurrentPageTitle = route switch
+        {
+            var r when r.Contains("DashboardPage") => "Dashboard",
+            var r when r.Contains("TransactionListPage") => "Transactions",
+            var r when r.Contains("AccountListPage") => "Accounts",
+            var r when r.Contains("MorePage") => "More",
+            var r when r.Contains("BillListPage") => "Bills",
+            var r when r.Contains("BillEditPage") => "Edit Bill",
+            var r when r.Contains("RecordBillPaymentPage") => "Pay Bill",
+            var r when r.Contains("EmiListPage") => "EMIs",
+            var r when r.Contains("EmiEditPage") => "Edit EMI",
+            var r when r.Contains("EmiDetailPage") => "EMI Details",
+            var r when r.Contains("RecordEmiPaymentPage") => "Pay EMI",
+            var r when r.Contains("BudgetListPage") => "Budgets",
+            var r when r.Contains("BudgetEditPage") => "Edit Budget",
+            var r when r.Contains("BorrowLendListPage") => "Borrow & Lend",
+            var r when r.Contains("BorrowLendEditPage") => "Edit Record",
+            var r when r.Contains("RecordBorrowLendTransactionPage") => "Settle",
+            var r when r.Contains("SavingGoalListPage") => "Saving Goals",
+            var r when r.Contains("SavingGoalEditPage") => "Edit Goal",
+            var r when r.Contains("SavingGoalContributePage") => "Contribute",
+            var r when r.Contains("ContactListPage") => "Contacts",
+            var r when r.Contains("ContactEditPage") => "Edit Contact",
+            var r when r.Contains("ContactDetailPage") => "Contact Details",
+            var r when r.Contains("CategoryListPage") => "Categories",
+            var r when r.Contains("CategoryEditPage") => "Edit Category",
+            var r when r.Contains("UserProfilePage") => "My Profile",
+            var r when r.Contains("AddEditTransactionPage") => "Transaction",
+            var r when r.Contains("NotificationListPage") => "Notifications",
+            _ => "Arthiva"
+        };
+    }
+
+    // ═══════════════════════════════════════════════════
+    //  USER INITIALS
+    // ═══════════════════════════════════════════════════
 
     private async Task LoadUserInitialsAsync()
     {
@@ -76,6 +146,10 @@ public partial class AppShell : Shell
         }
     }
 
+    // ═══════════════════════════════════════════════════
+    //  NOTIFICATIONS
+    // ═══════════════════════════════════════════════════
+
     private async Task RefreshUnreadCountAsync()
     {
         try
@@ -93,6 +167,10 @@ public partial class AppShell : Shell
     {
         await GoToAsync(nameof(NotificationListPage));
     }
+
+    // ═══════════════════════════════════════════════════
+    //  ROUTES
+    // ═══════════════════════════════════════════════════
 
     private static void RegisterRoutes()
     {

@@ -40,7 +40,6 @@
         <Grid RowDefinitions="Auto,*">
 
             <!-- ═══════════ PREMIUM ORANGE HEADER ═══════════ -->
-            <!-- ═══════════ COMPACT PREMIUM ORANGE HEADER ═══════════ -->
             <Grid Grid.Row="0">
                 <Grid.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -53,24 +52,24 @@
                 <!-- Decorative SVG layer -->
                 <Grid InputTransparent="True">
                     <Ellipse WidthRequest="100" HeightRequest="100"
-                 Fill="#30FFB37A"
-                 HorizontalOptions="Start" VerticalOptions="Start"
-                 TranslationX="-40" TranslationY="-40" />
+                             Fill="#30FFB37A"
+                             HorizontalOptions="Start" VerticalOptions="Start"
+                             TranslationX="-40" TranslationY="-40" />
 
                     <Ellipse WidthRequest="140" HeightRequest="140"
-                 Fill="#40FF8A1E"
-                 HorizontalOptions="End" VerticalOptions="End"
-                 TranslationX="60" TranslationY="60" />
+                             Fill="#40FF8A1E"
+                             HorizontalOptions="End" VerticalOptions="End"
+                             TranslationX="60" TranslationY="60" />
 
                     <Path Stroke="#28FFFFFF" StrokeThickness="1.2" Fill="Transparent"
-              HorizontalOptions="End" VerticalOptions="Center"
-              TranslationX="20"
-              Data="M0,0 C 40,30 40,100 0,130" />
+                          HorizontalOptions="End" VerticalOptions="Center"
+                          TranslationX="20"
+                          Data="M0,0 C 40,30 40,100 0,130" />
 
                     <HorizontalStackLayout Spacing="6"
-                               HorizontalOptions="Start"
-                               VerticalOptions="Start"
-                               Margin="20,18,0,0">
+                                           HorizontalOptions="Start"
+                                           VerticalOptions="Start"
+                                           Margin="20,18,0,0">
                         <Ellipse WidthRequest="3" HeightRequest="3" Fill="#66FFB37A" />
                         <Ellipse WidthRequest="3" HeightRequest="3" Fill="#40FFFFFF" />
                         <Ellipse WidthRequest="3" HeightRequest="3" Fill="#40FFFFFF" />
@@ -83,58 +82,58 @@
                     <VerticalStackLayout Grid.Column="0" Spacing="3">
 
                         <Border Padding="7,3"
-                    StrokeThickness="0"
-                    HorizontalOptions="Start"
-                    StrokeShape="RoundRectangle 6"
-                    BackgroundColor="#40FF5500">
+                                StrokeThickness="0"
+                                HorizontalOptions="Start"
+                                StrokeShape="RoundRectangle 6"
+                                BackgroundColor="#40FF5500">
                             <HorizontalStackLayout Spacing="4">
                                 <Ellipse WidthRequest="4" HeightRequest="4"
-                             Fill="#FFE0C2"
-                             VerticalOptions="Center" />
+                                         Fill="#FFE0C2"
+                                         VerticalOptions="Center" />
                                 <Label Text="MONEY LEDGER"
-                           FontSize="8.5"
-                           CharacterSpacing="1.8"
-                           FontAttributes="Bold"
-                           VerticalOptions="Center"
-                           TextColor="#FFE0C2" />
+                                       FontSize="8.5"
+                                       CharacterSpacing="1.8"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       TextColor="#FFE0C2" />
                             </HorizontalStackLayout>
                         </Border>
 
                         <Label Text="Borrow &amp; Lend"
-                   FontSize="22"
-                   FontAttributes="Bold"
-                   Margin="0,4,0,0"
-                   TextColor="White" />
+                               FontSize="22"
+                               FontAttributes="Bold"
+                               Margin="0,4,0,0"
+                               TextColor="White" />
 
                         <HorizontalStackLayout Spacing="5">
                             <Label Text="Track who owes what,"
-                       FontSize="11"
-                       TextColor="#FFD9B8" />
+                                   FontSize="11"
+                                   TextColor="#FFD9B8" />
                             <Label Text="stay balanced"
-                       FontSize="11"
-                       FontAttributes="Bold"
-                       TextColor="#FFE0C2" />
+                                   FontSize="11"
+                                   FontAttributes="Bold"
+                                   TextColor="#FFE0C2" />
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
 
-                    <!-- Smaller balance SVG badge -->
+                    <!-- Balance SVG badge -->
                     <Border Grid.Column="1"
-                WidthRequest="42" HeightRequest="42"
-                StrokeThickness="1"
-                Stroke="#30FFFFFF"
-                VerticalOptions="Center"
-                StrokeShape="RoundRectangle 13"
-                BackgroundColor="#30FFFFFF">
+                            WidthRequest="42" HeightRequest="42"
+                            StrokeThickness="1"
+                            Stroke="#30FFFFFF"
+                            VerticalOptions="Center"
+                            StrokeShape="RoundRectangle 13"
+                            BackgroundColor="#30FFFFFF">
                         <Path WidthRequest="20" HeightRequest="20"
-                  Aspect="Uniform"
-                  Fill="Transparent"
-                  Stroke="White"
-                  StrokeThickness="1.7"
-                  StrokeLineCap="Round"
-                  StrokeLineJoin="Round"
-                  HorizontalOptions="Center"
-                  VerticalOptions="Center"
-                  Data="M12,3 L12,21 M5,21 L19,21 M5,8 L12,3 L19,8 M3,14 L7,14 M17,14 L21,14 M3,14 L5,8 M7,14 L5,8 M17,14 L19,8 M21,14 L19,8" />
+                              Aspect="Uniform"
+                              Fill="Transparent"
+                              Stroke="White"
+                              StrokeThickness="1.7"
+                              StrokeLineCap="Round"
+                              StrokeLineJoin="Round"
+                              HorizontalOptions="Center"
+                              VerticalOptions="Center"
+                              Data="M12,3 L12,21 M5,21 L19,21 M5,8 L12,3 L19,8 M3,14 L7,14 M17,14 L21,14 M3,14 L5,8 M7,14 L5,8 M17,14 L19,8 M21,14 L19,8" />
                     </Border>
                 </Grid>
             </Grid>
@@ -355,17 +354,95 @@
                                     <DataTemplate x:DataType="vm:BorrowLendListItem">
 
                                         <SwipeView Margin="0,0,0,10">
+
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- LEFT SWIPE (finger →) → SETTLE (Green)   -->
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <SwipeView.LeftItems>
+                                                <SwipeItems Mode="Reveal"
+                                                            SwipeBehaviorOnInvoked="Close">
+
+                                                    <SwipeItemView>
+                                                        <Grid WidthRequest="88"
+                                                              BackgroundColor="#0FA968">
+                                                            <Grid.GestureRecognizers>
+                                                                <TapGestureRecognizer
+                                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToRecordTransactionCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            </Grid.GestureRecognizers>
+
+                                                            <VerticalStackLayout
+                                                                VerticalOptions="Center"
+                                                                HorizontalOptions="Center"
+                                                                Spacing="6">
+                                                                <Border WidthRequest="36" HeightRequest="36"
+                                                                        StrokeThickness="0"
+                                                                        StrokeShape="RoundRectangle 18"
+                                                                        BackgroundColor="#33FFFFFF"
+                                                                        HorizontalOptions="Center">
+                                                                    <Path WidthRequest="18" HeightRequest="18"
+                                                                          Aspect="Uniform"
+                                                                          Fill="Transparent"
+                                                                          Stroke="White"
+                                                                          StrokeThickness="2.6"
+                                                                          StrokeLineCap="Round"
+                                                                          StrokeLineJoin="Round"
+                                                                          HorizontalOptions="Center"
+                                                                          VerticalOptions="Center"
+                                                                          Data="M4,12 L9,17 L20,6" />
+                                                                </Border>
+                                                                <Label Text="Settle"
+                                                                       FontSize="11"
+                                                                       FontAttributes="Bold"
+                                                                       TextColor="White"
+                                                                       HorizontalOptions="Center" />
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </SwipeItemView>
+
+                                                </SwipeItems>
+                                            </SwipeView.LeftItems>
+
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- RIGHT SWIPE (finger ←) → DELETE (Red)     -->
+                                            <!-- ══════════════════════════════════════════ -->
                                             <SwipeView.RightItems>
-                                                <!-- Execute mode: no peek triangles -->
-                                                <SwipeItems Mode="Execute">
-                                                    <SwipeItem Text="Settle"
-                                                               BackgroundColor="{StaticResource Primary}"
-                                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToRecordTransactionCommand}"
-                                                               CommandParameter="{Binding .}" />
-                                                    <SwipeItem Text="Delete"
-                                                               BackgroundColor="{StaticResource Borrow}"
-                                                               Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
-                                                               CommandParameter="{Binding .}" />
+                                                <SwipeItems Mode="Reveal"
+                                                            SwipeBehaviorOnInvoked="Close">
+
+                                                    <SwipeItemView>
+                                                        <Grid WidthRequest="88"
+                                                              BackgroundColor="#E63946">
+                                                            <Grid.GestureRecognizers>
+                                                                <TapGestureRecognizer
+                                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            </Grid.GestureRecognizers>
+
+                                                            <VerticalStackLayout
+                                                                VerticalOptions="Center"
+                                                                HorizontalOptions="Center"
+                                                                Spacing="6">
+                                                                <Border WidthRequest="36" HeightRequest="36"
+                                                                        StrokeThickness="0"
+                                                                        StrokeShape="RoundRectangle 18"
+                                                                        BackgroundColor="#33FFFFFF"
+                                                                        HorizontalOptions="Center">
+                                                                    <Image Source="icon_delete_white.png"
+                                                                           WidthRequest="18" HeightRequest="18"
+                                                                           Aspect="AspectFit"
+                                                                           HorizontalOptions="Center"
+                                                                           VerticalOptions="Center" />
+                                                                </Border>
+                                                                <Label Text="Delete"
+                                                                       FontSize="11"
+                                                                       FontAttributes="Bold"
+                                                                       TextColor="White"
+                                                                       HorizontalOptions="Center" />
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </SwipeItemView>
+
                                                 </SwipeItems>
                                             </SwipeView.RightItems>
 
@@ -378,6 +455,7 @@
                                                     <Shadow Brush="#3D1E00" Offset="0,5" Radius="14" Opacity="0.07" />
                                                 </Border.Shadow>
 
+                                                <!-- Windows right-click menu -->
                                                 <Border.GestureRecognizers>
                                                     <TapGestureRecognizer
                                                         Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToRecordTransactionCommand}"
@@ -431,7 +509,6 @@
                                                                 </DataTrigger>
                                                             </Border.Triggers>
 
-                                                            <!-- ⬇️ FIXED: ContactInitial -->
                                                             <Label Text="{Binding ContactInitial}"
                                                                    FontSize="17"
                                                                    FontAttributes="Bold"
