@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.FirstTimeSetupPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="#FFFFFF"
+    Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <Grid Padding="28,0,28,24" RowDefinitions="Auto,*,Auto">
+
+            <!-- ═══════════════════════════════════════ -->
+            <!--  BRANDING                                -->
+            <!-- ═══════════════════════════════════════ -->
+            <VerticalStackLayout Grid.Row="0" Margin="0,64,0,0" Spacing="6">
+
+                <Border BackgroundColor="#FFF1E3"
+                        WidthRequest="64" HeightRequest="64"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 20"
+                        HorizontalOptions="Start">
+                    <Label Text="A"
+                           FontSize="30"
+                           FontAttributes="Bold"
+                           TextColor="#FF6B00"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+                </Border>
+
+                <Label Text="Welcome to Arthiva"
+                       FontSize="26"
+                       FontAttributes="Bold"
+                       TextColor="#1A1410"
+                       Margin="0,20,0,0" />
+
+                <Label Text="Let's set up your account to get started with managing your finances."
+                       FontSize="15"
+                       TextColor="#7A6B5E"
+                       LineBreakMode="WordWrap" />
+
+            </VerticalStackLayout>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!--  FORM                                    -->
+            <!-- ═══════════════════════════════════════ -->
+            <VerticalStackLayout Grid.Row="1" Margin="0,40,0,0" Spacing="22" VerticalOptions="Start">
+
+                <!-- Full Name -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Full Name" FontSize="13" FontAttributes="Bold" TextColor="#1A1410" />
+
+                    <Border BackgroundColor="#FFF8F2"
+                            Stroke="#FFF1E3" StrokeThickness="1.5"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="16,4">
+                        <Entry x:Name="FullNameEntry"
+                               Placeholder="Enter your full name"
+                               PlaceholderColor="#7A6B5E"
+                               TextColor="#1A1410"
+                               FontSize="16"
+                               HeightRequest="52"
+                               MaxLength="100"
+                               ReturnType="Next"
+                               TextChanged="OnFullNameChanged" />
+                    </Border>
+
+                    <Label x:Name="FullNameErrorLabel"
+                           Text="Full name is required."
+                           FontSize="12"
+                           TextColor="#DC2626"
+                           IsVisible="False" />
+                </VerticalStackLayout>
+
+                <!-- Mobile Number -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Mobile Number" FontSize="13" FontAttributes="Bold" TextColor="#1A1410" />
+
+                    <Border BackgroundColor="#FFF8F2"
+                            Stroke="#FFF1E3" StrokeThickness="1.5"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="16,4">
+                        <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="+91" FontSize="16" TextColor="#7A6B5E" VerticalOptions="Center" />
+                            <BoxView Grid.Column="1" WidthRequest="1.5" BackgroundColor="#FFE3CC" VerticalOptions="FillAndExpand" />
+                            <Entry Grid.Column="2"
+                                   x:Name="MobileNoEntry"
+                                   Placeholder="10-digit mobile number"
+                                   PlaceholderColor="#7A6B5E"
+                                   TextColor="#1A1410"
+                                   FontSize="16"
+                                   HeightRequest="52"
+                                   Keyboard="Numeric"
+                                   MaxLength="10"
+                                   ReturnType="Done"
+                                   TextChanged="OnMobileNoChanged" />
+                        </Grid>
+                    </Border>
+
+                    <Label x:Name="MobileNoErrorLabel"
+                           Text="Enter a valid 10-digit mobile number."
+                           FontSize="12"
+                           TextColor="#DC2626"
+                           IsVisible="False" />
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!--  CONTINUE                                -->
+            <!-- ═══════════════════════════════════════ -->
+            <Border Grid.Row="2"
+                    x:Name="ContinueButtonBorder"
+                    BackgroundColor="#FF6B00"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 16"
+                    HeightRequest="56"
+                    Margin="0,24,0,0">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnContinueTapped" />
+                </Border.GestureRecognizers>
+                <Grid>
+                    <Label Text="Continue"
+                           TextColor="White"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+                    <ActivityIndicator x:Name="ContinueBusyIndicator"
+                                       IsRunning="False"
+                                       IsVisible="False"
+                                       Color="White"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+        </Grid>
+    </ScrollView>
+
+</ContentPage>

@@ -13,16 +13,17 @@
 
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
         <ScrollView>
-            <VerticalStackLayout Padding="18,16,18,24" Spacing="18"
+            <VerticalStackLayout Padding="18,26,18,24" Spacing="18"
                                  MaximumWidthRequest="500"
-                                 HorizontalOptions="Center">
+                                 HorizontalOptions="Fill">
 
                 <!-- Greeting (animated) -->
                 <VerticalStackLayout x:Name="GreetingSection" Spacing="3" Margin="0,4,0,4"
-                                     Opacity="0" TranslationY="20">
+                                     Opacity="0" TranslationY="16">
                     <Label FontSize="13" TextColor="{StaticResource TextSecondary}"
                            Text="{Binding GreetingPrefix, StringFormat='{0},'}" />
-                    <Label FontSize="24" FontAttributes="Bold" TextColor="#1A2B4C">
+                    <Label FontSize="24" FontAttributes="Bold" TextColor="#1A2B4C"
+                           LineBreakMode="TailTruncation">
                         <Label.Text>
                             <MultiBinding StringFormat="{}{0} 👋">
                                 <Binding Path="UserName" />
@@ -37,7 +38,7 @@
                 <!-- TOTAL BALANCE CARD                              -->
                 <!-- ============================================== -->
                 <Border x:Name="BalanceCard" StrokeThickness="0" StrokeShape="RoundRectangle 20"
-                        Padding="0" Opacity="0" TranslationY="30">
+                        Padding="0" Opacity="0" TranslationY="20">
                     <Border.Shadow>
                         <Shadow Brush="#FF5500" Offset="0,6" Radius="16" Opacity="0.25" />
                     </Border.Shadow>
@@ -89,9 +90,10 @@
                                 <Label x:Name="BalanceAmountLabel" Grid.Column="1"
                                        Text="₹0.00"
                                        TextColor="White"
-                                       FontSize="28"
+                                       FontSize="26"
                                        FontAttributes="Bold"
-                                       LineBreakMode="NoWrap"
+                                       LineBreakMode="TailTruncation"
+                                       MaxLines="1"
                                        VerticalOptions="Center" />
                             </Grid>
 
@@ -125,7 +127,66 @@
                 </Border>
 
                 <!-- ============================================== -->
+                <!-- PERIOD SWITCHER (Month / Year)                  -->
+                <!-- Wrapped in its own card so it reads as one      -->
+                <!-- control, with visible bordered nav buttons at a -->
+                <!-- proper ≥40dp tap target instead of near-        -->
+                <!-- invisible floating circles.                     -->
+                <!-- ============================================== -->
+                <Border StrokeThickness="1" Stroke="#EEF0F3"
+                        StrokeShape="RoundRectangle 18"
+                        BackgroundColor="White" Padding="8,7">
+                    <Border.Shadow>
+                        <Shadow Brush="#000000" Offset="0,2" Radius="10" Opacity="0.05" />
+                    </Border.Shadow>
+
+                    <Grid ColumnDefinitions="40,*,40,Auto" ColumnSpacing="8" VerticalOptions="Center">
+                        <Border Grid.Column="0" WidthRequest="40" HeightRequest="40"
+                                StrokeThickness="1" Stroke="#E7E9ED"
+                                StrokeShape="RoundRectangle 20"
+                                BackgroundColor="#FAFAFB">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding PreviousPeriodCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="‹" FontSize="18" FontAttributes="Bold"
+                                   TextColor="#1A2B4C"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+
+                        <Label Grid.Column="1" Text="{Binding PeriodLabel}"
+                               FontSize="15" FontAttributes="Bold"
+                               TextColor="#1A2B4C"
+                               HorizontalTextAlignment="Center"
+                               VerticalOptions="Center"
+                               LineBreakMode="TailTruncation" />
+
+                        <Border Grid.Column="2" WidthRequest="40" HeightRequest="40"
+                                StrokeThickness="1" Stroke="#E7E9ED"
+                                StrokeShape="RoundRectangle 20"
+                                BackgroundColor="#FAFAFB">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding NextPeriodCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="›" FontSize="18" FontAttributes="Bold"
+                                   TextColor="#1A2B4C"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+
+                        <Border Grid.Column="3" StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                                BackgroundColor="#FFE9CC" Padding="14,9" Margin="4,0,0,0">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleViewModeCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="{Binding ViewModeLabel}" FontSize="12" FontAttributes="Bold"
+                                   TextColor="#FF7A00" VerticalOptions="Center" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- ============================================== -->
                 <!-- SUMMARY CARDS (animated cascade)               -->
+                <!-- Income / Expense / Savings follow the period    -->
+                <!-- switcher above; Net Balance is always all-time  -->
                 <!-- ============================================== -->
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto"
                       ColumnSpacing="12" RowSpacing="12">
@@ -135,29 +196,29 @@
                         IconSource="icon_arrow_up_green.png"
                         IconBackgroundColor="#E8F5E9" AccentColor="#00B368"
                         CardTitle="Income"
-                        CardAmount="{Binding MonthIncome, Converter={StaticResource CurrencyConverter}}"
-                        CardCaption="{Binding IncomeTransactionCount, StringFormat='{0} transactions'}"
+                        CardAmount="{Binding PeriodIncome, Converter={StaticResource CurrencyConverter}}"
+                        CardCaption="{Binding PeriodIncomeCount, StringFormat='{0} transactions'}"
                         ShowDot="True" DotColor="#00B368"
-                        Opacity="0" TranslationY="25" />
+                        Opacity="0" TranslationY="18" />
 
                     <components:SummaryCardView x:Name="CardExpense"
                         Grid.Row="0" Grid.Column="1"
                         IconSource="icon_arrow_down_red.png"
                         IconBackgroundColor="#FFEBEE" AccentColor="#E53935"
                         CardTitle="Expense"
-                        CardAmount="{Binding MonthExpense, Converter={StaticResource CurrencyConverter}}"
-                        CardCaption="{Binding ExpenseTransactionCount, StringFormat='{0} transactions'}"
+                        CardAmount="{Binding PeriodExpense, Converter={StaticResource CurrencyConverter}}"
+                        CardCaption="{Binding PeriodExpenseCount, StringFormat='{0} transactions'}"
                         ShowDot="True" DotColor="#E53935"
-                        Opacity="0" TranslationY="25" />
+                        Opacity="0" TranslationY="18" />
 
                     <components:SummaryCardView x:Name="CardSavings"
                         Grid.Row="1" Grid.Column="0"
                         IconSource="icon_piggy_blue.png"
                         IconBackgroundColor="#E3F2FD" AccentColor="#1E88E5"
                         CardTitle="Savings"
-                        CardAmount="{Binding MonthSaving, Converter={StaticResource CurrencyConverter}}"
+                        CardAmount="{Binding PeriodSaving, Converter={StaticResource CurrencyConverter}}"
                         CardCaption="Income − Expense"
-                        Opacity="0" TranslationY="25" />
+                        Opacity="0" TranslationY="18" />
 
                     <components:SummaryCardView x:Name="CardNetBalance"
                         Grid.Row="1" Grid.Column="1"
@@ -166,7 +227,7 @@
                         CardTitle="Net Balance"
                         CardAmount="{Binding TotalBalance, Converter={StaticResource CurrencyConverter}}"
                         CardCaption="Cash + Bank + UPI"
-                        Opacity="0" TranslationY="25" />
+                        Opacity="0" TranslationY="18" />
                 </Grid>
 
                 <!-- ============================================== -->
@@ -174,7 +235,7 @@
                 <!-- ============================================== -->
                 <Border x:Name="BorrowLendCard"
                         StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="16"
-                        Opacity="0" TranslationY="25">
+                        Opacity="0" TranslationY="18">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnBorrowLendTapped" />
                     </Border.GestureRecognizers>
@@ -227,10 +288,13 @@
 
                 <!-- ============================================== -->
                 <!-- RECENT TRANSACTIONS                             -->
+                <!-- Uses BindableLayout, NOT CollectionView, because -->
+                <!-- a CollectionView nested inside a ScrollView can  -->
+                <!-- fail to size/render on Android.                 -->
                 <!-- ============================================== -->
                 <Border x:Name="RecentTransactionsCard"
                         Style="{StaticResource CardBorder}" Padding="4,0,4,12"
-                        Opacity="0" TranslationY="25"
+                        Opacity="0" TranslationY="18"
                         IsVisible="{Binding RecentTransactions.Count, Converter={StaticResource CountToBoolConverter}}">
                     <Border.Shadow>
                         <Shadow Brush="#000000" Offset="0,2" Radius="12" Opacity="0.07" />
@@ -253,8 +317,9 @@
                                    VerticalOptions="Center" />
                         </Grid>
 
-                        <CollectionView ItemsSource="{Binding RecentTransactions}">
-                            <CollectionView.ItemTemplate>
+                        <VerticalStackLayout Spacing="0"
+                            BindableLayout.ItemsSource="{Binding RecentTransactions}">
+                            <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="models:Transaction">
                                     <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="10" Padding="12,10">
                                         <Border Grid.Column="0" WidthRequest="40" HeightRequest="40"
@@ -307,8 +372,8 @@
                                         </Label>
                                     </Grid>
                                 </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
 
                         <Grid ColumnDefinitions="*,Auto" Padding="12,8,12,0">
                             <Label Grid.Column="1" Text="View All ›"
@@ -333,13 +398,15 @@
 
                 <!-- ============================================== -->
                 <!-- UPCOMING BILLS + ACTIVE EMIs                    -->
+                <!-- Stack vertically on narrow (phone) widths so    -->
+                <!-- long bill/EMI names never get crushed.          -->
                 <!-- ============================================== -->
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowDefinitions="Auto" Margin="0,0,0,16">
+                <VerticalStackLayout Spacing="12" Margin="0,0,0,16">
 
                     <!-- Upcoming Bills -->
-                    <Border x:Name="BillsCard" Grid.Column="0"
+                    <Border x:Name="BillsCard"
                             Style="{StaticResource CardBorder}" Padding="14"
-                            Opacity="0" TranslationY="25"
+                            Opacity="0" TranslationY="18"
                             IsVisible="{Binding UpcomingBills.Count, Converter={StaticResource CountToBoolConverter}}">
                         <Border.Shadow>
                             <Shadow Brush="#000000" Offset="0,2" Radius="12" Opacity="0.07" />
@@ -355,34 +422,35 @@
                                            Aspect="AspectFit"
                                            HorizontalOptions="Center" VerticalOptions="Center" />
                                 </Border>
-                                <Label Grid.Column="1" Text="Upcoming Bills" FontSize="12" FontAttributes="Bold"
+                                <Label Grid.Column="1" Text="Upcoming Bills" FontSize="13" FontAttributes="Bold"
                                        TextColor="{StaticResource TextPrimary}"
                                        VerticalOptions="Center"
                                        LineBreakMode="TailTruncation" />
                             </Grid>
 
-                            <CollectionView ItemsSource="{Binding UpcomingBills}">
-                                <CollectionView.ItemTemplate>
+                            <VerticalStackLayout Spacing="0"
+                                BindableLayout.ItemsSource="{Binding UpcomingBills}">
+                                <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="models:Bill">
-                                        <VerticalStackLayout Spacing="2" Margin="0,6">
-                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
-                                                <Label Grid.Column="0" FontSize="12" FontAttributes="Bold"
-                                                       TextColor="{StaticResource TextPrimary}"
-                                                       LineBreakMode="TailTruncation"
-                                                       Text="{Binding Name}"
-                                                       VerticalOptions="Center" />
-                                                <Label Grid.Column="1" FontSize="12" FontAttributes="Bold"
-                                                       TextColor="#E53935"
-                                                       LineBreakMode="NoWrap"
-                                                       Text="{Binding Amount, Converter={StaticResource CurrencyConverter}}"
-                                                       VerticalOptions="Center" />
-                                            </Grid>
-                                            <Label FontSize="10" TextColor="{StaticResource TextSecondary}"
+                                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto"
+                                              ColumnSpacing="8" Margin="0,6">
+                                            <Label Grid.Row="0" Grid.Column="0" FontSize="13" FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextPrimary}"
+                                                   LineBreakMode="TailTruncation"
+                                                   Text="{Binding Name}"
+                                                   VerticalOptions="Center" />
+                                            <Label Grid.Row="0" Grid.Column="1" FontSize="13" FontAttributes="Bold"
+                                                   TextColor="#E53935"
+                                                   LineBreakMode="NoWrap"
+                                                   Text="{Binding Amount, Converter={StaticResource CurrencyConverter}}"
+                                                   VerticalOptions="Center" />
+                                            <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                   FontSize="11" TextColor="{StaticResource TextSecondary}"
                                                    Text="{Binding DueDate, StringFormat='Due {0:dd MMM}'}" />
-                                        </VerticalStackLayout>
+                                        </Grid>
                                     </DataTemplate>
-                                </CollectionView.ItemTemplate>
-                            </CollectionView>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
 
                             <Grid ColumnDefinitions="*,Auto" Margin="0,6,0,0">
                                 <Label Grid.Column="1" Text="View All ›"
@@ -397,10 +465,17 @@
                         </VerticalStackLayout>
                     </Border>
 
+                    <VerticalStackLayout Spacing="6" HorizontalOptions="Center" Padding="0,8"
+                        IsVisible="{Binding UpcomingBills.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                        <Label Text="No bills due in the next 7 days."
+                               FontSize="12" TextColor="{StaticResource TextSecondary}"
+                               HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+
                     <!-- Active EMIs -->
-                    <Border x:Name="EmisCard" Grid.Column="1"
+                    <Border x:Name="EmisCard"
                             Style="{StaticResource CardBorder}" Padding="14"
-                            Opacity="0" TranslationY="25"
+                            Opacity="0" TranslationY="18"
                             IsVisible="{Binding ActiveEmis.Count, Converter={StaticResource CountToBoolConverter}}">
                         <Border.Shadow>
                             <Shadow Brush="#000000" Offset="0,2" Radius="12" Opacity="0.07" />
@@ -416,28 +491,29 @@
                                            Aspect="AspectFit"
                                            HorizontalOptions="Center" VerticalOptions="Center" />
                                 </Border>
-                                <Label Grid.Column="1" Text="Active EMIs" FontSize="12" FontAttributes="Bold"
+                                <Label Grid.Column="1" Text="Active EMIs" FontSize="13" FontAttributes="Bold"
                                        TextColor="{StaticResource TextPrimary}"
                                        VerticalOptions="Center"
                                        LineBreakMode="TailTruncation" />
                             </Grid>
 
-                            <CollectionView ItemsSource="{Binding ActiveEmis}">
-                                <CollectionView.ItemTemplate>
+                            <VerticalStackLayout Spacing="0"
+                                BindableLayout.ItemsSource="{Binding ActiveEmis}">
+                                <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="models:EmiMaster">
-                                        <VerticalStackLayout Spacing="2" Margin="0,6">
-                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
-                                                <Label Grid.Column="0" FontSize="12" FontAttributes="Bold"
-                                                       TextColor="{StaticResource TextPrimary}"
-                                                       LineBreakMode="TailTruncation"
-                                                       Text="{Binding Title}"
-                                                       VerticalOptions="Center" />
-                                                <Label Grid.Column="1" FontSize="12" FontAttributes="Bold"
-                                                       LineBreakMode="NoWrap"
-                                                       Text="{Binding EmiAmount, Converter={StaticResource CurrencyConverter}}"
-                                                       VerticalOptions="Center" />
-                                            </Grid>
-                                            <Label FontSize="10" TextColor="{StaticResource TextSecondary}">
+                                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto"
+                                              ColumnSpacing="8" Margin="0,6">
+                                            <Label Grid.Row="0" Grid.Column="0" FontSize="13" FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextPrimary}"
+                                                   LineBreakMode="TailTruncation"
+                                                   Text="{Binding Title}"
+                                                   VerticalOptions="Center" />
+                                            <Label Grid.Row="0" Grid.Column="1" FontSize="13" FontAttributes="Bold"
+                                                   LineBreakMode="NoWrap"
+                                                   Text="{Binding EmiAmount, Converter={StaticResource CurrencyConverter}}"
+                                                   VerticalOptions="Center" />
+                                            <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                   FontSize="11" TextColor="{StaticResource TextSecondary}">
                                                 <Label.Text>
                                                     <MultiBinding StringFormat="{}{0} of {1} paid">
                                                         <Binding Path="PaidInstallment" />
@@ -445,10 +521,10 @@
                                                     </MultiBinding>
                                                 </Label.Text>
                                             </Label>
-                                        </VerticalStackLayout>
+                                        </Grid>
                                     </DataTemplate>
-                                </CollectionView.ItemTemplate>
-                            </CollectionView>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
 
                             <Grid ColumnDefinitions="*,Auto" Margin="0,6,0,0">
                                 <Label Grid.Column="1" Text="View All ›"
@@ -462,7 +538,15 @@
                             </Grid>
                         </VerticalStackLayout>
                     </Border>
-                </Grid>
+
+                    <VerticalStackLayout Spacing="6" HorizontalOptions="Center" Padding="0,8"
+                        IsVisible="{Binding ActiveEmis.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                        <Label Text="No active EMIs."
+                               FontSize="12" TextColor="{StaticResource TextSecondary}"
+                               HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
 
                 <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Expense}"
                        IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}"

@@ -14,8 +14,8 @@
         <ResourceDictionary>
             <Color x:Key="Primary">#FF6B00</Color>
             <Color x:Key="PrimaryTint">#FFF1E3</Color>
-            <Color x:Key="PageBg">#FFF8F2</Color>
-            <Color x:Key="CardBg">#FFFFFF</Color>
+            <Color x:Key="PageBg">#FFFFFF</Color>
+            <Color x:Key="CardBg">#FFF8F2</Color>
             <Color x:Key="CardStroke">#F4EBE1</Color>
             <Color x:Key="TrackMuted">#F4EDE6</Color>
             <Color x:Key="TextPrimary">#1A1410</Color>
@@ -31,104 +31,6 @@
 
         <Grid RowDefinitions="Auto,*">
 
-            <!-- ═══════════ COMPACT PREMIUM HEADER ═══════════ -->
-            <Grid Grid.Row="0">
-                <Grid.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#3D1E00" Offset="0.0" />
-                        <GradientStop Color="#B84500" Offset="0.55" />
-                        <GradientStop Color="#FF6B00" Offset="1.0" />
-                    </LinearGradientBrush>
-                </Grid.Background>
-
-                <!-- Decorative SVG layer -->
-                <Grid InputTransparent="True">
-                    <Ellipse WidthRequest="100" HeightRequest="100"
-                             Fill="#30FFB37A"
-                             HorizontalOptions="Start" VerticalOptions="Start"
-                             TranslationX="-40" TranslationY="-40" />
-
-                    <Ellipse WidthRequest="140" HeightRequest="140"
-                             Fill="#40FF8A1E"
-                             HorizontalOptions="End" VerticalOptions="End"
-                             TranslationX="60" TranslationY="60" />
-
-                    <Path Stroke="#28FFFFFF" StrokeThickness="1.2" Fill="Transparent"
-                          HorizontalOptions="End" VerticalOptions="Center"
-                          TranslationX="20"
-                          Data="M0,0 C 40,30 40,100 0,130" />
-
-                    <HorizontalStackLayout Spacing="6"
-                                           HorizontalOptions="Start"
-                                           VerticalOptions="Start"
-                                           Margin="20,18,0,0">
-                        <Ellipse WidthRequest="3" HeightRequest="3" Fill="#66FFB37A" />
-                        <Ellipse WidthRequest="3" HeightRequest="3" Fill="#40FFFFFF" />
-                        <Ellipse WidthRequest="3" HeightRequest="3" Fill="#40FFFFFF" />
-                    </HorizontalStackLayout>
-                </Grid>
-
-                <!-- Header content -->
-                <Grid Padding="20,16,20,18" ColumnDefinitions="*,Auto">
-
-                    <VerticalStackLayout Grid.Column="0" Spacing="3">
-
-                        <Border Padding="7,3"
-                                StrokeThickness="0"
-                                HorizontalOptions="Start"
-                                StrokeShape="RoundRectangle 6"
-                                BackgroundColor="#40FF5500">
-                            <HorizontalStackLayout Spacing="4">
-                                <Ellipse WidthRequest="4" HeightRequest="4"
-                                         Fill="#FFE0C2"
-                                         VerticalOptions="Center" />
-                                <Label Text="SAVINGS HUB"
-                                       FontSize="8.5"
-                                       CharacterSpacing="1.8"
-                                       FontAttributes="Bold"
-                                       VerticalOptions="Center"
-                                       TextColor="#FFE0C2" />
-                            </HorizontalStackLayout>
-                        </Border>
-
-                        <Label Text="Saving Goals"
-                               FontSize="22"
-                               FontAttributes="Bold"
-                               Margin="0,4,0,0"
-                               TextColor="White" />
-
-                        <HorizontalStackLayout Spacing="5">
-                            <Label Text="Plan your dreams,"
-                                   FontSize="11"
-                                   TextColor="#FFD9B8" />
-                            <Label Text="save step by step"
-                                   FontSize="11"
-                                   FontAttributes="Bold"
-                                   TextColor="#FFE0C2" />
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
-
-                    <!-- Piggy Bank SVG badge -->
-                    <Border Grid.Column="1"
-                            WidthRequest="42" HeightRequest="42"
-                            StrokeThickness="1"
-                            Stroke="#30FFFFFF"
-                            VerticalOptions="Center"
-                            StrokeShape="RoundRectangle 13"
-                            BackgroundColor="#30FFFFFF">
-                        <Path WidthRequest="20" HeightRequest="20"
-                              Aspect="Uniform"
-                              Fill="Transparent"
-                              Stroke="White"
-                              StrokeThickness="1.7"
-                              StrokeLineCap="Round"
-                              StrokeLineJoin="Round"
-                              HorizontalOptions="Center"
-                              VerticalOptions="Center"
-                              Data="M12,3 L15,3 L15,5 M9,3 L9,5 M19,9 L21,9 M19,13 L21,13 M19,17 L21,17 M5,7 L19,7 C19.6,7 20,7.4 20,8 L20,18 C20,18.6 19.6,19 19,19 L5,19 C4.4,19 4,18.6 4,18 L4,8 C4,7.4 4.4,7 5,7 Z M8,11 L10,11 M14,11 L16,11" />
-                    </Border>
-                </Grid>
-            </Grid>
 
             <!-- ═══════════ CONTENT SHEET ═══════════ -->
             <Border Grid.Row="1" Margin="0,-14,0,0"

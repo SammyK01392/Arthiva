@@ -8,14 +8,14 @@
     xmlns:models="clr-namespace:Arthiva.Models"
     x:DataType="vm:TransactionListViewModel"
     Title="Transactions"
-    BackgroundColor="#FFF8F2">
+    BackgroundColor="#FFFFFF">
 
     <ContentPage.Resources>
         <ResourceDictionary>
             <Color x:Key="Primary">#FF6B00</Color>
             <Color x:Key="PrimaryTint">#FFF1E3</Color>
-            <Color x:Key="PageBg">#FFF8F2</Color>
-            <Color x:Key="CardBg">#FFFFFF</Color>
+            <Color x:Key="PageBg">#FFFFFF</Color>
+            <Color x:Key="CardBg">#FFF8F2</Color>
             <Color x:Key="CardStroke">#F4EBE1</Color>
             <Color x:Key="TrackMuted">#F4EDE6</Color>
             <Color x:Key="TextPrimary">#1A1410</Color>
@@ -38,45 +38,7 @@
 
         <Grid RowDefinitions="Auto,*">
 
-            <!-- ═══════════ HEADER ═══════════ -->
-            <Grid Grid.Row="0">
-                <Grid.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#FF8A1E" Offset="0.0" />
-                        <GradientStop Color="#FF5500" Offset="1.0" />
-                    </LinearGradientBrush>
-                </Grid.Background>
 
-                <Grid InputTransparent="True">
-                    <Ellipse WidthRequest="100" HeightRequest="100" Fill="#18FFFFFF"
-                             HorizontalOptions="End" VerticalOptions="Start"
-                             TranslationX="40" TranslationY="-45" />
-                    <Ellipse WidthRequest="50" HeightRequest="50" Fill="#14FFFFFF"
-                             HorizontalOptions="Start" VerticalOptions="End"
-                             TranslationX="-18" TranslationY="18" />
-                </Grid>
-
-                <Grid Padding="18,14,18,16" ColumnDefinitions="*,Auto">
-                    <VerticalStackLayout Grid.Column="0" Spacing="1">
-                        <Label Text="TRANSACTIONS" FontSize="9.5" CharacterSpacing="2"
-                               FontAttributes="Bold" TextColor="#FFE0C2" />
-
-                        <Label Text="Your Activity" FontSize="19"
-                               FontAttributes="Bold" TextColor="White" />
-
-                        <Label FontSize="10.5" TextColor="#FFD9B8"
-                               Text="{Binding Transactions.Count, StringFormat='{}{0} records in this view'}" />
-                    </VerticalStackLayout>
-
-                    <Border Grid.Column="1" WidthRequest="36" HeightRequest="36"
-                            StrokeThickness="0" VerticalOptions="Center"
-                            StrokeShape="RoundRectangle 11" BackgroundColor="#2EFFFFFF">
-                        <Label Text="₹" FontSize="17" FontAttributes="Bold"
-                               HorizontalOptions="Center" VerticalOptions="Center"
-                               TextColor="White" />
-                    </Border>
-                </Grid>
-            </Grid>
 
             <!-- ═══════════ CONTENT ═══════════ -->
             <Border Grid.Row="1" Margin="0,-12,0,0"

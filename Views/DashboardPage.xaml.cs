@@ -1,5 +1,4 @@
 ﻿using Arthiva.ViewModels;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Arthiva.Views;
 
@@ -20,86 +19,58 @@ public partial class DashboardPage : ContentPage
     {
         base.OnAppearing();
 
-        _viewModel.LoadCommand.Execute(null);
+        // Load (and AWAIT) the data first. Every figure on screen is
+        // correct before anything becomes visible or animates — no more
+        // stale numbers flashing while a long animation plays out.
+        await _viewModel.LoadCommand.ExecuteAsync(null);
+
+        BalanceAmountLabel.Text = _isBalanceHidden
+            ? "₹ • • • • •"
+            : $"₹{_viewModel.TotalBalance:N2}";
 
         if (!_hasAnimatedOnLoad)
         {
             _hasAnimatedOnLoad = true;
-            // Slight delay so layout is measured before animating
-            await Task.Delay(80);
-            await RunEntranceAnimationsAsync();
+            // Fire-and-forget: purely cosmetic now, doesn't gate correctness.
+            _ = RunEntranceAnimationsAsync();
         }
     }
 
     // ============================================================
-    // ENTRANCE ANIMATIONS — staggered fade + slide from bottom
+    // ENTRANCE ANIMATIONS — fast, parallel fade + slide from bottom.
+    // Data is already loaded and correct by the time this runs, so
+    // this is now pure polish, not something the user waits on.
     // ============================================================
     private async Task RunEntranceAnimationsAsync()
     {
-        // 1. Greeting (first to appear)
-        _ = GreetingSection.FadeTo(1, 350, Easing.CubicOut);
-        await GreetingSection.TranslateTo(0, 0, 400, Easing.CubicOut);
+        const uint fast = 180;
+        const uint slower = 220;
 
-        // 2. Balance Card
-        _ = BalanceCard.FadeTo(1, 400, Easing.CubicOut);
-        await BalanceCard.TranslateTo(0, 0, 450, Easing.CubicOut);
-
-        // 3. Summary cards — cascade
-        var summaryCards = new VisualElement[] { CardIncome, CardExpense, CardSavings, CardNetBalance };
-        foreach (var card in summaryCards)
-        {
-            _ = card.FadeTo(1, 300, Easing.CubicOut);
-            _ = card.TranslateTo(0, 0, 350, Easing.CubicOut);
-            await Task.Delay(70);
-        }
-
-        // 4. Borrow Lend
-        _ = BorrowLendCard.FadeTo(1, 350, Easing.CubicOut);
-        await BorrowLendCard.TranslateTo(0, 0, 400, Easing.CubicOut);
-
-        // 5. Recent Transactions
-        _ = RecentTransactionsCard.FadeTo(1, 350, Easing.CubicOut);
-        _ = RecentTransactionsCard.TranslateTo(0, 0, 400, Easing.CubicOut);
-
-        // 6. Bills + EMIs side by side
-        _ = BillsCard.FadeTo(1, 350, Easing.CubicOut);
-        _ = EmisCard.FadeTo(1, 350, Easing.CubicOut);
+        // 1 + 2. Greeting and Balance card together
         await Task.WhenAll(
-            BillsCard.TranslateTo(0, 0, 400, Easing.CubicOut),
-            EmisCard.TranslateTo(0, 0, 400, Easing.CubicOut)
+            AnimateInAsync(GreetingSection, slower),
+            AnimateInAsync(BalanceCard, slower)
         );
 
-        // 7. Start count-up balance animation
-        _ = AnimateBalanceCountUpAsync();
+        // 3. Summary cards — all together, tiny stagger for polish only
+        var summaryCards = new VisualElement[] { CardIncome, CardExpense, CardSavings, CardNetBalance };
+        await Task.WhenAll(summaryCards.Select(c => AnimateInAsync(c, fast)));
+
+        // 4-6. Everything else together
+        await Task.WhenAll(
+            AnimateInAsync(BorrowLendCard, fast),
+            AnimateInAsync(RecentTransactionsCard, fast),
+            AnimateInAsync(BillsCard, fast),
+            AnimateInAsync(EmisCard, fast)
+        );
     }
 
-    // ============================================================
-    // COUNT-UP ANIMATION — balance from 0 → actual
-    // ============================================================
-    private async Task AnimateBalanceCountUpAsync()
+    private static Task AnimateInAsync(VisualElement element, uint duration)
     {
-        var target = _viewModel.TotalBalance;
-        if (target == 0)
-        {
-            BalanceAmountLabel.Text = "₹0.00";
-            return;
-        }
-
-        const int steps = 30;
-        const int duration = 900;
-        var stepDelay = duration / steps;
-
-        for (int i = 1; i <= steps; i++)
-        {
-            // Ease-out curve: starts fast, slows at end
-            double progress = 1 - Math.Pow(1 - (i / (double)steps), 3);
-            var current = (decimal)((double)target * progress);
-
-            BalanceAmountLabel.Text = $"₹{current:N2}";
-            await Task.Delay(stepDelay);
-        }
-
-        BalanceAmountLabel.Text = $"₹{target:N2}";
+        return Task.WhenAll(
+            element.FadeTo(1, duration, Easing.CubicOut),
+            element.TranslateTo(0, 0, duration, Easing.CubicOut)
+        );
     }
 
     // ============================================================
@@ -111,16 +82,10 @@ public partial class DashboardPage : ContentPage
 
         await BalanceAmountLabel.FadeTo(0, 120, Easing.CubicIn);
 
-        if (_isBalanceHidden)
-        {
-            BalanceAmountLabel.Text = "₹ • • • • •";
-            EyeIcon.Opacity = 0.5;
-        }
-        else
-        {
-            BalanceAmountLabel.Text = $"₹{_viewModel.TotalBalance:N2}";
-            EyeIcon.Opacity = 0.9;
-        }
+        BalanceAmountLabel.Text = _isBalanceHidden
+            ? "₹ • • • • •"
+            : $"₹{_viewModel.TotalBalance:N2}";
+        EyeIcon.Opacity = _isBalanceHidden ? 0.5 : 0.9;
 
         await BalanceAmountLabel.FadeTo(1, 180, Easing.CubicOut);
     }

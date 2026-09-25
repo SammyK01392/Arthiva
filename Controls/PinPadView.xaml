@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView
+    x:Class="Arthiva.Controls.PinPadView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <Style x:Key="PinKeyBorderStyle" TargetType="Border">
+                <Setter Property="WidthRequest" Value="68" />
+                <Setter Property="HeightRequest" Value="68" />
+                <Setter Property="BackgroundColor" Value="#FFF1E3" />
+                <Setter Property="StrokeThickness" Value="0" />
+                <Setter Property="StrokeShape" Value="RoundRectangle 34" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+            <Style x:Key="PinKeyLabelStyle" TargetType="Label">
+                <Setter Property="FontSize" Value="24" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="#1A1410" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalTextAlignment" Value="Center" />
+                <Setter Property="VerticalTextAlignment" Value="Center" />
+            </Style>
+        </ResourceDictionary>
+    </ContentView.Resources>
+
+    <VerticalStackLayout Spacing="36">
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!--  4 PIN INDICATOR DOTS                        -->
+        <!-- ═══════════════════════════════════════════ -->
+        <HorizontalStackLayout Spacing="22" HorizontalOptions="Center">
+
+            <Border x:Name="Dot1" WidthRequest="18" HeightRequest="18"
+                    Stroke="#FF6B00" StrokeThickness="2"
+                    BackgroundColor="Transparent"
+                    StrokeShape="RoundRectangle 9" />
+
+            <Border x:Name="Dot2" WidthRequest="18" HeightRequest="18"
+                    Stroke="#FF6B00" StrokeThickness="2"
+                    BackgroundColor="Transparent"
+                    StrokeShape="RoundRectangle 9" />
+
+            <Border x:Name="Dot3" WidthRequest="18" HeightRequest="18"
+                    Stroke="#FF6B00" StrokeThickness="2"
+                    BackgroundColor="Transparent"
+                    StrokeShape="RoundRectangle 9" />
+
+            <Border x:Name="Dot4" WidthRequest="18" HeightRequest="18"
+                    Stroke="#FF6B00" StrokeThickness="2"
+                    BackgroundColor="Transparent"
+                    StrokeShape="RoundRectangle 9" />
+
+        </HorizontalStackLayout>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!--  NUMERIC KEYPAD                               -->
+        <!-- ═══════════════════════════════════════════ -->
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto"
+              ColumnDefinitions="*,*,*"
+              RowSpacing="18" ColumnSpacing="28"
+              HorizontalOptions="Center">
+
+            <!-- Row 1: 1 2 3 -->
+            <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource PinKeyBorderStyle}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnDigitTapped" CommandParameter="1" />
+                </Border.GestureRecognizers>
+                <Label Text="1" Style="{StaticResource PinKeyLabelStyle}" />
+            </Border>
+
+            <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource PinKeyBorderStyle}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnDigitTapped" CommandParameter="2" />
+                </Border.GestureRecognizers>
+                <Label Text="2" Style="{StaticResource PinKeyLabelStyle}" />
+            </Border>
+
+            <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource PinKeyBorderStyle}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnDigitTapped" CommandParameter="3" />
+                </Border.GestureRecognizers>
+                <Label Text="3" Style="{StaticResource PinKeyLabelStyle}" />
+            </Border>
+
+            <!-- Row 2: 4 5 6 -->
+            <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource PinKeyBorderStyle}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnDigitTapped" CommandParameter="4" />
+                </Border.GestureRecognizers>
+                <Label Text="4" Style="{StaticResource PinKeyLabelStyle}" />
+            </Border>
+
+            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource PinKeyBorderStyle}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnDigitTapped" CommandParameter="5" />
+                </Border.GestureRecognizers>
+                <Label Text="5" Style="{StaticResource PinKeyLabelStyle}" />
+            </Border>
+
+            <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource PinKeyBorderStyle}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnDigitTapped" CommandParameter="6" />
+                </Border.GestureRecognizers>
+                <Label Text="6" Style="{StaticResource PinKeyLabelStyle}" />
+            </Border>
+
+            <!-- Row 3: 7 8 9 -->
+            <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource PinKeyBorderStyle}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnDigitTapped" CommandParameter="7" />
+                </Border.GestureRecognizers>
+                <Label Text="7" Style="{StaticResource PinKeyLabelStyle}" />
+            </Border>
+
+            <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource PinKeyBorderStyle}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnDigitTapped" CommandParameter="8" />
+                </Border.GestureRecognizers>
+                <Label Text="8" Style="{StaticResource PinKeyLabelStyle}" />
+            </Border>
+
+            <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource PinKeyBorderStyle}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnDigitTapped" CommandParameter="9" />
+                </Border.GestureRecognizers>
+                <Label Text="9" Style="{StaticResource PinKeyLabelStyle}" />
+            </Border>
+
+            <!-- Row 4: (blank) 0 backspace -->
+            <BoxView Grid.Row="3" Grid.Column="0" Color="Transparent" />
+
+            <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource PinKeyBorderStyle}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnDigitTapped" CommandParameter="0" />
+                </Border.GestureRecognizers>
+                <Label Text="0" Style="{StaticResource PinKeyLabelStyle}" />
+            </Border>
+
+            <Border Grid.Row="3" Grid.Column="2"
+                    WidthRequest="68" HeightRequest="68"
+                    BackgroundColor="Transparent"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 34"
+                    HorizontalOptions="Center" VerticalOptions="Center">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackspaceTapped" />
+                </Border.GestureRecognizers>
+                <Path WidthRequest="26" HeightRequest="26"
+                      Aspect="Uniform"
+                      Fill="Transparent"
+                      Stroke="#1A1410"
+                      StrokeThickness="1.8"
+                      StrokeLineCap="Round"
+                      StrokeLineJoin="Round"
+                      HorizontalOptions="Center" VerticalOptions="Center"
+                      Data="M9,4 L3,12 L9,20 L21,20 C21.55,20 22,19.55 22,19 L22,5 C22,4.45 21.55,4 21,4 Z M13,9 L18,14 M18,9 L13,14" />
+            </Border>
+
+        </Grid>
+
+    </VerticalStackLayout>
+
+</ContentView>

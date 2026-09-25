@@ -78,6 +78,9 @@ public static class MauiProgram
         services.AddSingleton<IAttachmentService, AttachmentService>();
         services.AddSingleton<IMonthlySummaryService, MonthlySummaryService>();
         services.AddSingleton<IUserProfileService, UserProfileService>();
+
+        // App PIN lock — stateless, safe as a singleton.
+        services.AddSingleton<IPinService, PinService>();
     }
 
     private static void RegisterViewModels(IServiceCollection services)
@@ -169,5 +172,10 @@ public static class MauiProgram
         services.AddTransient<UserProfilePage>();
 
         services.AddTransient<MorePage>();
+
+        // App PIN onboarding / lock gate.
+        services.AddTransient<FirstTimeSetupPage>();
+        services.AddTransient<CreatePinPage>();
+        services.AddTransient<AppLockPage>();
     }
 }

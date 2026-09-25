@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.CreatePinPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:Arthiva.Controls"
+    BackgroundColor="#FFFFFF"
+    Shell.NavBarIsVisible="False">
+
+    <Grid Padding="28,64,28,32" RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!--  BRANDING                                    -->
+        <!-- ═══════════════════════════════════════════ -->
+        <VerticalStackLayout Grid.Row="0" Spacing="4">
+            <Label Text="ARTHIVA"
+                   FontSize="14"
+                   FontAttributes="Bold"
+                   CharacterSpacing="2"
+                   TextColor="#FF6B00" />
+        </VerticalStackLayout>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!--  HEADER                                      -->
+        <!-- ═══════════════════════════════════════════ -->
+        <VerticalStackLayout Grid.Row="1" Margin="0,32,0,0" Spacing="8">
+            <Label x:Name="HeaderLabel"
+                   Text="Create your App PIN"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   TextColor="#1A1410" />
+
+            <Label x:Name="SubHeaderLabel"
+                   Text="Choose a 4-digit PIN to protect your financial data."
+                   FontSize="14"
+                   TextColor="#7A6B5E"
+                   LineBreakMode="WordWrap" />
+
+            <Label x:Name="ErrorLabel"
+                   Text="PINs don't match. Please try again."
+                   FontSize="13"
+                   FontAttributes="Bold"
+                   TextColor="#DC2626"
+                   IsVisible="False"
+                   Margin="0,8,0,0" />
+        </VerticalStackLayout>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!--  PIN PAD                                     -->
+        <!-- ═══════════════════════════════════════════ -->
+        <VerticalStackLayout Grid.Row="2" VerticalOptions="Center">
+            <controls:PinPadView x:Name="PinPad" PinChanged="OnPinPadChanged" />
+        </VerticalStackLayout>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!--  FOOTER NOTE                                 -->
+        <!-- ═══════════════════════════════════════════ -->
+        <Label Grid.Row="3"
+               Text="This PIN is used only to unlock Arthiva on this device."
+               FontSize="12"
+               TextColor="#7A6B5E"
+               HorizontalTextAlignment="Center" />
+
+    </Grid>
+
+</ContentPage>

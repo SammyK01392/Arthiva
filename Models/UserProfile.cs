@@ -23,6 +23,8 @@ public class UserProfile
 
     public string PasswordHash { get; set; } = string.Empty;
 
+    public string PinHash { get; set; } = string.Empty;
+
     public string? ProfileImage { get; set; }
 
     public bool IsActive { get; set; } = true;

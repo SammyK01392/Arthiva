@@ -8,14 +8,14 @@
     xmlns:models="clr-namespace:Arthiva.Models"
     x:DataType="vm:BillListViewModel"
     Title="Bills"
-    BackgroundColor="#FFF8F2">
+    BackgroundColor="#FFFFFF">
 
     <ContentPage.Resources>
         <ResourceDictionary>
             <Color x:Key="Primary">#FF6B00</Color>
             <Color x:Key="PrimaryTint">#FFF1E3</Color>
-            <Color x:Key="PageBg">#FFF8F2</Color>
-            <Color x:Key="CardBg">#FFFFFF</Color>
+            <Color x:Key="PageBg">#FFFFFF</Color>
+            <Color x:Key="CardBg">#FFF8F2</Color>
             <Color x:Key="CardStroke">#F4EBE1</Color>
             <Color x:Key="TrackMuted">#F4EDE6</Color>
             <Color x:Key="TextPrimary">#1A1410</Color>
@@ -37,104 +37,6 @@
 
         <Grid RowDefinitions="Auto,*">
 
-            <!-- ═══════════ COMPACT PREMIUM HEADER ═══════════ -->
-            <Grid Grid.Row="0">
-                <Grid.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#FF8A1E" Offset="0.0" />
-                        <GradientStop Color="#FF6B00" Offset="0.55" />
-                        <GradientStop Color="#F25600" Offset="1.0" />
-                    </LinearGradientBrush>
-                </Grid.Background>
-
-                <!-- Decorative SVG layer -->
-                <Grid InputTransparent="True">
-                    <Ellipse WidthRequest="100" HeightRequest="100"
-                             Fill="#30FFFFFF"
-                             HorizontalOptions="Start" VerticalOptions="Start"
-                             TranslationX="-40" TranslationY="-40" />
-
-                    <Ellipse WidthRequest="140" HeightRequest="140"
-                             Fill="#40FFFFFF"
-                             HorizontalOptions="End" VerticalOptions="End"
-                             TranslationX="60" TranslationY="60" />
-
-                    <Path Stroke="#28FFFFFF" StrokeThickness="1.3" Fill="Transparent"
-                          HorizontalOptions="End" VerticalOptions="Center"
-                          TranslationX="20"
-                          Data="M0,0 C 40,30 40,100 0,130" />
-
-                    <HorizontalStackLayout Spacing="6"
-                                           HorizontalOptions="Start"
-                                           VerticalOptions="Start"
-                                           Margin="20,18,0,0">
-                        <Ellipse WidthRequest="3" HeightRequest="3" Fill="#66FFE0C2" />
-                        <Ellipse WidthRequest="3" HeightRequest="3" Fill="#40FFFFFF" />
-                        <Ellipse WidthRequest="3" HeightRequest="3" Fill="#40FFFFFF" />
-                    </HorizontalStackLayout>
-                </Grid>
-
-                <!-- Header content — compact -->
-                <Grid Padding="20,16,20,18" ColumnDefinitions="*,Auto">
-
-                    <VerticalStackLayout Grid.Column="0" Spacing="3">
-
-                        <Border Padding="7,3"
-                                StrokeThickness="0"
-                                HorizontalOptions="Start"
-                                StrokeShape="RoundRectangle 6"
-                                BackgroundColor="#40FFFFFF">
-                            <HorizontalStackLayout Spacing="4">
-                                <Ellipse WidthRequest="4" HeightRequest="4"
-                                         Fill="#FFE0C2"
-                                         VerticalOptions="Center" />
-                                <Label Text="BILL MANAGER"
-                                       FontSize="8.5"
-                                       CharacterSpacing="1.8"
-                                       FontAttributes="Bold"
-                                       VerticalOptions="Center"
-                                       TextColor="#FFE0C2" />
-                            </HorizontalStackLayout>
-                        </Border>
-
-                        <Label Text="Your Bills"
-                               FontSize="22"
-                               FontAttributes="Bold"
-                               Margin="0,4,0,0"
-                               TextColor="White" />
-
-                        <HorizontalStackLayout Spacing="5">
-                            <Label Text="Track payments,"
-                                   FontSize="11"
-                                   TextColor="#FFE0C2" />
-                            <Label Text="never miss a due"
-                                   FontSize="11"
-                                   FontAttributes="Bold"
-                                   TextColor="White" />
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
-
-                    <!-- Receipt SVG badge — smaller -->
-                    <Border Grid.Column="1"
-                            WidthRequest="42" HeightRequest="42"
-                            StrokeThickness="1"
-                            Stroke="#40FFFFFF"
-                            VerticalOptions="Center"
-                            StrokeShape="RoundRectangle 13"
-                            BackgroundColor="#40FFFFFF">
-                        <Path WidthRequest="20" HeightRequest="20"
-                              Aspect="Uniform"
-                              Fill="Transparent"
-                              Stroke="White"
-                              StrokeThickness="1.7"
-                              StrokeLineCap="Round"
-                              StrokeLineJoin="Round"
-                              HorizontalOptions="Center"
-                              VerticalOptions="Center"
-                              Data="M6,2 L18,2 L18,22 L15,20 L12,22 L9,20 L6,22 Z M9,8 L15,8 M9,12 L15,12 M9,16 L13,16" />
-                    </Border>
-                </Grid>
-            </Grid>
 
             <!-- ═══════════ CONTENT SHEET ═══════════ -->
             <Border Grid.Row="1" Margin="0,-12,0,0"

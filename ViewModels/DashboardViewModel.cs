@@ -23,27 +23,44 @@ public partial class DashboardViewModel : BaseViewModel
     private decimal totalBalance;
 
     [ObservableProperty]
-    private decimal monthIncome;
-
-    [ObservableProperty]
-    private decimal monthExpense;
-
-    [ObservableProperty]
-    private decimal monthSaving;
-
-    [ObservableProperty]
-    private int incomeTransactionCount;
-
-    [ObservableProperty]
-    private int expenseTransactionCount;
-
-    [ObservableProperty]
     private decimal totalReceivable;
 
     [ObservableProperty]
     private decimal totalPayable;
 
+    // ------------------------------------------------------------
+    // Month / Year period switcher.
+    // Income, Expense and Savings on the dashboard follow whichever
+    // period is selected here; Net Balance stays all-time.
+    // ------------------------------------------------------------
+    [ObservableProperty]
+    private DateTime selectedPeriod = DateTime.Today;
+
+    [ObservableProperty]
+    private bool isYearView;
+
+    [ObservableProperty]
+    private string periodLabel = string.Empty;
+
+    [ObservableProperty]
+    private decimal periodIncome;
+
+    [ObservableProperty]
+    private decimal periodExpense;
+
+    [ObservableProperty]
+    private decimal periodSaving;
+
+    [ObservableProperty]
+    private int periodIncomeCount;
+
+    [ObservableProperty]
+    private int periodExpenseCount;
+
+    public string ViewModeLabel => IsYearView ? "Yearly" : "Monthly";
+
     public decimal NetBorrowLend => TotalReceivable - TotalPayable;
+
     public string GreetingPrefix
     {
         get
@@ -57,6 +74,7 @@ public partial class DashboardViewModel : BaseViewModel
             };
         }
     }
+
     public ObservableCollection<Transaction> RecentTransactions { get; } = new();
 
     public ObservableCollection<Bill> UpcomingBills { get; } = new();
@@ -90,36 +108,101 @@ public partial class DashboardViewModel : BaseViewModel
 
             TotalBalance = await _accountService.GetTotalBalanceAsync();
 
-            var from = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
-            var to = from.AddMonths(1).AddTicks(-1);
-
-            MonthIncome = await _transactionService.GetTotalByTypeAsync("Income", from, to);
-            MonthExpense = await _transactionService.GetTotalByTypeAsync("Expense", from, to);
-            MonthSaving = MonthIncome - MonthExpense;
-
-            var monthTransactions = await _transactionService.GetByDateRangeAsync(from, to);
-            IncomeTransactionCount = monthTransactions.Count(t => t.TransactionType == "Income");
-            ExpenseTransactionCount = monthTransactions.Count(t => t.TransactionType == "Expense");
-
             TotalReceivable = await _borrowLendService.GetTotalReceivableAsync();
             TotalPayable = await _borrowLendService.GetTotalPayableAsync();
             OnPropertyChanged(nameof(NetBorrowLend));
 
+            // Month/year income, expense and savings for the currently
+            // selected period (defaults to "this month" on first load).
+            await RefreshPeriodTotalsAsync();
+
             var recent = await _transactionService.GetAllAsync();
-            RecentTransactions.Clear();
-            foreach (var t in recent.Take(10))
-                RecentTransactions.Add(t);
-
             var upcoming = await _billService.GetUpcomingAsync(7);
-            UpcomingBills.Clear();
-            foreach (var b in upcoming)
-                UpcomingBills.Add(b);
-
             var emis = await _emiService.GetAllAsync();
-            ActiveEmis.Clear();
-            foreach (var e in emis)
-                ActiveEmis.Add(e);
+
+            // All ObservableCollection mutations MUST happen on the main
+            // thread. On Android, updating them from a background
+            // continuation can leave the collection changed but the
+            // bound CollectionView/BindableLayout never refreshes visibly
+            // — which is why bills/EMIs/transactions can silently fail
+            // to appear even though the data loaded correctly.
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                RecentTransactions.Clear();
+                foreach (var t in recent.Take(10))
+                    RecentTransactions.Add(t);
+
+                UpcomingBills.Clear();
+                foreach (var b in upcoming)
+                    UpcomingBills.Add(b);
+
+                ActiveEmis.Clear();
+                foreach (var e in emis)
+                    ActiveEmis.Add(e);
+            });
         });
     }
 
+    [RelayCommand]
+    private Task PreviousPeriodAsync()
+    {
+        SelectedPeriod = IsYearView ? SelectedPeriod.AddYears(-1) : SelectedPeriod.AddMonths(-1);
+        return RefreshPeriodTotalsAsync();
+    }
+
+    [RelayCommand]
+    private Task NextPeriodAsync()
+    {
+        SelectedPeriod = IsYearView ? SelectedPeriod.AddYears(1) : SelectedPeriod.AddMonths(1);
+        return RefreshPeriodTotalsAsync();
+    }
+
+    [RelayCommand]
+    private Task ToggleViewModeAsync()
+    {
+        IsYearView = !IsYearView;
+        OnPropertyChanged(nameof(ViewModeLabel));
+        return RefreshPeriodTotalsAsync();
+    }
+
+    // ------------------------------------------------------------
+    // Recomputes Income / Expense / Savings for whichever period is
+    // currently selected (a single month, or a whole year), without
+    // reloading everything else on the dashboard. This is what
+    // "month wise" and "year wise" switching drives.
+    // ------------------------------------------------------------
+    private async Task RefreshPeriodTotalsAsync()
+    {
+        DateTime from, to;
+
+        var today = DateTime.Today;
+
+        if (IsYearView)
+        {
+            from = new DateTime(SelectedPeriod.Year, 1, 1);
+            to = from.AddYears(1).AddTicks(-1);
+            PeriodLabel = SelectedPeriod.Year == today.Year
+                ? "This Year"
+                : SelectedPeriod.Year.ToString();
+        }
+        else
+        {
+            from = new DateTime(SelectedPeriod.Year, SelectedPeriod.Month, 1);
+            to = from.AddMonths(1).AddTicks(-1);
+            PeriodLabel = SelectedPeriod.Year == today.Year && SelectedPeriod.Month == today.Month
+                ? "This Month"
+                : SelectedPeriod.ToString("MMMM yyyy");
+        }
+
+        var periodTransactions = await _transactionService.GetByDateRangeAsync(from, to);
+
+        var income = periodTransactions.Where(t => t.TransactionType == "Income").ToList();
+        var expense = periodTransactions.Where(t => t.TransactionType == "Expense").ToList();
+
+        PeriodIncome = income.Sum(t => t.Amount);
+        PeriodExpense = expense.Sum(t => t.Amount);
+        PeriodSaving = PeriodIncome - PeriodExpense;
+        PeriodIncomeCount = income.Count;
+        PeriodExpenseCount = expense.Count;
+    }
 }
