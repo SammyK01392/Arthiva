@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.BackupRestorePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Backup &amp; Restore"
+    BackgroundColor="#FFFFFF">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <Border BackgroundColor="#FFF1E3" StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="16">
+                <VerticalStackLayout Spacing="4">
+                    <Label x:Name="AccountStatusLabel" Text="Not logged in" FontAttributes="Bold" FontSize="15" TextColor="#1A1410" />
+                    <Label x:Name="LastBackupLabel" Text="" FontSize="13" TextColor="#7A6B5E" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border x:Name="LoginButtonBorder"
+                    BackgroundColor="#FF6B00" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 16" HeightRequest="52">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnLoginTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="Login / Create Account" TextColor="White" FontSize="15" FontAttributes="Bold"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+
+            <Border x:Name="BackupButtonBorder"
+                    BackgroundColor="#FF6B00" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 16" HeightRequest="52" IsVisible="False">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackupTapped" />
+                </Border.GestureRecognizers>
+                <Grid>
+                    <Label Text="Backup Now" TextColor="White" FontSize="15" FontAttributes="Bold"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                    <ActivityIndicator x:Name="BackupBusyIndicator" IsRunning="False" IsVisible="False"
+                                       Color="White" HorizontalOptions="Center" VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <Border x:Name="RestoreButtonBorder"
+                    BackgroundColor="#FFF1E3" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 16" HeightRequest="52" IsVisible="False">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnRestoreTapped" />
+                </Border.GestureRecognizers>
+                <Grid>
+                    <Label Text="Restore from Backup" TextColor="#FF6B00" FontSize="15" FontAttributes="Bold"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                    <ActivityIndicator x:Name="RestoreBusyIndicator" IsRunning="False" IsVisible="False"
+                                       Color="#FF6B00" HorizontalOptions="Center" VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <Border x:Name="LogoutButtonBorder"
+                    BackgroundColor="Transparent" StrokeThickness="0"
+                    HeightRequest="44" IsVisible="False">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnLogoutTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="Logout" TextColor="#DC2626" FontSize="14" FontAttributes="Bold"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,201 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Arthiva.Views.LoginPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="#FFFFFF"
+    Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <Grid Padding="28,0,28,28" RowDefinitions="Auto,*,Auto">
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!--  BRANDING + HEADER                           -->
+            <!-- ═══════════════════════════════════════════ -->
+            <VerticalStackLayout Grid.Row="0" Margin="0,56,0,0" Spacing="6">
+
+                <Border BackgroundColor="#FFF1E3"
+                        WidthRequest="56" HeightRequest="56"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 18"
+                        HorizontalOptions="Start">
+                    <Label Text="☁"
+                           FontSize="26"
+                           TextColor="#FF6B00"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+                </Border>
+
+                <Label Text="Cloud Backup"
+                       FontSize="26"
+                       FontAttributes="Bold"
+                       TextColor="#1A1410"
+                       Margin="0,18,0,0" />
+
+                <Label Text="Log in or create an account to keep your data safe in the cloud."
+                       FontSize="14"
+                       TextColor="#7A6B5E"
+                       LineBreakMode="WordWrap" />
+            </VerticalStackLayout>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!--  FORM                                        -->
+            <!-- ═══════════════════════════════════════════ -->
+            <VerticalStackLayout Grid.Row="1" Margin="0,36,0,0" Spacing="4" VerticalOptions="Start">
+
+                <!-- Email -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Email" FontSize="13" FontAttributes="Bold" TextColor="#1A1410" />
+
+                    <Border x:Name="EmailBorder"
+                            BackgroundColor="#FFF8F2"
+                            Stroke="#FFF1E3" StrokeThickness="1.5"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="16,4">
+                        <Entry x:Name="EmailEntry"
+                               Placeholder="you@example.com"
+                               PlaceholderColor="#B0A296"
+                               TextColor="#1A1410"
+                               FontSize="16"
+                               HeightRequest="52"
+                               Keyboard="Email"
+                               ReturnType="Next"
+                               TextChanged="OnEmailChanged" />
+                    </Border>
+
+                    <Label x:Name="EmailFormatErrorLabel"
+                           Text="Enter a valid email address (e.g. name@example.com)"
+                           FontSize="12"
+                           TextColor="#DC2626"
+                           IsVisible="False" />
+                </VerticalStackLayout>
+
+                <!-- Password -->
+                <VerticalStackLayout Spacing="8" Margin="0,18,0,0">
+                    <Label Text="Password" FontSize="13" FontAttributes="Bold" TextColor="#1A1410" />
+
+                    <Border BackgroundColor="#FFF8F2"
+                            Stroke="#FFF1E3" StrokeThickness="1.5"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="16,4">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Entry Grid.Column="0"
+                                   x:Name="PasswordEntry"
+                                   Placeholder="At least 6 characters"
+                                   PlaceholderColor="#B0A296"
+                                   TextColor="#1A1410"
+                                   FontSize="16"
+                                   HeightRequest="52"
+                                   IsPassword="True"
+                                   ReturnType="Done" />
+
+                            <Label Grid.Column="1"
+                                   x:Name="TogglePasswordLabel"
+                                   Text="Show"
+                                   FontSize="13"
+                                   FontAttributes="Bold"
+                                   TextColor="#7A6B5E"
+                                   VerticalOptions="Center"
+                                   Margin="8,0,0,0">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnTogglePasswordTapped" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Forgot password -->
+                <Label x:Name="ForgotPasswordLabel"
+                       Text="Forgot Password?"
+                       FontSize="13"
+                       FontAttributes="Bold"
+                       TextColor="#FF6B00"
+                       HorizontalOptions="End"
+                       Margin="0,10,0,0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnForgotPasswordTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <!-- General error -->
+                <Border x:Name="ErrorBorder"
+                        BackgroundColor="#FEF2F2"
+                        Stroke="#FCA5A5" StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="14,10"
+                        Margin="0,14,0,0"
+                        IsVisible="False">
+                    <Label x:Name="ErrorLabel"
+                           FontSize="13"
+                           TextColor="#DC2626"
+                           LineBreakMode="WordWrap" />
+                </Border>
+
+            </VerticalStackLayout>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!--  ACTIONS                                     -->
+            <!-- ═══════════════════════════════════════════ -->
+            <VerticalStackLayout Grid.Row="2" Spacing="12" Margin="0,24,0,0">
+
+                <Border x:Name="LoginButtonBorder"
+                        BackgroundColor="#FF6B00"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 16"
+                        HeightRequest="56">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnLoginTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid>
+                        <Label Text="Login"
+                               TextColor="White"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
+                        <ActivityIndicator x:Name="LoginBusyIndicator"
+                                           IsRunning="False"
+                                           IsVisible="False"
+                                           Color="White"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <Border x:Name="SignUpButtonBorder"
+                        BackgroundColor="#FFF1E3"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 16"
+                        HeightRequest="56">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnSignUpTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid>
+                        <Label Text="Create Account"
+                               TextColor="#FF6B00"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
+                        <ActivityIndicator x:Name="SignUpBusyIndicator"
+                                           IsRunning="False"
+                                           IsVisible="False"
+                                           Color="#FF6B00"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <Label Text="Your data stays secure on your local device too."
+                       FontSize="12"
+                       TextColor="#7A6B5E"
+                       HorizontalTextAlignment="Center"
+                       Margin="0,10,0,0" />
+
+            </VerticalStackLayout>
+
+        </Grid>
+    </ScrollView>
+
+</ContentPage>

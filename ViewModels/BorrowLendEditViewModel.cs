@@ -9,6 +9,7 @@ using Contact = Arthiva.Models.Contact;
 
 namespace Arthiva.ViewModels;
 
+[QueryProperty(nameof(RequestedType), "Type")]
 public partial class BorrowLendEditViewModel : BaseViewModel
 {
     private readonly IBorrowLendService _borrowLendService;
@@ -17,6 +18,19 @@ public partial class BorrowLendEditViewModel : BaseViewModel
 
     [ObservableProperty]
     private string type = "Lend"; // Borrow / Lend
+
+    // Set when navigated here via a Quick Action ("Borrow" or "Lend" button
+    // on the Dashboard), so the toggle opens pre-set on the right side
+    // instead of always defaulting to "Lend". Same Shell quirk as elsewhere:
+    // resets to "" (not null) when the route is reached without this param.
+    public string RequestedType
+    {
+        set
+        {
+            if (value is "Borrow" or "Lend")
+                Type = value;
+        }
+    }
 
     [ObservableProperty]
     private decimal totalAmount;

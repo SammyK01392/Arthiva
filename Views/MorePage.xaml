@@ -162,7 +162,7 @@
 
                 <Border Style="{StaticResource MenuRowBorder}">
                     <Border.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnComingSoonTapped" />
+                        <TapGestureRecognizer Tapped="OnBackupRestoreTapped" />
                     </Border.GestureRecognizers>
                     <Grid ColumnDefinitions="Auto,*,Auto">
                         <Label Grid.Column="0" Style="{StaticResource MenuIconLabel}" Text="&#9729;" />

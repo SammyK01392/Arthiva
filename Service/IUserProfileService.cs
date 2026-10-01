@@ -14,4 +14,6 @@ public interface IUserProfileService
     Task<int> UpdateCurrencyAsync(string currencyCode);
 
     Task<bool> ProfileExistsAsync();
+
+    Task ResetProfileAsync();
 }

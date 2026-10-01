@@ -34,10 +34,7 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid>
-
-        <Grid RowDefinitions="Auto,*">
-
+    <Grid RowDefinitions="Auto,*">
 
 
             <!-- ═══════════ CONTENT ═══════════ -->
@@ -433,7 +430,7 @@
                                 <Label Text="No transactions yet" FontSize="16"
                                        FontAttributes="Bold" HorizontalOptions="Center"
                                        TextColor="{StaticResource TextPrimary}" />
-                                <Label Text="Tap + to record your first transaction."
+                                <Label Text="Use Quick Actions on Home to add one."
                                        FontSize="12.5" HorizontalOptions="Center"
                                        HorizontalTextAlignment="Center"
                                        TextColor="{StaticResource TextSecondary}" />
@@ -453,37 +450,4 @@
                 </Grid>
             </Border>
         </Grid>
-
-        <!-- ═══════════ FAB ═══════════ -->
-        <Border WidthRequest="58"
-                HeightRequest="58"
-                StrokeThickness="0"
-                HorizontalOptions="End"
-                VerticalOptions="End"
-                Margin="0,0,20,24"
-                StrokeShape="RoundRectangle 29">
-            <Border.Shadow>
-                <Shadow Brush="#FF6B00" Offset="0,8" Radius="18" Opacity="0.50" />
-            </Border.Shadow>
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#FF8A1E" Offset="0.0" />
-                    <GradientStop Color="#FF5500" Offset="1.0" />
-                </LinearGradientBrush>
-            </Border.Background>
-            <Border.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding GoToAddCommand}" />
-            </Border.GestureRecognizers>
-
-            <Path WidthRequest="20" HeightRequest="20"
-                  Aspect="Uniform"
-                  Stroke="White"
-                  StrokeThickness="2.8"
-                  StrokeLineCap="Round"
-                  HorizontalOptions="Center"
-                  VerticalOptions="Center"
-                  Data="M12,4 L12,20 M4,12 L20,12" />
-        </Border>
-
-    </Grid>
 </ContentPage>

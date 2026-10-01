@@ -20,4 +20,5 @@ public interface INotificationService
     Task<int> MarkCompletedAsync(int id);
 
     Task<int> SoftDeleteAsync(int id);
+    Task RescheduleAllPendingAsync();
 }

@@ -52,6 +52,10 @@ public partial class DashboardPage : ContentPage
             AnimateInAsync(BalanceCard, slower)
         );
 
+        // 2b. Quick Actions strip — right after the balance, before
+        // anything else, since it's the primary "do something" surface.
+        await AnimateInAsync(QuickActionsSection, fast);
+
         // 3. Summary cards — all together, tiny stagger for polish only
         var summaryCards = new VisualElement[] { CardIncome, CardExpense, CardSavings, CardNetBalance };
         await Task.WhenAll(summaryCards.Select(c => AnimateInAsync(c, fast)));
@@ -131,5 +135,59 @@ public partial class DashboardPage : ContentPage
     {
         await AnimateButtonTapAsync(BorrowLendCard);
         await Shell.Current.GoToAsync(nameof(BorrowLendListPage));
+    }
+
+    // ============================================================
+    // QUICK ACTIONS — one tap, straight to the right form.
+    // AddEditTransactionPage is a pushed route (Routing.RegisterRoute
+    // in AppShell), NOT a TabBar item — only Home/Transactions/Accounts/
+    // More are tabs — so this is a plain relative GoToAsync, same as
+    // TransactionListViewModel's own GoToAddCommand uses. The "Type"
+    // query param pre-selects Income/Expense there. Borrow/Lend/EMI/
+    // Saving/Budget use the same routes their own "Add" buttons already
+    // use (see e.g. BorrowLendListViewModel.GoToAddAsync, EmiListViewModel.GoToAddAsync).
+    // ============================================================
+    private async void OnQuickAddIncomeTapped(object sender, TappedEventArgs e)
+    {
+        if (sender is VisualElement el) await AnimateButtonTapAsync(el);
+        await Shell.Current.GoToAsync($"{nameof(AddEditTransactionPage)}?Type=Income");
+    }
+
+    private async void OnQuickAddExpenseTapped(object sender, TappedEventArgs e)
+    {
+        if (sender is VisualElement el) await AnimateButtonTapAsync(el);
+        await Shell.Current.GoToAsync($"{nameof(AddEditTransactionPage)}?Type=Expense");
+    }
+
+    private async void OnQuickBorrowTapped(object sender, TappedEventArgs e)
+    {
+        if (sender is VisualElement el) await AnimateButtonTapAsync(el);
+        var route = nameof(BorrowLendEditViewModel).Replace("ViewModel", "Page");
+        await Shell.Current.GoToAsync($"{route}?Type=Borrow");
+    }
+
+    private async void OnQuickLendTapped(object sender, TappedEventArgs e)
+    {
+        if (sender is VisualElement el) await AnimateButtonTapAsync(el);
+        var route = nameof(BorrowLendEditViewModel).Replace("ViewModel", "Page");
+        await Shell.Current.GoToAsync($"{route}?Type=Lend");
+    }
+
+    private async void OnQuickEmiTapped(object sender, TappedEventArgs e)
+    {
+        if (sender is VisualElement el) await AnimateButtonTapAsync(el);
+        await Shell.Current.GoToAsync(nameof(EmiEditViewModel).Replace("ViewModel", "Page"));
+    }
+
+    private async void OnQuickSavingTapped(object sender, TappedEventArgs e)
+    {
+        if (sender is VisualElement el) await AnimateButtonTapAsync(el);
+        await Shell.Current.GoToAsync(nameof(SavingGoalEditViewModel).Replace("ViewModel", "Page"));
+    }
+
+    private async void OnQuickBudgetTapped(object sender, TappedEventArgs e)
+    {
+        if (sender is VisualElement el) await AnimateButtonTapAsync(el);
+        await Shell.Current.GoToAsync(nameof(BudgetEditViewModel).Replace("ViewModel", "Page"));
     }
 }
