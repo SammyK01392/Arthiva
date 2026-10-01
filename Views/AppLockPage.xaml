@@ -19,7 +19,7 @@
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 18"
                         HorizontalOptions="Center">
-                    <Label Text="A"
+                    <Label Text="MS"
                            FontSize="26"
                            FontAttributes="Bold"
                            TextColor="#FF6B00"
