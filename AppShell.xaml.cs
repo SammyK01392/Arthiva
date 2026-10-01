@@ -1,6 +1,7 @@
 using Arthiva.Services;
 using Arthiva.Views;
-
+using Plugin.LocalNotification;
+using INotificationService = Arthiva.Services.INotificationService;
 namespace Arthiva;
 
 public partial class AppShell : Shell
@@ -81,6 +82,9 @@ public partial class AppShell : Shell
 
         Loaded += async (_, _) =>
         {
+            await EnsureNotificationPermissionAsync();
+            await RescheduleNotificationsAsync();
+
             await RefreshUnreadCountAsync();
             await LoadUserInitialsAsync();
 
@@ -258,6 +262,15 @@ public partial class AppShell : Shell
 
 
                 // ───────────────────────────────────────
+                // Cloud Backup
+                // ───────────────────────────────────────
+
+                BackupRestorePage => "Backup & Restore",
+
+                LoginPage => "Cloud Backup",
+
+
+                // ───────────────────────────────────────
                 // Default
                 // ───────────────────────────────────────
 
@@ -323,6 +336,38 @@ public partial class AppShell : Shell
         catch
         {
             // Database may not be initialized yet.
+        }
+    }
+
+    private static async Task EnsureNotificationPermissionAsync()
+    {
+        try
+        {
+            var isGranted = await LocalNotificationCenter.Current.AreNotificationsEnabled();
+            if (!isGranted)
+                await LocalNotificationCenter.Current.RequestNotificationPermission();
+        }
+        catch
+        {
+            // Permission prompt failing shouldn't block app startup —
+            // reminders just won't fire visibly until the user grants it
+            // later from OS settings.
+        }
+    }
+
+    private async Task RescheduleNotificationsAsync()
+    {
+        try
+        {
+            // Android can drop scheduled exact alarms across a device reboot
+            // or app force-stop, so DB rows can silently fall out of sync with
+            // what the OS will actually fire. Re-arm everything still pending
+            // once per app launch.
+            await _notificationService.RescheduleAllPendingAsync();
+        }
+        catch
+        {
+            // Database may not be initialized yet on very first launch.
         }
     }
 
@@ -481,6 +526,19 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(
             nameof(UserProfilePage),
             typeof(UserProfilePage));
+
+
+        // ═══════════════════════════════════════════════
+        // CLOUD BACKUP
+        // ═══════════════════════════════════════════════
+
+        Routing.RegisterRoute(
+            nameof(BackupRestorePage),
+            typeof(BackupRestorePage));
+
+        Routing.RegisterRoute(
+            nameof(LoginPage),
+            typeof(LoginPage));
 
 
         // ═══════════════════════════════════════════════

@@ -1,9 +1,11 @@
-using Microsoft.Extensions.Logging;
 using Arthiva.Data;
 using Arthiva.Services;
 using Arthiva.ViewModels;
 using Arthiva.Views;
+using Microsoft.Extensions.Logging;
+using Plugin.LocalNotification;
 
+using INotificationService = Arthiva.Services.INotificationService;
 namespace Arthiva;
 
 public static class MauiProgram
@@ -22,6 +24,7 @@ public static class MauiProgram
 
         builder
             .UseMauiApp<App>()
+            .UseLocalNotification()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -81,6 +84,10 @@ public static class MauiProgram
 
         // App PIN lock — stateless, safe as a singleton.
         services.AddSingleton<IPinService, PinService>();
+
+        // Cloud backup — Firebase Auth (Email/Password) + Realtime Database sync.
+        services.AddSingleton<IFirebaseAuthService, FirebaseAuthService>();
+        services.AddSingleton<IFirebaseSyncService, FirebaseSyncService>();
     }
 
     private static void RegisterViewModels(IServiceCollection services)
@@ -177,5 +184,9 @@ public static class MauiProgram
         services.AddTransient<FirstTimeSetupPage>();
         services.AddTransient<CreatePinPage>();
         services.AddTransient<AppLockPage>();
+
+        // Cloud backup UI.
+        services.AddTransient<LoginPage>();
+        services.AddTransient<BackupRestorePage>();
     }
 }

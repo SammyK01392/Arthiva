@@ -50,4 +50,6 @@ public partial class MorePage : ContentPage
             File = new ShareFile(CrashLogger.FilePath)
         });
     }
+    private async void OnBackupRestoreTapped(object? sender, TappedEventArgs e)
+    => await Shell.Current.GoToAsync(nameof(BackupRestorePage));
 }

@@ -42,4 +42,16 @@ public class UserProfileService : IUserProfileService
 
     public async Task<bool> ProfileExistsAsync()
         => await _repo.CountAsync() > 0;
+
+    public async Task ResetProfileAsync()
+    {
+        var profile = await GetProfileAsync();
+        if (profile is not null)
+            await _repo.DeleteAsync(profile);
+
+        // NOTE: Arthiva is single-profile, but this only deletes UserProfile.
+        // Agar transactions/budgets waghera dusri tables mein hain, unhe bhi
+        // yahin delete karna padega taaki koi orphan financial data na bache.
+        // e.g. await _transactionRepo.DeleteAllAsync(); etc.
+    }
 }

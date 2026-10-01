@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-
 <ContentPage
     x:Class="Arthiva.Views.AccountListPage"
     x:Name="PageRoot"
@@ -7,19 +6,24 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:Arthiva.ViewModels"
     xmlns:models="clr-namespace:Arthiva.Models"
+    xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
     x:DataType="vm:AccountListViewModel"
     Title="Accounts"
     BackgroundColor="#FFFFFF">
 
-    <RefreshView
-        IsRefreshing="{Binding IsBusy}"
-        Command="{Binding LoadCommand}"
-        RefreshColor="{StaticResource Primary}">
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- OUTER GRID: RefreshView + FAB overlay            -->
+    <!-- FAB RefreshView ke BAHAR hai, isliye Android    -->
+    <!-- pe hamesha visible rahega                        -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <Grid>
 
-        <Grid>
+        <RefreshView
+            IsRefreshing="{Binding IsBusy}"
+            Command="{Binding LoadCommand}"
+            RefreshColor="{StaticResource Primary}">
 
             <ScrollView>
-
                 <VerticalStackLayout
                     Padding="16,16,16,100"
                     Spacing="14"
@@ -38,44 +42,27 @@
                     <!-- ═════════════════════════════════════ -->
                     <!-- ACCOUNT LIST                          -->
                     <!-- ═════════════════════════════════════ -->
-
                     <CollectionView
                         ItemsSource="{Binding Accounts}"
-                        IsVisible="{Binding Accounts.Count,
-                        Converter={StaticResource CountToBoolConverter}}">
+                        IsVisible="{Binding Accounts.Count, Converter={StaticResource CountToBoolConverter}}">
 
                         <CollectionView.ItemsLayout>
-                            <LinearItemsLayout
-                                Orientation="Vertical"
-                                ItemSpacing="16" />
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="16" />
                         </CollectionView.ItemsLayout>
 
                         <CollectionView.ItemTemplate>
-
                             <DataTemplate x:DataType="models:Account">
 
                                 <SwipeView>
 
-                                    <!-- ═══════════════════════ -->
-                                    <!-- LEFT SWIPE - DELETE     -->
-                                    <!-- ═══════════════════════ -->
-
+                                    <!-- LEFT SWIPE — DELETE -->
                                     <SwipeView.LeftItems>
-
-                                        <SwipeItems
-                                            Mode="Reveal"
-                                            SwipeBehaviorOnInvoked="Close">
-
+                                        <SwipeItems Mode="Reveal" SwipeBehaviorOnInvoked="Close">
                                             <SwipeItemView>
-
-                                                <Grid
-                                                    WidthRequest="88"
-                                                    BackgroundColor="#E63946">
-
+                                                <Grid WidthRequest="88" BackgroundColor="#E63946">
                                                     <Grid.GestureRecognizers>
                                                         <TapGestureRecognizer
-                                                            Command="{Binding Source={x:Reference PageRoot},
-                                                            Path=BindingContext.DeleteCommand}"
+                                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}"
                                                             CommandParameter="{Binding .}" />
                                                     </Grid.GestureRecognizers>
 
@@ -83,635 +70,387 @@
                                                         VerticalOptions="Center"
                                                         HorizontalOptions="Center"
                                                         Spacing="6">
-
-                                                        <Border
-                                                            WidthRequest="36"
-                                                            HeightRequest="36"
-                                                            StrokeThickness="0"
-                                                            StrokeShape="RoundRectangle 18"
-                                                            BackgroundColor="#33FFFFFF"
-                                                            HorizontalOptions="Center">
-
-                                                            <Image
-                                                                Source="icon_delete_white.png"
-                                                                WidthRequest="18"
-                                                                HeightRequest="18"
-                                                                Aspect="AspectFit"
-                                                                HorizontalOptions="Center"
-                                                                VerticalOptions="Center" />
-
+                                                        <Border WidthRequest="36" HeightRequest="36"
+                                                                StrokeThickness="0"
+                                                                StrokeShape="RoundRectangle 18"
+                                                                BackgroundColor="#33FFFFFF"
+                                                                HorizontalOptions="Center">
+                                                            <Image Source="icon_delete_white.png"
+                                                                   WidthRequest="18" HeightRequest="18"
+                                                                   Aspect="AspectFit"
+                                                                   HorizontalOptions="Center"
+                                                                   VerticalOptions="Center" />
                                                         </Border>
-
-                                                        <Label
-                                                            Text="Delete"
-                                                            FontSize="11"
-                                                            FontAttributes="Bold"
-                                                            TextColor="White"
-                                                            HorizontalOptions="Center" />
-
+                                                        <Label Text="Delete"
+                                                               FontSize="11"
+                                                               FontAttributes="Bold"
+                                                               TextColor="White"
+                                                               HorizontalOptions="Center" />
                                                     </VerticalStackLayout>
-
                                                 </Grid>
-
                                             </SwipeItemView>
-
                                         </SwipeItems>
-
                                     </SwipeView.LeftItems>
 
-                                    <!-- ═════════════════════════ -->
-                                    <!-- ACCOUNT CARD              -->
-                                    <!-- ═════════════════════════ -->
-
-                                    <Border
-                                        StrokeThickness="0"
-                                        StrokeShape="RoundRectangle 22"
-                                        Padding="0">
-
+                                    <!-- ═════════════════════════════ -->
+                                    <!-- ACCOUNT CARD                  -->
+                                    <!-- ═════════════════════════════ -->
+                                    <Border StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 22"
+                                            Padding="0">
                                         <Border.Shadow>
-                                            <Shadow
-                                                Brush="#000000"
-                                                Offset="0,8"
-                                                Radius="18"
-                                                Opacity="0.18" />
+                                            <Shadow Brush="#000000" Offset="0,8" Radius="18" Opacity="0.18" />
                                         </Border.Shadow>
 
                                         <Grid x:Name="CardBackground">
 
                                             <!-- DEFAULT BLUE GRADIENT -->
-
                                             <Grid.Background>
-
-                                                <LinearGradientBrush
-                                                    StartPoint="0,0"
-                                                    EndPoint="1,1">
-
-                                                    <GradientStop
-                                                        Color="#4A90E2"
-                                                        Offset="0.0" />
-
-                                                    <GradientStop
-                                                        Color="#1E5EB8"
-                                                        Offset="1.0" />
-
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#4A90E2" Offset="0.0" />
+                                                    <GradientStop Color="#1E5EB8" Offset="1.0" />
                                                 </LinearGradientBrush>
-
                                             </Grid.Background>
 
-                                            <!-- ═════════════════════ -->
-                                            <!-- CARD TYPE COLORS      -->
-                                            <!-- ═════════════════════ -->
-
+                                            <!-- TYPE COLORS -->
                                             <Grid.Triggers>
 
-                                                <!-- CASH -->
-
-                                                <DataTrigger
-                                                    TargetType="Grid"
-                                                    Binding="{Binding Type}"
-                                                    Value="Cash">
-
+                                                <!-- CASH → Orange -->
+                                                <DataTrigger TargetType="Grid" Binding="{Binding Type}" Value="Cash">
                                                     <Setter Property="Background">
-
                                                         <Setter.Value>
-
-                                                            <LinearGradientBrush
-                                                                StartPoint="0,0"
-                                                                EndPoint="1,1">
-
-                                                                <GradientStop
-                                                                    Color="#FFA726"
-                                                                    Offset="0.0" />
-
-                                                                <GradientStop
-                                                                    Color="#E65100"
-                                                                    Offset="1.0" />
-
+                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                <GradientStop Color="#FFA726" Offset="0.0" />
+                                                                <GradientStop Color="#E65100" Offset="1.0" />
                                                             </LinearGradientBrush>
-
                                                         </Setter.Value>
-
                                                     </Setter>
-
                                                 </DataTrigger>
 
-                                                <!-- BANK -->
-
-                                                <DataTrigger
-                                                    TargetType="Grid"
-                                                    Binding="{Binding Type}"
-                                                    Value="Bank">
-
+                                                <!-- BANK → Blue (default) -->
+                                                <DataTrigger TargetType="Grid" Binding="{Binding Type}" Value="Bank">
                                                     <Setter Property="Background">
-
                                                         <Setter.Value>
-
-                                                            <LinearGradientBrush
-                                                                StartPoint="0,0"
-                                                                EndPoint="1,1">
-
-                                                                <GradientStop
-                                                                    Color="#4A90E2"
-                                                                    Offset="0.0" />
-
-                                                                <GradientStop
-                                                                    Color="#1E5EB8"
-                                                                    Offset="1.0" />
-
+                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                <GradientStop Color="#4A90E2" Offset="0.0" />
+                                                                <GradientStop Color="#1E5EB8" Offset="1.0" />
                                                             </LinearGradientBrush>
-
                                                         </Setter.Value>
-
                                                     </Setter>
-
                                                 </DataTrigger>
 
-                                                <!-- UPI -->
-
-                                                <DataTrigger
-                                                    TargetType="Grid"
-                                                    Binding="{Binding Type}"
-                                                    Value="UPI">
-
+                                                <!-- UPI → Purple -->
+                                                <DataTrigger TargetType="Grid" Binding="{Binding Type}" Value="UPI">
                                                     <Setter Property="Background">
-
                                                         <Setter.Value>
-
-                                                            <LinearGradientBrush
-                                                                StartPoint="0,0"
-                                                                EndPoint="1,1">
-
-                                                                <GradientStop
-                                                                    Color="#9C6BFF"
-                                                                    Offset="0.0" />
-
-                                                                <GradientStop
-                                                                    Color="#5E35B1"
-                                                                    Offset="1.0" />
-
+                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                <GradientStop Color="#9C6BFF" Offset="0.0" />
+                                                                <GradientStop Color="#5E35B1" Offset="1.0" />
                                                             </LinearGradientBrush>
-
                                                         </Setter.Value>
-
                                                     </Setter>
-
                                                 </DataTrigger>
 
-                                                <!-- CREDIT CARD -->
-
-                                                <DataTrigger
-                                                    TargetType="Grid"
-                                                    Binding="{Binding Type}"
-                                                    Value="Credit Card">
-
+                                                <!-- CREDIT CARD → Pink -->
+                                                <DataTrigger TargetType="Grid" Binding="{Binding Type}" Value="Credit Card">
                                                     <Setter Property="Background">
-
                                                         <Setter.Value>
-
-                                                            <LinearGradientBrush
-                                                                StartPoint="0,0"
-                                                                EndPoint="1,1">
-
-                                                                <GradientStop
-                                                                    Color="#FF5C7C"
-                                                                    Offset="0.0" />
-
-                                                                <GradientStop
-                                                                    Color="#C2185B"
-                                                                    Offset="1.0" />
-
+                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                <GradientStop Color="#FF5C7C" Offset="0.0" />
+                                                                <GradientStop Color="#C2185B" Offset="1.0" />
                                                             </LinearGradientBrush>
-
                                                         </Setter.Value>
-
                                                     </Setter>
-
                                                 </DataTrigger>
 
-                                                <!-- WALLET -->
-
-                                                <DataTrigger
-                                                    TargetType="Grid"
-                                                    Binding="{Binding Type}"
-                                                    Value="Wallet">
-
+                                                <!-- WALLET → Teal -->
+                                                <DataTrigger TargetType="Grid" Binding="{Binding Type}" Value="Wallet">
                                                     <Setter Property="Background">
-
                                                         <Setter.Value>
-
-                                                            <LinearGradientBrush
-                                                                StartPoint="0,0"
-                                                                EndPoint="1,1">
-
-                                                                <GradientStop
-                                                                    Color="#26C6DA"
-                                                                    Offset="0.0" />
-
-                                                                <GradientStop
-                                                                    Color="#00838F"
-                                                                    Offset="1.0" />
-
+                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                <GradientStop Color="#26C6DA" Offset="0.0" />
+                                                                <GradientStop Color="#00838F" Offset="1.0" />
                                                             </LinearGradientBrush>
-
                                                         </Setter.Value>
-
                                                     </Setter>
-
                                                 </DataTrigger>
 
-                                                <!-- SAVINGS -->
-
-                                                <DataTrigger
-                                                    TargetType="Grid"
-                                                    Binding="{Binding Type}"
-                                                    Value="Savings">
-
+                                                <!-- SAVINGS → Green -->
+                                                <DataTrigger TargetType="Grid" Binding="{Binding Type}" Value="Savings">
                                                     <Setter Property="Background">
-
                                                         <Setter.Value>
-
-                                                            <LinearGradientBrush
-                                                                StartPoint="0,0"
-                                                                EndPoint="1,1">
-
-                                                                <GradientStop
-                                                                    Color="#42D97C"
-                                                                    Offset="0.0" />
-
-                                                                <GradientStop
-                                                                    Color="#00875A"
-                                                                    Offset="1.0" />
-
+                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                <GradientStop Color="#42D97C" Offset="0.0" />
+                                                                <GradientStop Color="#00875A" Offset="1.0" />
                                                             </LinearGradientBrush>
-
                                                         </Setter.Value>
-
                                                     </Setter>
-
                                                 </DataTrigger>
 
-                                                <!-- OTHER -->
-
-                                                <DataTrigger
-                                                    TargetType="Grid"
-                                                    Binding="{Binding Type}"
-                                                    Value="Other">
-
+                                                <!-- OTHER → Slate -->
+                                                <DataTrigger TargetType="Grid" Binding="{Binding Type}" Value="Other">
                                                     <Setter Property="Background">
-
                                                         <Setter.Value>
-
-                                                            <LinearGradientBrush
-                                                                StartPoint="0,0"
-                                                                EndPoint="1,1">
-
-                                                                <GradientStop
-                                                                    Color="#7B8DA8"
-                                                                    Offset="0.0" />
-
-                                                                <GradientStop
-                                                                    Color="#455A64"
-                                                                    Offset="1.0" />
-
+                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                <GradientStop Color="#7B8DA8" Offset="0.0" />
+                                                                <GradientStop Color="#455A64" Offset="1.0" />
                                                             </LinearGradientBrush>
-
                                                         </Setter.Value>
-
                                                     </Setter>
-
                                                 </DataTrigger>
 
                                             </Grid.Triggers>
 
-                                            <!-- DECORATIVE CIRCLES -->
+                                            <!-- Decorative circles -->
+                                            <Ellipse Fill="#25FFFFFF"
+                                                     WidthRequest="150" HeightRequest="150"
+                                                     HorizontalOptions="End" VerticalOptions="Start"
+                                                     TranslationX="45" TranslationY="-45" />
 
-                                            <Ellipse
-                                                Fill="#25FFFFFF"
-                                                WidthRequest="150"
-                                                HeightRequest="150"
-                                                HorizontalOptions="End"
-                                                VerticalOptions="Start"
-                                                TranslationX="45"
-                                                TranslationY="-45" />
+                                            <Ellipse Fill="#15FFFFFF"
+                                                     WidthRequest="120" HeightRequest="120"
+                                                     HorizontalOptions="Start" VerticalOptions="End"
+                                                     TranslationX="-40" TranslationY="40" />
 
-                                            <Ellipse
-                                                Fill="#15FFFFFF"
-                                                WidthRequest="120"
-                                                HeightRequest="120"
-                                                HorizontalOptions="Start"
-                                                VerticalOptions="End"
-                                                TranslationX="-40"
-                                                TranslationY="40" />
+                                            <!-- ═══════════════════════ -->
+                                            <!-- CARD CONTENT           -->
+                                            <!-- ═══════════════════════ -->
+                                            <VerticalStackLayout Padding="18" Spacing="14">
 
-                                            <!-- CARD CONTENT -->
+                                                <!-- ── TOP ROW: Icon + Name + Default badge ── -->
+                                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
 
-                                            <VerticalStackLayout
-                                                Padding="20"
-                                                Spacing="18">
+                                                    <!-- TYPE-SPECIFIC ICON (SVG inside white circle) -->
+                                                    <Border Grid.Column="0"
+                                                            WidthRequest="48" HeightRequest="48"
+                                                            StrokeThickness="0"
+                                                            StrokeShape="RoundRectangle 24"
+                                                            BackgroundColor="#33FFFFFF"
+                                                            VerticalOptions="Center">
 
-                                                <!-- TOP ROW -->
+                                                        <!-- Default: wallet icon -->
+                                                        <shapes:Path WidthRequest="22" HeightRequest="22"
+                                                                     Aspect="Uniform"
+                                                                     Stroke="White"
+                                                                     StrokeThickness="1.8"
+                                                                     StrokeLineCap="Round"
+                                                                     StrokeLineJoin="Round"
+                                                                     HorizontalOptions="Center"
+                                                                     VerticalOptions="Center"
+                                                                     Data="M3,7 L21,7 L21,18 C21,19.1 20.1,20 19,20 L5,20 C3.9,20 3,19.1 3,18 Z M3,7 L3,6 C3,4.9 3.9,4 5,4 L17,4 C18.1,4 19,4.9 19,6 M16,13 L20,13">
+                                                            <shapes:Path.Triggers>
 
-                                                <Grid
-                                                    ColumnDefinitions="Auto,*,Auto"
-                                                    ColumnSpacing="12">
+                                                                <!-- CASH → banknote with coin -->
+                                                                <DataTrigger TargetType="shapes:Path" Binding="{Binding Type}" Value="Cash">
+                                                                    <Setter Property="Data" Value="M3,7 L21,7 L21,17 L3,17 Z M7,12 C7,10.9 7.9,10 9,10 C10.1,10 11,10.9 11,12 C11,13.1 10.1,14 9,14 C7.9,14 7,13.1 7,12 Z M3,9 L3,15 M21,9 L21,15" />
+                                                                </DataTrigger>
 
-                                                    <!-- ACCOUNT ICON -->
+                                                                <!-- BANK → classic bank building -->
+                                                                <DataTrigger TargetType="shapes:Path" Binding="{Binding Type}" Value="Bank">
+                                                                    <Setter Property="Data" Value="M3,10 L12,4 L21,10 M5,10 L5,19 M9,10 L9,19 M15,10 L15,19 M19,10 L19,19 M3,19 L21,19 M3,21 L21,21" />
+                                                                </DataTrigger>
 
-                                                    <Border
-                                                        Grid.Column="0"
-                                                        WidthRequest="48"
-                                                        HeightRequest="48"
-                                                        StrokeThickness="0"
-                                                        StrokeShape="RoundRectangle 24"
-                                                        BackgroundColor="#33FFFFFF"
-                                                        VerticalOptions="Center">
+                                                                <!-- UPI → mobile with arrow -->
+                                                                <DataTrigger TargetType="shapes:Path" Binding="{Binding Type}" Value="UPI">
+                                                                    <Setter Property="Data" Value="M7,3 L17,3 C18.1,3 19,3.9 19,5 L19,19 C19,20.1 18.1,21 17,21 L7,21 C5.9,21 5,20.1 5,19 L5,5 C5,3.9 5.9,3 7,3 Z M11,18 L13,18 M10,8 L12,6 L14,8 M12,6 L12,13" />
+                                                                </DataTrigger>
 
-                                                        <Image
-                                                            Source="icon_wallet.png"
-                                                            WidthRequest="22"
-                                                            HeightRequest="22"
-                                                            Aspect="AspectFit"
-                                                            HorizontalOptions="Center"
-                                                            VerticalOptions="Center" />
+                                                                <!-- CREDIT CARD → card with chip -->
+                                                                <DataTrigger TargetType="shapes:Path" Binding="{Binding Type}" Value="Credit Card">
+                                                                    <Setter Property="Data" Value="M3,7 L3,18 C3,19.1 3.9,20 5,20 L19,20 C20.1,20 21,19.1 21,18 L21,7 Z M3,7 L21,7 L21,11 L3,11 Z M6,15 L10,15" />
+                                                                </DataTrigger>
 
+                                                                <!-- WALLET → purse shape -->
+                                                                <DataTrigger TargetType="shapes:Path" Binding="{Binding Type}" Value="Wallet">
+                                                                    <Setter Property="Data" Value="M4,7 L20,7 C20.6,7 21,7.4 21,8 L21,18 C21,18.6 20.6,19 20,19 L4,19 C3.4,19 3,18.6 3,18 L3,8 C3,7.4 3.4,7 4,7 Z M3,7 L3,6 C3,5.4 3.4,5 4,5 L17,5 M16,13 L20,13" />
+                                                                </DataTrigger>
+
+                                                                <!-- SAVINGS → piggy bank -->
+                                                                <DataTrigger TargetType="shapes:Path" Binding="{Binding Type}" Value="Savings">
+                                                                    <Setter Property="Data" Value="M4,10 C4,7.8 5.8,6 8,6 L16,6 C18.2,6 20,7.8 20,10 L20,16 C20,17.1 19.1,18 18,18 L17,18 L17,20 L14,20 L14,18 L10,18 L10,20 L7,20 L7,18 L6,18 C4.9,18 4,17.1 4,16 Z M8,13 L16,13" />
+                                                                </DataTrigger>
+                                                            </shapes:Path.Triggers>
+                                                        </shapes:Path>
                                                     </Border>
 
-                                                    <!-- NAME / TYPE -->
-
-                                                    <VerticalStackLayout
-                                                        Grid.Column="1"
-                                                        Spacing="2"
-                                                        VerticalOptions="Center">
-
-                                                        <Label
-                                                            Text="{Binding Name}"
-                                                            FontSize="16"
-                                                            FontAttributes="Bold"
-                                                            TextColor="White"
-                                                            LineBreakMode="TailTruncation" />
-
-                                                        <Label
-                                                            Text="{Binding Type}"
-                                                            FontSize="12"
-                                                            TextColor="White"
-                                                            Opacity="0.8" />
-
+                                                    <!-- Name + Type -->
+                                                    <VerticalStackLayout Grid.Column="1"
+                                                                         Spacing="2"
+                                                                         VerticalOptions="Center">
+                                                        <Label Text="{Binding Name}"
+                                                               FontSize="15.5"
+                                                               FontAttributes="Bold"
+                                                               TextColor="White"
+                                                               LineBreakMode="TailTruncation"
+                                                               MaxLines="1" />
+                                                        <Label Text="{Binding Type}"
+                                                               FontSize="11.5"
+                                                               TextColor="White"
+                                                               Opacity="0.85" />
                                                     </VerticalStackLayout>
 
-                                                    <!-- DEFAULT BADGE -->
-
-                                                    <Border
-                                                        Grid.Column="2"
-                                                        IsVisible="{Binding IsDefault}"
-                                                        StrokeThickness="0"
-                                                        StrokeShape="RoundRectangle 10"
-                                                        BackgroundColor="White"
-                                                        Padding="10,5"
-                                                        VerticalOptions="Start">
-
+                                                    <!-- Default badge -->
+                                                    <Border Grid.Column="2"
+                                                            IsVisible="{Binding IsDefault}"
+                                                            StrokeThickness="0"
+                                                            StrokeShape="RoundRectangle 10"
+                                                            BackgroundColor="White"
+                                                            Padding="9,4"
+                                                            VerticalOptions="Start">
                                                         <HorizontalStackLayout Spacing="4">
-
-                                                            <Label
-                                                                Text="★"
-                                                                FontSize="10"
-                                                                TextColor="#FF8A00"
-                                                                VerticalOptions="Center" />
-
-                                                            <Label
-                                                                Text="DEFAULT"
-                                                                FontSize="9"
-                                                                FontAttributes="Bold"
-                                                                CharacterSpacing="0.8"
-                                                                TextColor="#FF8A00"
-                                                                VerticalOptions="Center" />
-
+                                                            <Label Text="★"
+                                                                   FontSize="10"
+                                                                   TextColor="#FF8A00"
+                                                                   VerticalOptions="Center" />
+                                                            <Label Text="DEFAULT"
+                                                                   FontSize="9"
+                                                                   FontAttributes="Bold"
+                                                                   CharacterSpacing="0.8"
+                                                                   TextColor="#FF8A00"
+                                                                   VerticalOptions="Center" />
                                                         </HorizontalStackLayout>
-
                                                     </Border>
-
                                                 </Grid>
 
-                                                <!-- DIVIDER -->
+                                                <!-- Divider -->
+                                                <BoxView HeightRequest="1" Color="#33FFFFFF"
+                                                         HorizontalOptions="Fill" />
 
-                                                <BoxView
-                                                    HeightRequest="1"
-                                                    Color="#33FFFFFF"
-                                                    HorizontalOptions="Fill" />
-
-                                                <!-- BALANCE -->
-
+                                                <!-- ── BOTTOM: Balance + Arrow ── -->
                                                 <Grid ColumnDefinitions="*,Auto">
-
-                                                    <VerticalStackLayout
-                                                        Grid.Column="0"
-                                                        Spacing="4">
-
-                                                        <Label
-                                                            Text="AVAILABLE BALANCE"
-                                                            FontSize="10"
-                                                            FontAttributes="Bold"
-                                                            CharacterSpacing="1.2"
-                                                            TextColor="White"
-                                                            Opacity="0.8" />
-
-                                                        <Label
-                                                            Text="{Binding CurrentBalance,
-                                                            StringFormat='₹{0:N2}'}"
-                                                            FontSize="26"
-                                                            FontAttributes="Bold"
-                                                            TextColor="White" />
-
+                                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                        <Label Text="AVAILABLE BALANCE"
+                                                               FontSize="10"
+                                                               FontAttributes="Bold"
+                                                               CharacterSpacing="1.2"
+                                                               TextColor="White"
+                                                               Opacity="0.85" />
+                                                        <Label Text="{Binding CurrentBalance, StringFormat='₹{0:N2}'}"
+                                                               FontSize="26"
+                                                               FontAttributes="Bold"
+                                                               TextColor="White"
+                                                               LineBreakMode="NoWrap"
+                                                               MaxLines="1" />
                                                     </VerticalStackLayout>
 
-                                                    <!-- ARROW -->
-
-                                                    <Border
-                                                        Grid.Column="1"
-                                                        WidthRequest="38"
-                                                        HeightRequest="38"
-                                                        StrokeThickness="0"
-                                                        StrokeShape="RoundRectangle 19"
-                                                        BackgroundColor="#33FFFFFF"
-                                                        VerticalOptions="Center">
-
-                                                        <Label
-                                                            Text="›"
-                                                            FontSize="22"
-                                                            FontAttributes="Bold"
-                                                            FontAutoScalingEnabled="False"
-                                                            TextColor="White"
-                                                            HorizontalOptions="Center"
-                                                            VerticalOptions="Center"
-                                                            HorizontalTextAlignment="Center"
-                                                            VerticalTextAlignment="Center" />
-
+                                                    <Border Grid.Column="1"
+                                                            WidthRequest="38" HeightRequest="38"
+                                                            StrokeThickness="0"
+                                                            StrokeShape="RoundRectangle 19"
+                                                            BackgroundColor="#33FFFFFF"
+                                                            VerticalOptions="Center">
+                                                        <Label Text="›"
+                                                               FontSize="22"
+                                                               FontAttributes="Bold"
+                                                               FontAutoScalingEnabled="False"
+                                                               TextColor="White"
+                                                               HorizontalOptions="Center"
+                                                               VerticalOptions="Center"
+                                                               HorizontalTextAlignment="Center"
+                                                               VerticalTextAlignment="Center" />
                                                     </Border>
-
                                                 </Grid>
-
                                             </VerticalStackLayout>
-
                                         </Grid>
 
                                         <Border.GestureRecognizers>
-
                                             <TapGestureRecognizer
-                                                Command="{Binding Source={x:Reference PageRoot},
-                                                Path=BindingContext.GoToEditCommand}"
+                                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
                                                 CommandParameter="{Binding .}" />
-
                                         </Border.GestureRecognizers>
-
                                     </Border>
-
                                 </SwipeView>
-
                             </DataTemplate>
-
                         </CollectionView.ItemTemplate>
-
                     </CollectionView>
 
-                    <!-- ═════════════════════════════════ -->
-                    <!-- EMPTY STATE                       -->
-                    <!-- ═════════════════════════════════ -->
-
+                    <!-- EMPTY STATE -->
                     <VerticalStackLayout
                         Spacing="14"
                         Padding="32,60"
                         HorizontalOptions="Center"
-                        IsVisible="{Binding Accounts.Count,
-                        Converter={StaticResource CountToInverseBoolConverter}}">
+                        IsVisible="{Binding Accounts.Count, Converter={StaticResource CountToInverseBoolConverter}}">
 
-                        <Border
-                            WidthRequest="100"
-                            HeightRequest="100"
-                            StrokeThickness="0"
-                            StrokeShape="RoundRectangle 50"
-                            BackgroundColor="#FFF1E3"
-                            HorizontalOptions="Center">
-
-                            <Image
-                                Source="icon_wallet.png"
-                                WidthRequest="46"
-                                HeightRequest="46"
-                                Aspect="AspectFit"
-                                HorizontalOptions="Center"
-                                VerticalOptions="Center" />
-
+                        <Border WidthRequest="100" HeightRequest="100"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 50"
+                                BackgroundColor="#FFF1E3"
+                                HorizontalOptions="Center">
+                            <Image Source="icon_wallet.png"
+                                   WidthRequest="46" HeightRequest="46"
+                                   Aspect="AspectFit"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center" />
                         </Border>
 
-                        <Label
-                            Text="No accounts yet"
-                            FontSize="18"
-                            FontAttributes="Bold"
-                            TextColor="#1A1410"
-                            HorizontalOptions="Center" />
+                        <Label Text="No accounts yet"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#1A1410"
+                               HorizontalOptions="Center" />
 
-                        <Label
-                            Text="Tap + below to add your first account"
-                            FontSize="13"
-                            TextColor="#8A94A6"
-                            HorizontalTextAlignment="Center"
-                            HorizontalOptions="Center" />
-
+                        <Label Text="Tap + below to add your first account"
+                               FontSize="13"
+                               TextColor="#8A94A6"
+                               HorizontalTextAlignment="Center"
+                               HorizontalOptions="Center" />
                     </VerticalStackLayout>
-
                 </VerticalStackLayout>
-
             </ScrollView>
+        </RefreshView>
 
-            <!-- LOADING -->
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- LOADING INDICATOR                                -->
+        <!-- ═══════════════════════════════════════════════ -->
+        <ActivityIndicator
+            IsVisible="{Binding IsBusy}"
+            IsRunning="{Binding IsBusy}"
+            Color="#FF6B00"
+            VerticalOptions="Center"
+            HorizontalOptions="Center"
+            InputTransparent="True" />
 
-            <ActivityIndicator
-                IsVisible="{Binding IsBusy}"
-                IsRunning="{Binding IsBusy}"
-                Color="#FF6B00"
-                VerticalOptions="Center"
-                HorizontalOptions="Center" />
-
-
-            <!-- ═════════════════════════════════════════ -->
-            <!-- FAB                                       -->
-            <!-- Android + Windows consistent vector icon -->
-            <!-- ═════════════════════════════════════════ -->
-
-            <Border
-                x:Name="FabButton"
+        <!-- ═══════════════════════════════════════════════ -->
+        <!-- FAB — OUTSIDE RefreshView                        -->
+        <!-- Android pe ab pakka visible hoga                 -->
+        <!-- ═══════════════════════════════════════════════ -->
+        <Border x:Name="FabButton"
                 WidthRequest="60"
                 HeightRequest="60"
                 StrokeThickness="0"
                 StrokeShape="RoundRectangle 30"
                 HorizontalOptions="End"
                 VerticalOptions="End"
-                Margin="0,0,20,20">
+                Margin="0,0,20,24"
+                ZIndex="999">
 
-                <!-- ORANGE GRADIENT -->
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#FF8A00" Offset="0.0" />
+                    <GradientStop Color="#FF5500" Offset="1.0" />
+                </LinearGradientBrush>
+            </Border.Background>
 
-                <Border.Background>
+            <Border.Shadow>
+                <Shadow Brush="#FF5500" Offset="0,6" Radius="16" Opacity="0.45" />
+            </Border.Shadow>
 
-                    <LinearGradientBrush
-                        StartPoint="0,0"
-                        EndPoint="1,1">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnFabTapped" />
+            </Border.GestureRecognizers>
 
-                        <GradientStop
-                            Color="#FF8A00"
-                            Offset="0.0" />
+            <!-- Vector "+" icon -->
+            <shapes:Path WidthRequest="22"
+                         HeightRequest="22"
+                         Aspect="Uniform"
+                         Stroke="White"
+                         StrokeThickness="2.8"
+                         StrokeLineCap="Round"
+                         StrokeLineJoin="Round"
+                         HorizontalOptions="Center"
+                         VerticalOptions="Center"
+                         Data="M12,4 L12,20 M4,12 L20,12" />
+        </Border>
 
-                        <GradientStop
-                            Color="#FF5500"
-                            Offset="1.0" />
-
-                    </LinearGradientBrush>
-
-                </Border.Background>
-
-                <!-- SHADOW -->
-
-                <Border.Shadow>
-
-                    <Shadow
-                        Brush="#FF5500"
-                        Offset="0,6"
-                        Radius="16"
-                        Opacity="0.4" />
-
-                </Border.Shadow>
-
-                <!-- TAP -->
-
-                <Border.GestureRecognizers>
-
-                    <TapGestureRecognizer
-                        Tapped="OnFabTapped" />
-
-                </Border.GestureRecognizers>
-
-
-                <!--
-                    IMPORTANT:
-                    Label Text="+" remove kiya hai.
-
-                    Vector Path use kar rahe hain so Android aur
-                    Windows dono par same plus icon render hoga.
-                -->
-
-                <Path
-                    WidthRequest="22"
-                    HeightRequest="22"
-                    Aspect="Uniform"
-                    Stroke="White"
-                    StrokeThickness="2.8"
-                    StrokeLineCap="Round"
-                    StrokeLineJoin="Round"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center"
-                    Data="M12,4 L12,20 M4,12 L20,12" />
-
-            </Border>
-
-        </Grid>
-
-    </RefreshView>
-
+    </Grid>
 </ContentPage>

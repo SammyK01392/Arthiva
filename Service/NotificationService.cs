@@ -1,4 +1,6 @@
 using Arthiva.Models;
+using Plugin.LocalNotification;
+using Plugin.LocalNotification.Core.Models;
 
 namespace Arthiva.Services;
 
@@ -34,11 +36,23 @@ public class NotificationService : INotificationService
     public Task<Notification?> GetByIdAsync(int id)
         => _repo.GetByIdAsync(id);
 
-    public Task<int> CreateAsync(Notification notification)
+    public async Task<int> CreateAsync(Notification notification)
     {
         notification.CreatedAt = DateTime.UtcNow;
         notification.UpdatedAt = DateTime.UtcNow;
-        return _repo.AddAsync(notification);
+
+        var id = await _repo.AddAsync(notification);
+
+        // Schedule the actual OS-level notification so it fires at ReminderDate,
+        // even if the app isn't open at that time. Creating the DB row alone
+        // (as before) never triggers anything visible to the user.
+        if (notification.IsScheduled && notification.ReminderDate > DateTime.Now)
+        {
+            notification.Id = id;
+            await ScheduleOsNotificationAsync(notification);
+        }
+
+        return id;
     }
 
     public async Task<int> MarkReadAsync(int id)
@@ -58,6 +72,11 @@ public class NotificationService : INotificationService
 
         notification.IsCompleted = true;
         notification.UpdatedAt = DateTime.UtcNow;
+
+        // Cancel the OS notification since the reminder is done — otherwise
+        // it could still fire at ReminderDate even after being marked complete.
+        LocalNotificationCenter.Current.Cancel(id);
+
         return await _repo.UpdateAsync(notification);
     }
 
@@ -68,6 +87,43 @@ public class NotificationService : INotificationService
 
         notification.IsDeleted = true;
         notification.UpdatedAt = DateTime.UtcNow;
+
+        LocalNotificationCenter.Current.Cancel(id);
+
         return await _repo.UpdateAsync(notification);
+    }
+
+    /// <summary>
+    /// Re-schedules every pending (not completed/deleted, still in the future)
+    /// notification's OS alarm. Call this once at app startup — Android can
+    /// drop scheduled exact alarms across a device reboot or app force-stop,
+    /// so DB rows can silently go out of sync with what the OS will actually fire.
+    /// </summary>
+    public async Task RescheduleAllPendingAsync()
+    {
+        var all = await _repo.FindAsync(n =>
+            !n.IsDeleted && !n.IsCompleted && n.IsScheduled && n.ReminderDate > DateTime.Now);
+
+        foreach (var notification in all)
+        {
+            await ScheduleOsNotificationAsync(notification);
+        }
+    }
+
+    private static Task ScheduleOsNotificationAsync(Notification notification)
+    {
+        var request = new NotificationRequest
+        {
+            NotificationId = notification.Id,
+            Title = notification.Title,
+            Description = notification.Body,
+            ReturningData = notification.ActionRoute, // tapping the notification can carry the route to navigate to
+            Schedule = new NotificationRequestSchedule
+            {
+                NotifyTime = notification.ReminderDate
+            }
+        };
+
+        return LocalNotificationCenter.Current.Show(request);
     }
 }

@@ -7,6 +7,7 @@ using Arthiva.Services;
 namespace Arthiva.ViewModels;
 
 [QueryProperty(nameof(TransactionId), "TransactionId")]
+[QueryProperty(nameof(RequestedType), "Type")]
 public partial class AddEditTransactionViewModel : BaseViewModel
 {
     private readonly ITransactionService _transactionService;
@@ -15,6 +16,18 @@ public partial class AddEditTransactionViewModel : BaseViewModel
 
     private int _transactionId;
     private Transaction? _existingTransaction;
+
+    // Set by Quick Actions (Dashboard) / the Transactions speed-dial when they
+    // navigate straight to "Add Income" or "Add Expense" instead of the
+    // generic Add tab. Same Shell quirk as TransactionId below: Shell resets
+    // this to "" (not null) when navigating to the tab without a "Type"
+    // query param, so a plain tab tap still falls back to the "Expense" default.
+    private string? _requestedType;
+
+    public string RequestedType
+    {
+        set => _requestedType = value is "Income" or "Expense" ? value : null;
+    }
 
     // Guards against OnTransactionTypeChanged firing a second, overlapping
     // LoadCategoriesAsync() call while AppearingAsync is already loading them
@@ -111,7 +124,7 @@ public partial class AddEditTransactionViewModel : BaseViewModel
                 Amount = 0;
 
                 _suppressCategoryAutoReload = true;
-                TransactionType = "Expense";
+                TransactionType = _requestedType ?? "Expense";
                 _suppressCategoryAutoReload = false;
 
                 TransactionDate = DateTime.Now;
@@ -212,8 +225,16 @@ public partial class AddEditTransactionViewModel : BaseViewModel
                 };
                 await _transactionService.AddTransactionAsync(transaction);
 
-                // This instance IS the "Add" tab root — jump to the Transactions
-                // tab so the user immediately sees the new entry in the list.
+                // Quick Actions land here and save in one motion — without this,
+                // the page would jump straight to the list with no acknowledgement
+                // that the entry actually went in. A short confirmation + a beat
+                // to see it keeps "fast entry" feeling fast AND confirmed.
+                SuccessMessage = $"✓ {TransactionType} of ₹{Amount:N0} added";
+                await Task.Delay(600);
+
+                // Pushed on top of whichever tab we came from — jump to the
+                // Transactions tab (resets the nav stack) so the user lands
+                // straight on the list and immediately sees the new entry.
                 await Shell.Current.GoToAsync($"//{nameof(Views.TransactionListPage)}");
             }
         });

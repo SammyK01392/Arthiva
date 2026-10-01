@@ -111,6 +111,45 @@ public partial class AppLockPage : ContentPage
         }
     }
 
+    private async void OnForgotPinTapped(object? sender, TappedEventArgs e)
+    {
+        if (_isVerifying)
+            return;
+
+        var confirmed = await DisplayAlert(
+            "Reset PIN?",
+            "Aapka PIN sirf isi device par store hota hai aur iska koi cloud backup nahi hai. " +
+            "PIN reset karne ke liye aapki saved profile aur saara data delete karna hoga, " +
+            "aur aapko dubara naye sirf se set up karna hoga.\n\nContinue karein?",
+            "Yes, reset",
+            "Cancel");
+
+        if (!confirmed)
+            return;
+
+        try
+        {
+            SetBusy(true);
+            await _userProfileService.ResetProfileAsync();
+
+            // Fresh start: send the user back to the first-run setup flow,
+            // as its own NavigationPage root (same pattern App.xaml.cs uses
+            // for the very first launch), not AppShell.
+            var firstTimeSetupPage = _serviceProvider.GetRequiredService<FirstTimeSetupPage>();
+            Application.Current!.MainPage = new NavigationPage(firstTimeSetupPage);
+        }
+        catch (Exception ex)
+        {
+            CrashLogger.Log(ex, "AppLockPage.OnForgotPinTapped");
+            ErrorLabel.Text = "Reset nahi ho paya. Dubara try karein.";
+            ErrorLabel.IsVisible = true;
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+    }
+
     private void SetBusy(bool busy)
     {
         VerifyingIndicator.IsVisible = busy;
