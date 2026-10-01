@@ -1,222 +1,73 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg
-    width="456"
-    height="456"
-    viewBox="0 0 456 456"
-    xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="432"
+     height="432"
+     viewBox="0 0 432 432">
 
-	<defs>
-		<!-- Orange gradient -->
-		<linearGradient
-            id="bgGradient"
-            x1="0"
-            y1="0"
-            x2="456"
-            y2="456"
-            gradientUnits="userSpaceOnUse">
+	<!-- Main Arthiva A -->
+	<path d="M72 315 L216 45 L360 315"
+		  fill="none"
+		  stroke="#FF8A00"
+		  stroke-width="40"
+		  stroke-linecap="round"
+		  stroke-linejoin="round"/>
 
-			<stop offset="0%" stop-color="#F97316"/>
-			<stop offset="55%" stop-color="#F97316"/>
-			<stop offset="100%" stop-color="#EA580C"/>
-		</linearGradient>
+	<!-- Growth Bars -->
+	<rect x="155" y="225"
+		  width="30" height="65"
+		  rx="7"
+		  fill="#FFD180"/>
 
-		<!-- Soft white glow -->
-		<filter id="softGlow">
-			<feGaussianBlur
-                stdDeviation="4"
-                result="blur"/>
-			<feMerge>
-				<feMergeNode in="blur"/>
-				<feMergeNode in="SourceGraphic"/>
-			</feMerge>
-		</filter>
-	</defs>
+	<rect x="200" y="188"
+		  width="30" height="102"
+		  rx="7"
+		  fill="#FFB74D"/>
 
+	<rect x="245" y="142"
+		  width="30" height="148"
+		  rx="7"
+		  fill="#FF9800"/>
 
-	<!-- ===================================================== -->
-	<!-- BACKGROUND -->
-	<!-- ===================================================== -->
+	<!-- Growth Curve -->
+	<path d="M147 246
+           C180 232 216 203 247 165
+           C264 145 277 123 289 101"
+		  fill="none"
+		  stroke="#E86F00"
+		  stroke-width="10"
+		  stroke-linecap="round"/>
 
-	<rect
-        width="456"
-        height="456"
-        rx="70"
-        fill="url(#bgGradient)"/>
-
-
-	<!-- ===================================================== -->
-	<!-- SUBTLE CENTER GLOW -->
-	<!-- ===================================================== -->
-
-	<circle
-        cx="228"
-        cy="148"
-        r="92"
-        fill="#FFFFFF"
-        opacity="0.035"/>
-
-
-	<!-- ===================================================== -->
-	<!-- LOADER RING -->
-	<!-- ===================================================== -->
-
-	<!-- Faint complete ring -->
-	<circle
-        cx="228"
-        cy="148"
-        r="66"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="2"
-        opacity="0.14"/>
-
-	<!-- Active loader -->
-	<circle
-        cx="228"
-        cy="148"
-        r="66"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="7"
-        stroke-linecap="round"
-        stroke-dasharray="105 310"
-        transform="rotate(-70 228 148)"
-        filter="url(#softGlow)"/>
-
-
-	<!-- ===================================================== -->
-	<!-- ARTHIVA A LOGO -->
-	<!-- ===================================================== -->
-
-	<!-- Left side of A -->
-	<path
-        d="M187 183
-           L216 116
-           Q228 91 240 116
-           L269 183
-           L249 183
-           L228 133
-           L207 183
+	<!-- Growth Arrow -->
+	<path d="M268 108
+           L291 98
+           L286 123
            Z"
-        fill="#FFFFFF"/>
+		  fill="#E86F00"/>
 
-	<!-- A center cut -->
-	<path
-        d="M218 158
-           L238 158
-           L244 173
-           L212 173
-           Z"
-        fill="#F97316"/>
+	<!-- Rupee Badge -->
+	<circle cx="302"
+			cy="265"
+			r="44"
+			fill="#FFD180"
+			stroke="#FFA726"
+			stroke-width="7"/>
 
+	<!-- Rupee Symbol -->
+	<text x="302"
+		  y="280"
+		  text-anchor="middle"
+		  font-size="49"
+		  font-family="Arial, Helvetica, sans-serif"
+		  font-weight="700"
+		  fill="#FF9800">₹</text>
 
-	<!-- ===================================================== -->
-	<!-- GROWTH ARROW -->
-	<!-- ===================================================== -->
-
-	<path
-        d="M202 174
-           C216 160 229 156 242 151
-           C252 147 261 141 271 132"
-        fill="none"
-        stroke="#FFFFFF"
-        stroke-width="7"
-        stroke-linecap="round"
-        stroke-linejoin="round"/>
-
-	<!-- Arrow head -->
-	<path
-        d="M261 130
-           L275 128
-           L273 143
-           Z"
-        fill="#FFFFFF"/>
-
-
-	<!-- ===================================================== -->
-	<!-- BRAND NAME -->
-	<!-- ===================================================== -->
-
-	<text
-        x="228"
-        y="265"
-        text-anchor="middle"
-        font-family="Arial, Helvetica, sans-serif"
-        font-size="48"
-        font-weight="700"
-        letter-spacing="-1"
-        fill="#FFFFFF">
-		Arthiva
-	</text>
-
-
-	<!-- ===================================================== -->
-	<!-- TAGLINE -->
-	<!-- ===================================================== -->
-
-	<text
-        x="228"
-        y="290"
-        text-anchor="middle"
-        font-family="Arial, Helvetica, sans-serif"
-        font-size="10"
-        font-weight="600"
-        letter-spacing="3"
-        fill="#FFF7ED">
-		MONEY • MADE SIMPLE
-	</text>
-
-
-	<!-- ===================================================== -->
-	<!-- FOUNDER SECTION -->
-	<!-- ===================================================== -->
-
-	<!-- Divider -->
-	<line
-        x1="158"
-        y1="340"
-        x2="198"
-        y2="340"
-        stroke="#FFFFFF"
-        stroke-width="1"
-        opacity="0.45"/>
-
-	<line
-        x1="258"
-        y1="340"
-        x2="298"
-        y2="340"
-        stroke="#FFFFFF"
-        stroke-width="1"
-        opacity="0.45"/>
-
-
-	<!-- Developer label -->
-	<text
-        x="228"
-        y="344"
-        text-anchor="middle"
-        font-family="Arial, Helvetica, sans-serif"
-        font-size="9"
-        font-weight="500"
-        letter-spacing="1.5"
-        fill="#FFF7ED">
-		DESIGNED &amp; DEVELOPED BY
-	</text>
-
-
-	<!-- Founder name -->
-	<text
-        x="228"
-        y="375"
-        text-anchor="middle"
-        font-family="cursive"
-        font-size="25"
-        font-style="italic"
-        font-weight="500"
-        fill="#FFFFFF">
-		Sameer Karale
-	</text>
+	<!-- ARTHIVA Brand Name -->
+	<text x="216"
+		  y="385"
+		  text-anchor="middle"
+		  font-size="38"
+		  font-family="Arial, Helvetica, sans-serif"
+		  font-weight="700"
+		  letter-spacing="6"
+		  fill="#E86F00">ARTHIVA</text>
 
 </svg>

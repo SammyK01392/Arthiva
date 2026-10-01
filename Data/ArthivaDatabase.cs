@@ -42,5 +42,33 @@ public class ArthivaDatabase
         await _database.CreateTableAsync<MonthlySummary>();
 
         await SeedData.SeedAsync(_database);
+
+        // One-time, idempotent: rows created before the sync feature existed
+        // get NULL for the new SyncId column after auto-migration. Give them
+        // a stable id now so they're immediately eligible to sync once a
+        // Google account is ever linked. Safe to run on every launch — once
+        // every row has a SyncId, the query returns nothing and this is a
+        // no-op read with no writes.
+        await BackfillTransactionSyncIdsAsync();
+    }
+
+    private async Task BackfillTransactionSyncIdsAsync()
+    {
+        // Filtered at the SQL level (WHERE SyncId IS NULL) rather than
+        // loading the whole table into memory — matters once a user has
+        // thousands of historical transactions.
+        var rowsMissingSyncId = await _database.Table<Transaction>()
+            .Where(t => t.SyncId == null)
+            .ToListAsync();
+
+        if (rowsMissingSyncId.Count == 0)
+            return;
+
+        foreach (var row in rowsMissingSyncId)
+        {
+            row.SyncId = Guid.NewGuid().ToString();
+        }
+
+        await _database.UpdateAllAsync(rowsMissingSyncId);
     }
 }

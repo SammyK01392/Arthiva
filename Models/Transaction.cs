@@ -53,4 +53,25 @@ public class Transaction
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    // ═══════════════════════════════════════════════════
+    //  CLOUD SYNC (Firestore) — added, existing columns untouched
+    // ═══════════════════════════════════════════════════
+
+    /// <summary>
+    /// Stable cross-device identifier used as the Firestore document id
+    /// (users/{firebaseUid}/transactions/{SyncId}). Deliberately separate
+    /// from the local SQLite auto-increment Id, which is only meaningful
+    /// on this one device/install.
+    /// </summary>
+    [Indexed]
+    public string? SyncId { get; set; } = Guid.NewGuid().ToString();
+
+    /// <summary>
+    /// Local sync state. See remarks on <see cref="Models.SyncStatus"/> for
+    /// why Pending (0) is a safe default for rows migrated from an older
+    /// schema version too.
+    /// </summary>
+    [Indexed]
+    public SyncStatus SyncStatus { get; set; } = SyncStatus.Pending;
 }

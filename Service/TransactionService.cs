@@ -46,6 +46,13 @@ public class TransactionService : ITransactionService
         transaction.CreatedAt = DateTime.UtcNow;
         transaction.UpdatedAt = DateTime.UtcNow;
 
+        // Cloud sync bookkeeping. SyncId must never change once assigned —
+        // it's the Firestore document id for this record's whole lifetime.
+        if (string.IsNullOrWhiteSpace(transaction.SyncId))
+            transaction.SyncId = Guid.NewGuid().ToString();
+
+        transaction.SyncStatus = SyncStatus.Pending;
+
         var result = await _repo.AddAsync(transaction);
 
         var delta = SignedAmount(transaction);
@@ -63,7 +70,15 @@ public class TransactionService : ITransactionService
         var reverseDelta = -SignedAmount(existing);
         await _accountService.AdjustBalanceAsync(existing.AccountId, reverseDelta);
 
+        // Preserve the original SyncId even if the caller passed in a
+        // Transaction object that never had it populated — the Firestore
+        // document id must stay stable across edits.
+        if (string.IsNullOrWhiteSpace(transaction.SyncId))
+            transaction.SyncId = existing.SyncId ?? Guid.NewGuid().ToString();
+
         transaction.UpdatedAt = DateTime.UtcNow;
+        transaction.SyncStatus = SyncStatus.Pending;
+
         var result = await _repo.UpdateAsync(transaction);
 
         // Apply the new transaction's effect on its (possibly new) account.
@@ -80,6 +95,11 @@ public class TransactionService : ITransactionService
 
         existing.IsDeleted = true;
         existing.UpdatedAt = DateTime.UtcNow;
+
+        // A soft-delete is itself a change that must propagate to the
+        // cloud, so it needs to be picked up by the sync engine too.
+        existing.SyncStatus = SyncStatus.Pending;
+
         var result = await _repo.UpdateAsync(existing);
 
         var reverseDelta = -SignedAmount(existing);
