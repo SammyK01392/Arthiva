@@ -1,6 +1,6 @@
-using Arthiva.Models;
+using MoneySpend.Models;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 public class UserProfileService : IUserProfileService
 {
@@ -49,7 +49,7 @@ public class UserProfileService : IUserProfileService
         if (profile is not null)
             await _repo.DeleteAsync(profile);
 
-        // NOTE: Arthiva is single-profile, but this only deletes UserProfile.
+        // NOTE: MoneySpend is single-profile, but this only deletes UserProfile.
         // Agar transactions/budgets waghera dusri tables mein hain, unhe bhi
         // yahin delete karna padega taaki koi orphan financial data na bache.
         // e.g. await _transactionRepo.DeleteAllAsync(); etc.

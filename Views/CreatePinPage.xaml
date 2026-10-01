@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage
-    x:Class="Arthiva.Views.CreatePinPage"
+    x:Class="MoneySpend.Views.CreatePinPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:controls="clr-namespace:Arthiva.Controls"
+    xmlns:controls="clr-namespace:MoneySpend.Controls"
     BackgroundColor="#FFFFFF"
     Shell.NavBarIsVisible="False">
 
@@ -13,7 +13,7 @@
         <!--  BRANDING                                    -->
         <!-- ═══════════════════════════════════════════ -->
         <VerticalStackLayout Grid.Row="0" Spacing="4">
-            <Label Text="ARTHIVA"
+            <Label Text="MoneySpend"
                    FontSize="14"
                    FontAttributes="Bold"
                    CharacterSpacing="2"
@@ -56,7 +56,7 @@
         <!--  FOOTER NOTE                                 -->
         <!-- ═══════════════════════════════════════════ -->
         <Label Grid.Row="3"
-               Text="This PIN is used only to unlock Arthiva on this device."
+               Text="This PIN is used only to unlock MoneySpend on this device."
                FontSize="12"
                TextColor="#7A6B5E"
                HorizontalTextAlignment="Center" />

@@ -3,7 +3,7 @@
      height="432"
      viewBox="0 0 432 432">
 
-	<!-- Main Arthiva A -->
+	<!-- Main MoneySpend A -->
 	<path d="M72 315 L216 45 L360 315"
 		  fill="none"
 		  stroke="#FF8A00"
@@ -60,7 +60,7 @@
 		  font-weight="700"
 		  fill="#FF9800">₹</text>
 
-	<!-- ARTHIVA Brand Name -->
+	<!-- MoneySpend Brand Name -->
 	<text x="216"
 		  y="385"
 		  text-anchor="middle"
@@ -68,6 +68,6 @@
 		  font-family="Arial, Helvetica, sans-serif"
 		  font-weight="700"
 		  letter-spacing="6"
-		  fill="#E86F00">ARTHIVA</text>
+		  fill="#E86F00">MoneySpend</text>
 
 </svg>

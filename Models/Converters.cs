@@ -1,7 +1,7 @@
 using System.Globalization;
-using Arthiva.Models;
+using MoneySpend.Models;
 
-namespace Arthiva.Converters;
+namespace MoneySpend.Converters;
 
 /// <summary>Transaction (or a "Income"/"Expense" string) -> Income/Expense Brush.</summary>
 public class TransactionAmountColorConverter : IValueConverter

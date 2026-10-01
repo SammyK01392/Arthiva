@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace Arthiva
+namespace MoneySpend
 {
     public class Program
     {

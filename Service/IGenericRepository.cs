@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 /// <summary>
 /// Generic repository contract used by all entity-specific services.

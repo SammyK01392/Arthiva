@@ -1,7 +1,7 @@
 
-using Contact = Arthiva.Models.Contact;
+using Contact = MoneySpend.Models.Contact;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 public interface IContactService
 {

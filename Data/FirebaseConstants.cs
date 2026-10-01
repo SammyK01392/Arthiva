@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Arthiva.Data;
+namespace MoneySpend.Data;
 
 public static class FirebaseConstants
 {

@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Arthiva.Models;
-using Arthiva.Services;
+using MoneySpend.Models;
+using MoneySpend.Services;
 
-namespace Arthiva.ViewModels;
+namespace MoneySpend.ViewModels;
 
 public partial class TransactionListViewModel : BaseViewModel
 {

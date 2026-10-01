@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell
-    x:Class="Arthiva.AppShell"
+    x:Class="MoneySpend.AppShell"
     x:Name="RootShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:views="clr-namespace:Arthiva.Views"
-    xmlns:converters="clr-namespace:Arthiva.Converters"
+    xmlns:views="clr-namespace:MoneySpend.Views"
+    xmlns:converters="clr-namespace:MoneySpend.Converters"
     FlyoutBehavior="Disabled"
 
     Shell.NavBarIsVisible="True"
@@ -21,7 +21,7 @@
     Shell.TabBarUnselectedColor="{StaticResource TextSecondary}"
     Shell.TabBarTitleColor="{StaticResource Primary}"
 
-    Title="Arthiva">
+    Title="MoneySpend">
 
     <Shell.Resources>
         <ResourceDictionary>

@@ -1,6 +1,6 @@
 using SQLite;
 
-namespace Arthiva.Models;
+namespace MoneySpend.Models;
 
 public class BillPayment
 {

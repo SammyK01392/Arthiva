@@ -1,4 +1,4 @@
-﻿namespace Arthiva.Views.Components
+﻿namespace MoneySpend.Views.Components
 {
     public partial class AccountCardView : ContentView
     {

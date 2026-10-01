@@ -1,19 +1,19 @@
 ﻿using SQLite;
-using Arthiva.Models;
+using MoneySpend.Models;
 // Explicit alias — required because .NET MAUI's SDK auto-injects a global
 // using for Microsoft.Maui.ApplicationModel.Communication, which also has a
 // "Contact" type. Without this alias, "Contact" below would silently bind to
 // the wrong (MAUI) type and CreateTableAsync<Contact>() would create a table
 // for the wrong class.
-using Contact = Arthiva.Models.Contact;
+using Contact = MoneySpend.Models.Contact;
 
-namespace Arthiva.Data;
+namespace MoneySpend.Data;
 
-public class ArthivaDatabase
+public class MoneySpendDatabase
 {
     private readonly SQLiteAsyncConnection _database;
 
-    public ArthivaDatabase(string dbPath)
+    public MoneySpendDatabase(string dbPath)
     {
         _database = new SQLiteAsyncConnection(dbPath);
     }

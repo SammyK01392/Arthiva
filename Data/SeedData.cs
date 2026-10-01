@@ -1,7 +1,7 @@
-﻿using Arthiva.Models;
+﻿using MoneySpend.Models;
 using SQLite;
 
-namespace Arthiva.Data;
+namespace MoneySpend.Data;
 
 public static class SeedData
 {

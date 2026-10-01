@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 /// <summary>
 /// PBKDF2-based (Rfc2898DeriveBytes) salted hashing for the local 4-digit

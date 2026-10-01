@@ -1,8 +1,8 @@
-﻿namespace Arthiva.Data;
+﻿namespace MoneySpend.Data;
 
 public static class DatabaseConstants
 {
-    public const string DatabaseFileName = "arthiva.db3";
+    public const string DatabaseFileName = "MoneySpend.db3";
 
     public const SQLite.SQLiteOpenFlags Flags =
         SQLite.SQLiteOpenFlags.ReadWrite |

@@ -1,8 +1,8 @@
-using Arthiva.Services;
-using Arthiva.Views;
+using MoneySpend.Services;
+using MoneySpend.Views;
 using Plugin.LocalNotification;
-using INotificationService = Arthiva.Services.INotificationService;
-namespace Arthiva;
+using INotificationService = MoneySpend.Services.INotificationService;
+namespace MoneySpend;
 
 public partial class AppShell : Shell
 {
@@ -118,7 +118,7 @@ public partial class AppShell : Shell
 
             if (currentPage == null)
             {
-                CurrentPageTitle = "Arthiva";
+                CurrentPageTitle = "MoneySpend";
                 return;
             }
 
@@ -274,12 +274,12 @@ public partial class AppShell : Shell
                 // Default
                 // ───────────────────────────────────────
 
-                _ => "Arthiva"
+                _ => "MoneySpend"
             };
         }
         catch
         {
-            CurrentPageTitle = "Arthiva";
+            CurrentPageTitle = "MoneySpend";
         }
     }
 

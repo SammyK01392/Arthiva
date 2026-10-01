@@ -1,8 +1,8 @@
-using Arthiva.Models;
+using MoneySpend.Models;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.Core.Models;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 public class NotificationService : INotificationService
 {

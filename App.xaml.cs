@@ -1,16 +1,16 @@
-﻿using Arthiva.Data;
-using Arthiva.Services;
-using Arthiva.Views;
+﻿using MoneySpend.Data;
+using MoneySpend.Services;
+using MoneySpend.Views;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Arthiva;
+namespace MoneySpend;
 
 public partial class App : Application
 {
-    private readonly ArthivaDatabase _database;
+    private readonly MoneySpendDatabase _database;
     private readonly IServiceProvider _serviceProvider;
 
-    public App(ArthivaDatabase database, IServiceProvider serviceProvider)
+    public App(MoneySpendDatabase database, IServiceProvider serviceProvider)
     {
         InitializeComponent();          // loads Colors.xaml/Styles.xaml into App resources FIRST
 
@@ -74,7 +74,7 @@ public partial class App : Application
                     BackgroundColor = Color.FromArgb("#FFFFFF"),
                     Content = new Label
                     {
-                        Text = "Something went wrong starting Arthiva. Please restart the app.",
+                        Text = "Something went wrong starting MoneySpend. Please restart the app.",
                         Margin = 24,
                         HorizontalOptions = LayoutOptions.Center,
                         VerticalOptions = LayoutOptions.Center,

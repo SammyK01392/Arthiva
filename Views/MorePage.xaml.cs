@@ -1,6 +1,6 @@
-using Arthiva.Services;
+using MoneySpend.Services;
 
-namespace Arthiva.Views;
+namespace MoneySpend.Views;
 
 public partial class MorePage : ContentPage
 {
@@ -46,7 +46,7 @@ public partial class MorePage : ContentPage
 
         await Share.Default.RequestAsync(new ShareFileRequest
         {
-            Title = "Arthiva Crash Log",
+            Title = "MoneySpend Crash Log",
             File = new ShareFile(CrashLogger.FilePath)
         });
     }

@@ -1,8 +1,8 @@
 ﻿using Android.App;
 using Android.Runtime;
-using Arthiva.Services;
+using MoneySpend.Services;
 
-namespace Arthiva
+namespace MoneySpend
 {
     [Application]
     public class MainApplication : MauiApplication

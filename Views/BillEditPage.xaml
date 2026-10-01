@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage
-    x:Class="Arthiva.Views.BillEditPage"
+    x:Class="MoneySpend.Views.BillEditPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:vm="clr-namespace:Arthiva.ViewModels"
+    xmlns:vm="clr-namespace:MoneySpend.ViewModels"
     x:DataType="vm:BillEditViewModel"
     Title="{Binding Title}">
 

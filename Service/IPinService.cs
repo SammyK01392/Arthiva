@@ -1,4 +1,4 @@
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 /// <summary>
 /// Handles secure hashing/verification of the local 4-digit App PIN.

@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 /// <summary>
 /// Writes unhandled exceptions to a plain text file in the app's private

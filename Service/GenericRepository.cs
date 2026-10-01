@@ -1,14 +1,14 @@
 using System.Linq.Expressions;
-using Arthiva.Data;
+using MoneySpend.Data;
 using SQLite;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 public class GenericRepository<T> : IGenericRepository<T> where T : new()
 {
     protected readonly SQLiteAsyncConnection Db;
 
-    public GenericRepository(ArthivaDatabase database)
+    public GenericRepository(MoneySpendDatabase database)
     {
         Db = database.Database;
     }

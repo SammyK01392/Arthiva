@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace Arthiva
+namespace MoneySpend
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

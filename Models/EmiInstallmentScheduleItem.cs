@@ -1,4 +1,4 @@
-﻿namespace Arthiva.Models;
+﻿namespace MoneySpend.Models;
 
 public class EmiInstallmentScheduleItem
 {

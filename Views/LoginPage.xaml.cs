@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
-using Arthiva.Services;
+using MoneySpend.Services;
 
-namespace Arthiva.Views;
+namespace MoneySpend.Views;
 
 public partial class LoginPage : ContentPage
 {

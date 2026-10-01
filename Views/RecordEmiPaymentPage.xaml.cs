@@ -1,6 +1,6 @@
-using Arthiva.ViewModels;
+using MoneySpend.ViewModels;
 
-namespace Arthiva.Views;
+namespace MoneySpend.Views;
 
 public partial class RecordEmiPaymentPage : ContentPage
 {

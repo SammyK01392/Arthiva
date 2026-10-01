@@ -1,9 +1,9 @@
-using Arthiva.Controls;
-using Arthiva.Models;
-using Arthiva.Services;
+using MoneySpend.Controls;
+using MoneySpend.Models;
+using MoneySpend.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Arthiva.Views;
+namespace MoneySpend.Views;
 
 /// <summary>
 /// Gate page shown on every normal launch once a UserProfile already
@@ -44,13 +44,13 @@ public partial class AppLockPage : ContentPage
         {
             _profile = await _userProfileService.GetProfileAsync();
             UserNameLabel.Text = string.IsNullOrWhiteSpace(_profile?.FullName)
-                ? "Arthiva User"
+                ? "MoneySpend User"
                 : _profile.FullName;
         }
         catch (Exception ex)
         {
             CrashLogger.Log(ex, "AppLockPage.OnAppearing");
-            UserNameLabel.Text = "Arthiva User";
+            UserNameLabel.Text = "MoneySpend User";
         }
     }
 

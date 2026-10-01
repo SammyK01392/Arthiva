@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
-using Arthiva.Data;
-using Arthiva.Models;
-using Contact = Arthiva.Models.Contact;
+using MoneySpend.Data;
+using MoneySpend.Models;
+using Contact = MoneySpend.Models.Contact;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 public class FirebaseSyncService : IFirebaseSyncService
 {
-    private readonly ArthivaDatabase _db;
+    private readonly MoneySpendDatabase _db;
     private readonly IFirebaseAuthService _authService;
     private readonly HttpClient _http = new();
 
-    public FirebaseSyncService(ArthivaDatabase db, IFirebaseAuthService authService)
+    public FirebaseSyncService(MoneySpendDatabase db, IFirebaseAuthService authService)
     {
         _db = db;
         _authService = authService;

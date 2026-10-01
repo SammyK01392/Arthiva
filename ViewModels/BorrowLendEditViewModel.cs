@@ -1,13 +1,13 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Arthiva.Models;
-using Arthiva.Services;
+using MoneySpend.Models;
+using MoneySpend.Services;
 // Explicit alias avoids ambiguity with MAUI's own Contact type, which .NET
 // MAUI adds as a global using in every file in the project.
-using Contact = Arthiva.Models.Contact;
+using Contact = MoneySpend.Models.Contact;
 
-namespace Arthiva.ViewModels;
+namespace MoneySpend.ViewModels;
 
 [QueryProperty(nameof(RequestedType), "Type")]
 public partial class BorrowLendEditViewModel : BaseViewModel

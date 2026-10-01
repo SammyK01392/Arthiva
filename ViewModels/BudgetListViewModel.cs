@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Arthiva.Models;
-using Arthiva.Services;
+using MoneySpend.Models;
+using MoneySpend.Services;
 
-namespace Arthiva.ViewModels;
+namespace MoneySpend.ViewModels;
 
 /// <summary>
 /// Display wrapper combining a Budget with its category's name, so the list

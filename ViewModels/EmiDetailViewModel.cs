@@ -1,11 +1,11 @@
-﻿using Arthiva.Models;
-using Arthiva.Services;
-using Arthiva.Views;
+﻿using MoneySpend.Models;
+using MoneySpend.Services;
+using MoneySpend.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 
-namespace Arthiva.ViewModels;
+namespace MoneySpend.ViewModels;
 
 [QueryProperty(nameof(EmiId), "EmiId")]
 public partial class EmiDetailViewModel : BaseViewModel

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-using Arthiva.Services;
+using MoneySpend.Services;
 
-namespace Arthiva.Views;
+namespace MoneySpend.Views;
 
 public partial class BackupRestorePage : ContentPage
 {

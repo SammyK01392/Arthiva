@@ -1,8 +1,8 @@
 // Explicit alias avoids the ambiguity with Microsoft.Maui.ApplicationModel
 // .Communication.Contact, which .NET MAUI adds as a global using in every file.
-using Contact = Arthiva.Models.Contact;
+using Contact = MoneySpend.Models.Contact;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 public class ContactService : IContactService
 {

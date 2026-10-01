@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage
-    x:Class="Arthiva.Views.MorePage"
+    x:Class="MoneySpend.Views.MorePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Title="More">
@@ -186,7 +186,7 @@
 
             </VerticalStackLayout>
 
-            <Label Style="{StaticResource CaptionLabel}" Text="Arthiva v1.0" HorizontalOptions="Center" Margin="0,10,0,0" />
+            <Label Style="{StaticResource CaptionLabel}" Text="MoneySpend v1.0" HorizontalOptions="Center" Margin="0,10,0,0" />
 
         </VerticalStackLayout>
     </ScrollView>

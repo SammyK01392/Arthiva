@@ -1,4 +1,4 @@
-namespace Arthiva.Views;
+namespace MoneySpend.Views;
 
 /// <summary>
 /// First screen shown when no UserProfile exists yet. Collects Full Name

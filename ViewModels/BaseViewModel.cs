@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace Arthiva.ViewModels;
+namespace MoneySpend.ViewModels;
 
 public abstract partial class BaseViewModel : ObservableObject
 {

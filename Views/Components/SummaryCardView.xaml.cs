@@ -1,6 +1,6 @@
 ﻿using Microsoft.Maui.Controls;
 
-namespace Arthiva.Views.Components;
+namespace MoneySpend.Views.Components;
 
 public partial class SummaryCardView : ContentView
 {

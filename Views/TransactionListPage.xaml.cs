@@ -1,6 +1,6 @@
-using Arthiva.ViewModels;
+using MoneySpend.ViewModels;
 
-namespace Arthiva.Views;
+namespace MoneySpend.Views;
 
 // Pure history — just shows transactions. Adding a transaction happens from
 // the Dashboard's Quick Actions (Income/Expense), which jump straight to

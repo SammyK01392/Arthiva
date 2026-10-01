@@ -1,10 +1,10 @@
-using Arthiva.Models;
+using MoneySpend.Models;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 public interface IUserProfileService
 {
-    /// <summary>Arthiva is single-profile local app — returns the one active profile, if any.</summary>
+    /// <summary>MoneySpend is single-profile local app — returns the one active profile, if any.</summary>
     Task<UserProfile?> GetProfileAsync();
 
     Task<int> CreateAsync(UserProfile profile);

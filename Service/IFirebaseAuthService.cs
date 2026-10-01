@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-using Arthiva.Models;
+using MoneySpend.Models;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 public interface IFirebaseAuthService
 {

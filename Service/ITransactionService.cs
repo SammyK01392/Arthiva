@@ -1,6 +1,6 @@
-using Arthiva.Models;
+using MoneySpend.Models;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 public interface ITransactionService
 {

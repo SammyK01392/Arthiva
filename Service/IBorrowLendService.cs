@@ -1,6 +1,6 @@
-using Arthiva.Models;
+using MoneySpend.Models;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 /// <summary>Result of an operation that can fail validation (e.g. over-paying an outstanding balance).</summary>
 public record BorrowLendResult(bool Success, string? ErrorMessage = null);

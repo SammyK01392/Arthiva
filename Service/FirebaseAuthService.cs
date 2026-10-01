@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
-using Arthiva.Data;
-using Arthiva.Models;
+using MoneySpend.Data;
+using MoneySpend.Models;
 
-namespace Arthiva.Services;
+namespace MoneySpend.Services;
 
 public class FirebaseAuthService : IFirebaseAuthService
 {

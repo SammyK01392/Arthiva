@@ -4,7 +4,7 @@ using System.Text;
 
 using System.Text.Json.Serialization;
 
-namespace Arthiva.Models;
+namespace MoneySpend.Models;
 
 public class FirebaseAuthResult
 {

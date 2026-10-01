@@ -1,12 +1,12 @@
-using Arthiva.Data;
-using Arthiva.Services;
-using Arthiva.ViewModels;
-using Arthiva.Views;
+using MoneySpend.Data;
+using MoneySpend.Services;
+using MoneySpend.ViewModels;
+using MoneySpend.Views;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 
-using INotificationService = Arthiva.Services.INotificationService;
-namespace Arthiva;
+using INotificationService = MoneySpend.Services.INotificationService;
+namespace MoneySpend;
 
 public static class MauiProgram
 {
@@ -54,7 +54,7 @@ public static class MauiProgram
         services.AddSingleton(_ =>
         {
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, DatabaseConstants.DatabaseFileName);
-            return new ArthivaDatabase(dbPath);
+            return new MoneySpendDatabase(dbPath);
         });
     }
 

@@ -1,9 +1,9 @@
-using Arthiva.Controls;
-using Arthiva.Models;
-using Arthiva.Services;
+using MoneySpend.Controls;
+using MoneySpend.Models;
+using MoneySpend.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Arthiva.Views;
+namespace MoneySpend.Views;
 
 /// <summary>
 /// Handles both "create PIN" and "confirm PIN" as two stages of one page

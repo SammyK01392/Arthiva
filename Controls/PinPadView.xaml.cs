@@ -1,4 +1,4 @@
-namespace Arthiva.Controls;
+namespace MoneySpend.Controls;
 
 /// <summary>
 /// Self-contained 4-digit PIN entry control.

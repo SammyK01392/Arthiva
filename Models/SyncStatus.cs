@@ -1,4 +1,4 @@
-namespace Arthiva.Models;
+namespace MoneySpend.Models;
 
 /// <summary>
 /// Local sync state of a record. Stored as an integer in SQLite.

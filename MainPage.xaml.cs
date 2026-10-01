@@ -1,4 +1,4 @@
-﻿namespace Arthiva
+﻿namespace MoneySpend
 {
     public partial class MainPage : ContentPage
     {
