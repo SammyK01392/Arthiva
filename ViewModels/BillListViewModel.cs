@@ -10,6 +10,9 @@ public partial class BillListViewModel : BaseViewModel
 {
     private readonly IBillService _billService;
 
+    // CHANGED: auto-refresh field
+    private readonly AutoRefresh _autoRefresh;
+
     private List<Bill> _allBills = new();
 
     public ObservableCollection<Bill> Bills { get; } = new();
@@ -19,31 +22,40 @@ public partial class BillListViewModel : BaseViewModel
 
     public List<string> FilterOptions { get; } = new() { "All", "Upcoming", "Overdue" };
 
+    // CHANGED: filter badalne par guard-free, serialized refresh
     partial void OnSelectedFilterChanged(string value)
-        => _ = LoadAsync();
+        => _autoRefresh.Request();
 
     public BillListViewModel(IBillService billService)
     {
         _billService = billService;
         Title = "Bills";
+
+        // CHANGED
+        _autoRefresh = new AutoRefresh(ReloadAsync);
     }
 
+    // CHANGED: asli load logic yahan (silent, spinner nahi)
+    private async Task ReloadAsync()
+    {
+        _allBills = SelectedFilter switch
+        {
+            "Upcoming" => await _billService.GetUpcomingAsync(7),
+            "Overdue" => await _billService.GetOverdueAsync(),
+            _ => await _billService.GetAllAsync()
+        };
+
+        Bills.Clear();
+        foreach (var b in _allBills)
+            Bills.Add(b);
+    }
+
+    // CHANGED: command ab ReloadAsync use karta hai, pehli load ke baad auto-refresh on
     [RelayCommand]
     private async Task LoadAsync()
     {
-        await ExecuteAsync(async () =>
-        {
-            _allBills = SelectedFilter switch
-            {
-                "Upcoming" => await _billService.GetUpcomingAsync(7),
-                "Overdue" => await _billService.GetOverdueAsync(),
-                _ => await _billService.GetAllAsync()
-            };
-
-            Bills.Clear();
-            foreach (var b in _allBills)
-                Bills.Add(b);
-        });
+        await ExecuteAsync(ReloadAsync);
+        _autoRefresh.Enabled = true;
     }
 
     [RelayCommand]
@@ -74,7 +86,7 @@ public partial class BillListViewModel : BaseViewModel
         await ExecuteAsync(async () =>
         {
             await _billService.SoftDeleteAsync(bill.Id);
-            Bills.Remove(bill);
+            Bills.Remove(bill); // turant gayab ho; baaki refresh auto-publish se
         });
     }
 }

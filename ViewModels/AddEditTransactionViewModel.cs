@@ -81,10 +81,24 @@ public partial class AddEditTransactionViewModel : BaseViewModel
 
     public List<string> PaymentMethods { get; } = new() { "Cash", "UPI", "Bank Transfer", "Card" };
 
+    // CHANGED: fire-and-forget ab safe wrapper se chalta hai
     partial void OnTransactionTypeChanged(string value)
     {
         if (_suppressCategoryAutoReload) return;
-        _ = LoadCategoriesAsync();
+        _ = SafeLoadCategoriesAsync();
+    }
+
+    // CHANGED: naya helper — exception silently gayab nahi hoga
+    private async Task SafeLoadCategoriesAsync()
+    {
+        try
+        {
+            await LoadCategoriesAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
     }
 
     public AddEditTransactionViewModel(
@@ -205,6 +219,7 @@ public partial class AddEditTransactionViewModel : BaseViewModel
                 _existingTransaction.AccountId = SelectedAccount.Id;
                 _existingTransaction.CategoryId = SelectedCategory.Id;
 
+                // DB write + balance adjust poora await hone ke baad hi navigate hoga
                 await _transactionService.UpdateTransactionAsync(_existingTransaction);
 
                 // This instance was pushed on top of the list page — pop back to it.
@@ -230,7 +245,7 @@ public partial class AddEditTransactionViewModel : BaseViewModel
                 // that the entry actually went in. A short confirmation + a beat
                 // to see it keeps "fast entry" feeling fast AND confirmed.
                 SuccessMessage = $"✓ {TransactionType} of ₹{Amount:N0} added";
-                await Task.Delay(600);
+                await Task.Delay(300); // CHANGED: 600 → 300
 
                 // Pushed on top of whichever tab we came from — jump to the
                 // Transactions tab (resets the nav stack) so the user lands

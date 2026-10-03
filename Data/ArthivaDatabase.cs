@@ -22,6 +22,12 @@ public class MoneySpendDatabase
 
     public async Task InitializeAsync()
     {
+        // CHANGED: WAL mode — writes aur reads ek doosre ko block nahi karte,
+        // isse refresh ke time list/dashboard queries jaldi chalti hain.
+        // journal_mode ek row return karta hai, isliye ExecuteScalarAsync use kiya hai.
+        await _database.ExecuteScalarAsync<string>("PRAGMA journal_mode=WAL;");
+        await _database.ExecuteAsync("PRAGMA synchronous=NORMAL;");
+
         await _database.CreateTableAsync<UserProfile>();
         await _database.CreateTableAsync<Account>();
         await _database.CreateTableAsync<Category>();

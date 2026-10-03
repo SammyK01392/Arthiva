@@ -57,7 +57,7 @@ public class TransactionService : ITransactionService
 
         var delta = SignedAmount(transaction);
         await _accountService.AdjustBalanceAsync(transaction.AccountId, delta);
-
+        DataChangeNotifier.Publish<Transaction>();
         return result;
     }
 
@@ -84,7 +84,7 @@ public class TransactionService : ITransactionService
         // Apply the new transaction's effect on its (possibly new) account.
         var applyDelta = SignedAmount(transaction);
         await _accountService.AdjustBalanceAsync(transaction.AccountId, applyDelta);
-
+        DataChangeNotifier.Publish<Transaction>();
         return result;
     }
 
@@ -104,7 +104,7 @@ public class TransactionService : ITransactionService
 
         var reverseDelta = -SignedAmount(existing);
         await _accountService.AdjustBalanceAsync(existing.AccountId, reverseDelta);
-
+        DataChangeNotifier.Publish<Transaction>();
         return result;
     }
 

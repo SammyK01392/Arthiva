@@ -414,43 +414,54 @@
         <!-- FAB — OUTSIDE RefreshView                        -->
         <!-- Android pe ab pakka visible hoga                 -->
         <!-- ═══════════════════════════════════════════════ -->
-        <Border x:Name="FabButton"
-                WidthRequest="60"
-                HeightRequest="60"
-                StrokeThickness="0"
-                StrokeShape="RoundRectangle 30"
-                HorizontalOptions="End"
-                VerticalOptions="End"
-                Margin="0,0,20,24"
-                ZIndex="999">
+        <!-- FAB — OUTSIDE RefreshView -->
+        <Grid x:Name="FabButton"
+      WidthRequest="76"
+      HeightRequest="76"
+      HorizontalOptions="End"
+      VerticalOptions="End"
+      Margin="0,0,12,16"
+      ZIndex="999">
 
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#FF8A00" Offset="0.0" />
-                    <GradientStop Color="#FF5500" Offset="1.0" />
-                </LinearGradientBrush>
-            </Border.Background>
-
-            <Border.Shadow>
-                <Shadow Brush="#FF5500" Offset="0,6" Radius="16" Opacity="0.45" />
-            </Border.Shadow>
-
-            <Border.GestureRecognizers>
+            <Grid.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnFabTapped" />
-            </Border.GestureRecognizers>
+            </Grid.GestureRecognizers>
 
-            <!-- Vector "+" icon -->
+            <!-- Fake soft shadow / glow (no Shadow property, works on Android) -->
+            <Ellipse WidthRequest="68" HeightRequest="68"
+             Fill="#FF5500"
+             Opacity="0.18"
+             HorizontalOptions="Center"
+             VerticalOptions="Center"
+             TranslationY="4"
+             InputTransparent="True" />
+
+            <!-- Actual button -->
+            <Ellipse WidthRequest="60" HeightRequest="60"
+             HorizontalOptions="Center"
+             VerticalOptions="Center"
+             InputTransparent="True">
+                <Ellipse.Fill>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#FF8A00" Offset="0.0" />
+                        <GradientStop Color="#FF5500" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+
+            <!-- "+" icon -->
             <shapes:Path WidthRequest="22"
-                         HeightRequest="22"
-                         Aspect="Uniform"
-                         Stroke="White"
-                         StrokeThickness="2.8"
-                         StrokeLineCap="Round"
-                         StrokeLineJoin="Round"
-                         HorizontalOptions="Center"
-                         VerticalOptions="Center"
-                         Data="M12,4 L12,20 M4,12 L20,12" />
-        </Border>
+                 HeightRequest="22"
+                 Aspect="Uniform"
+                 Stroke="White"
+                 StrokeThickness="2.8"
+                 StrokeLineCap="Round"
+                 StrokeLineJoin="Round"
+                 HorizontalOptions="Center"
+                 VerticalOptions="Center"
+                 InputTransparent="True"
+                 Data="M12,4 L12,20 M4,12 L20,12" />
+        </Grid>
 
     </Grid>
 </ContentPage>

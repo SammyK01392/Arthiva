@@ -13,6 +13,21 @@ public partial class DashboardPage : ContentPage
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = _viewModel;
+
+        // CHANGED: balance badalte hi label turant update ho (auto-refresh ke liye)
+        _viewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(DashboardViewModel.TotalBalance))
+                MainThread.BeginInvokeOnMainThread(UpdateBalanceLabel);
+        };
+    }
+
+    // CHANGED: label update ek hi jagah se, hidden/visible dono respect karta hai
+    private void UpdateBalanceLabel()
+    {
+        BalanceAmountLabel.Text = _isBalanceHidden
+            ? "₹ • • • • •"
+            : $"₹{_viewModel.TotalBalance:N2}";
     }
 
     protected override async void OnAppearing()
@@ -24,9 +39,7 @@ public partial class DashboardPage : ContentPage
         // stale numbers flashing while a long animation plays out.
         await _viewModel.LoadCommand.ExecuteAsync(null);
 
-        BalanceAmountLabel.Text = _isBalanceHidden
-            ? "₹ • • • • •"
-            : $"₹{_viewModel.TotalBalance:N2}";
+        UpdateBalanceLabel(); // CHANGED
 
         if (!_hasAnimatedOnLoad)
         {
@@ -86,9 +99,7 @@ public partial class DashboardPage : ContentPage
 
         await BalanceAmountLabel.FadeTo(0, 120, Easing.CubicIn);
 
-        BalanceAmountLabel.Text = _isBalanceHidden
-            ? "₹ • • • • •"
-            : $"₹{_viewModel.TotalBalance:N2}";
+        UpdateBalanceLabel(); // CHANGED: same helper, duplicate code hata diya
         EyeIcon.Opacity = _isBalanceHidden ? 0.5 : 0.9;
 
         await BalanceAmountLabel.FadeTo(1, 180, Easing.CubicOut);

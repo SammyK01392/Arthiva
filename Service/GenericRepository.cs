@@ -30,15 +30,30 @@ public class GenericRepository<T> : IGenericRepository<T> where T : new()
         return all.Where(compiled).ToList();
     }
 
-    public Task<int> AddAsync(T entity)
-        => Db.InsertAsync(entity);
+    public async Task<int> AddAsync(T entity)
+    {
+        var result = await Db.InsertAsync(entity);
+        DataChangeNotifier.Publish<T>();
+        return result;
+    }
 
-    public Task<int> UpdateAsync(T entity)
-        => Db.UpdateAsync(entity);
+    public async Task<int> UpdateAsync(T entity)
+    {
+        var result = await Db.UpdateAsync(entity);
+        DataChangeNotifier.Publish<T>();
+        return result;
+    }
 
-    public Task<int> DeleteAsync(T entity)
-        => Db.DeleteAsync(entity);
+    public async Task<int> DeleteAsync(T entity)
+    {
+        var result = await Db.DeleteAsync(entity);
+        DataChangeNotifier.Publish<T>();
+        return result;
+    }
 
     public Task<int> CountAsync()
         => Db.Table<T>().CountAsync();
+
+
+
 }
