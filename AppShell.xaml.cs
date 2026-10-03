@@ -238,5 +238,8 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));
 
         Routing.RegisterRoute(nameof(AddEditTransactionPage), typeof(AddEditTransactionPage));
+        Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
+        Routing.RegisterRoute(nameof(SecurityPage), typeof(SecurityPage));
+        Routing.RegisterRoute(nameof(CreatePinPage), typeof(CreatePinPage)); // agar pehle se registered nahi hai
     }
 }

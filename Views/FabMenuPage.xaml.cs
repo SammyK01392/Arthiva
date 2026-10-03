@@ -11,40 +11,31 @@ public partial class FabMenuPage : ContentPage
         InitializeComponent();
     }
 
-    private VisualElement[] Items =>
-        new VisualElement[] { ItemIncome, ItemExpense, ItemBorrow, ItemLend };
-
-    private double SheetOffset => Sheet.Height > 0 ? Sheet.Height : 420;
+    private double SheetOffset => Sheet.Height > 0 ? Sheet.Height + 40 : 700;
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         try
         {
+            await Task.Delay(30); // layout measure hone do
             Backdrop.Opacity = 0;
-            Sheet.TranslationY = 420; // sheet neeche se aayegi
-            foreach (var item in Items)
-            {
-                item.Opacity = 0;
-                item.Scale = 0.88;
-            }
+            Sheet.TranslationY = SheetOffset;
 
-            var cards = Items.Select(async (item, i) =>
-            {
-                await Task.Delay(120 + i * 55);
-                await Task.WhenAll(
-                    item.FadeTo(1, 200, Easing.CubicOut),
-                    item.ScaleTo(1, 240, Easing.SpringOut));
-            });
-
-            await Task.WhenAll(
+            var anim = Task.WhenAll(
                 Backdrop.FadeTo(1, 200),
-                Sheet.TranslateTo(0, 0, 280, Easing.CubicOut),
-                Task.WhenAll(cards));
+                Sheet.TranslateTo(0, 0, 260, Easing.CubicOut));
+
+            await Task.WhenAny(anim, Task.Delay(700));
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[FabMenu] {ex}");
+        }
+        finally
+        {
+            Backdrop.Opacity = 1; // kuch bhi ho, final state
+            Sheet.TranslationY = 0;
         }
     }
 
@@ -52,11 +43,14 @@ public partial class FabMenuPage : ContentPage
     {
         try
         {
-            await Task.WhenAll(
-                Backdrop.FadeTo(0, 180),
-                Sheet.TranslateTo(0, SheetOffset, 220, Easing.CubicIn));
+            await Task.WhenAny(
+                Task.WhenAll(
+                    Backdrop.FadeTo(0, 160),
+                    Sheet.TranslateTo(0, SheetOffset, 200, Easing.CubicIn)),
+                Task.Delay(500));
         }
         catch { }
+
         await Navigation.PopModalAsync(false);
     }
 

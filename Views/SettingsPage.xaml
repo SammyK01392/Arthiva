@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="MoneySpend.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Settings"
+    BackgroundColor="#F6F7FB">
+
+    <ContentPage.Resources>
+        <Style x:Key="RowBorder" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="White" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="Padding" Value="16,14" />
+        </Style>
+        <Style x:Key="IconBox" TargetType="Border">
+            <Setter Property="WidthRequest" Value="38" />
+            <Setter Property="HeightRequest" Value="38" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="RowTitle" TargetType="Label">
+            <Setter Property="FontSize" Value="14.5" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="TextColor" Value="#111827" />
+        </Style>
+        <Style x:Key="RowSub" TargetType="Label">
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="TextColor" Value="#8A94A6" />
+        </Style>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,12,16,32" Spacing="18" MaximumWidthRequest="500">
+
+            <VerticalStackLayout Spacing="1">
+                <Label Text="NOTIFICATIONS" FontSize="11" FontAttributes="Bold"
+                       CharacterSpacing="1" TextColor="#8A94A6" Margin="4,0,4,6" />
+
+                <Border Style="{StaticResource RowBorder}" StrokeShape="RoundRectangle 16">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnNotificationSettingsTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                        <Border Style="{StaticResource IconBox}" BackgroundColor="#FFF1E3">
+                            <Label Text="🔔" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Style="{StaticResource RowTitle}" Text="Reminders &amp; Alerts" />
+                            <Label Style="{StaticResource RowSub}" Text="Bill, EMI and due-date reminders (phone settings)" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="2" Text="›" FontSize="20" TextColor="#9CA3AF" VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="1">
+                <Label Text="HELP" FontSize="11" FontAttributes="Bold"
+                       CharacterSpacing="1" TextColor="#8A94A6" Margin="4,0,4,6" />
+
+                <Border Style="{StaticResource RowBorder}" StrokeShape="RoundRectangle 16">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnReplayTipsTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                        <Border Style="{StaticResource IconBox}" BackgroundColor="#E0F2FE">
+                            <Label Text="💡" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Style="{StaticResource RowTitle}" Text="Show swipe tips again" />
+                            <Label Style="{StaticResource RowSub}" Text="Edit / delete swipe hint next app start" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="2" Text="›" FontSize="20" TextColor="#9CA3AF" VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="1">
+                <Label Text="ABOUT" FontSize="11" FontAttributes="Bold"
+                       CharacterSpacing="1" TextColor="#8A94A6" Margin="4,0,4,6" />
+
+                <Border Style="{StaticResource RowBorder}" StrokeShape="RoundRectangle 16">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                        <Border Style="{StaticResource IconBox}" BackgroundColor="#ECFDF5">
+                            <Label Text="ℹ️" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Style="{StaticResource RowTitle}" Text="MoneySpend" />
+                            <Label Style="{StaticResource RowSub}" Text="Track income, expense, EMI and more" />
+                        </VerticalStackLayout>
+                        <Label x:Name="VersionLabel" Grid.Column="2" FontSize="12"
+                               TextColor="#8A94A6" VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

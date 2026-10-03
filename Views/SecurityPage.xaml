@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="MoneySpend.Views.SecurityPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Security"
+    BackgroundColor="#F6F7FB">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,12,16,32" Spacing="18" MaximumWidthRequest="500">
+
+            <VerticalStackLayout Spacing="1">
+                <Label Text="APP LOCK" FontSize="11" FontAttributes="Bold"
+                       CharacterSpacing="1" TextColor="#8A94A6" Margin="4,0,4,6" />
+
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                        BackgroundColor="White" Padding="16,14">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnPinTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                        <Border WidthRequest="38" HeightRequest="38" StrokeThickness="0"
+                                StrokeShape="RoundRectangle 12" BackgroundColor="#FFF1E3"
+                                VerticalOptions="Center">
+                            <Label Text="🔒" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Text="Set / Change PIN" FontSize="14.5" FontAttributes="Bold" TextColor="#111827" />
+                            <Label Text="4-digit PIN se app ko lock rakho" FontSize="11.5" TextColor="#8A94A6" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="2" Text="›" FontSize="20" TextColor="#9CA3AF" VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="1">
+                <Label Text="PRIVACY" FontSize="11" FontAttributes="Bold"
+                       CharacterSpacing="1" TextColor="#8A94A6" Margin="4,0,4,6" />
+
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                        BackgroundColor="White" Padding="16,14">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                        <Border WidthRequest="38" HeightRequest="38" StrokeThickness="0"
+                                StrokeShape="RoundRectangle 12" BackgroundColor="#E0F2FE"
+                                VerticalOptions="Center">
+                            <Label Text="👁" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Text="Hide balance on start" FontSize="14.5" FontAttributes="Bold" TextColor="#111827" />
+                            <Label Text="Home par balance ₹ • • • • • dikhe" FontSize="11.5" TextColor="#8A94A6" />
+                        </VerticalStackLayout>
+                        <Switch x:Name="HideBalanceSwitch" Grid.Column="2"
+                                OnColor="#FF7A00" VerticalOptions="Center"
+                                Toggled="OnHideBalanceToggled" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="1">
+                <Label Text="DATA" FontSize="11" FontAttributes="Bold"
+                       CharacterSpacing="1" TextColor="#8A94A6" Margin="4,0,4,6" />
+
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                        BackgroundColor="White" Padding="16,14">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnBackupTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                        <Border WidthRequest="38" HeightRequest="38" StrokeThickness="0"
+                                StrokeShape="RoundRectangle 12" BackgroundColor="#ECFDF5"
+                                VerticalOptions="Center">
+                            <Label Text="☁" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Text="Backup &amp; Restore" FontSize="14.5" FontAttributes="Bold" TextColor="#111827" />
+                            <Label Text="Apna data cloud par safe rakho" FontSize="11.5" TextColor="#8A94A6" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="2" Text="›" FontSize="20" TextColor="#9CA3AF" VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

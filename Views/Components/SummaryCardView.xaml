@@ -5,49 +5,60 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Name="Root">
 
-    <Border StrokeThickness="0" StrokeShape="RoundRectangle 16"
+    <Border x:Name="CardBorder"
+            StrokeThickness="0"
             BackgroundColor="{StaticResource Surface}"
-            Padding="14,14,14,16">
+            Padding="{Binding CardPadding, Source={x:Reference Root}}">
         <Border.Shadow>
-            <Shadow Brush="#000000" Offset="0,2" Radius="12" Opacity="0.07" />
+            <Shadow Brush="#000000" Offset="0,2" Radius="10" Opacity="0.06" />
         </Border.Shadow>
 
-        <VerticalStackLayout Spacing="10">
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalOptions="Center">
 
-            <!-- SVG Icon inside tinted circle -->
-            <Border WidthRequest="40" HeightRequest="40"
-                    StrokeThickness="0" StrokeShape="RoundRectangle 20"
-                    HorizontalOptions="Start"
+            <!-- Icon -->
+            <Border Grid.Column="0"
+                    WidthRequest="{Binding IconSize, Source={x:Reference Root}}"
+                    HeightRequest="{Binding IconSize, Source={x:Reference Root}}"
+                    StrokeThickness="0"
+                    StrokeShape="Ellipse"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center"
                     BackgroundColor="{Binding IconBackgroundColor, Source={x:Reference Root}}">
                 <Image Source="{Binding IconSource, Source={x:Reference Root}}"
-                       WidthRequest="20" HeightRequest="20"
+                       WidthRequest="{Binding IconImageSize, Source={x:Reference Root}}"
+                       HeightRequest="{Binding IconImageSize, Source={x:Reference Root}}"
                        Aspect="AspectFit"
                        HorizontalOptions="Center" VerticalOptions="Center" />
             </Border>
 
-            <!-- Title -->
-            <Label FontSize="13"
-                   TextColor="{Binding AccentColor, Source={x:Reference Root}}"
-                   FontAttributes="Bold"
-                   Text="{Binding CardTitle, Source={x:Reference Root}}" />
+            <!-- Text -->
+            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
 
-            <!-- Amount -->
-            <Label FontSize="18" FontAttributes="Bold"
-                   TextColor="{StaticResource TextPrimary}"
-                   Text="{Binding CardAmount, Source={x:Reference Root}}" />
+                <Label FontAttributes="Bold"
+                       FontSize="{Binding TitleFontSize, Source={x:Reference Root}}"
+                       TextColor="{Binding AccentColor, Source={x:Reference Root}}"
+                       Text="{Binding CardTitle, Source={x:Reference Root}}"
+                       LineBreakMode="TailTruncation" MaxLines="1" />
 
-            <!-- Caption row: optional dot + text -->
-            <HorizontalStackLayout Spacing="5" VerticalOptions="Center"
-                    IsVisible="{Binding CardCaption, Source={x:Reference Root}, Converter={StaticResource StringNotEmptyConverter}}">
-                <Ellipse WidthRequest="6" HeightRequest="6"
-                         Fill="{Binding DotColor, Source={x:Reference Root}}"
-                         VerticalOptions="Center"
-                         IsVisible="{Binding ShowDot, Source={x:Reference Root}}" />
-                <Label FontSize="11" TextColor="{StaticResource TextSecondary}"
-                       VerticalOptions="Center"
-                       Text="{Binding CardCaption, Source={x:Reference Root}}" />
-            </HorizontalStackLayout>
+                <Label FontAttributes="Bold"
+                       FontSize="{Binding AmountFontSize, Source={x:Reference Root}}"
+                       TextColor="{StaticResource TextPrimary}"
+                       Text="{Binding CardAmount, Source={x:Reference Root}}"
+                       LineBreakMode="TailTruncation" MaxLines="1" />
 
-        </VerticalStackLayout>
+                <HorizontalStackLayout Spacing="5" VerticalOptions="Center"
+                        IsVisible="{Binding CardCaption, Source={x:Reference Root}, Converter={StaticResource StringNotEmptyConverter}}">
+                    <Ellipse WidthRequest="6" HeightRequest="6"
+                             Fill="{Binding DotColor, Source={x:Reference Root}}"
+                             VerticalOptions="Center"
+                             IsVisible="{Binding ShowDot, Source={x:Reference Root}}" />
+                    <Label FontSize="{Binding CaptionFontSize, Source={x:Reference Root}}"
+                           TextColor="{StaticResource TextSecondary}"
+                           VerticalOptions="Center"
+                           Text="{Binding CardCaption, Source={x:Reference Root}}"
+                           LineBreakMode="TailTruncation" MaxLines="1" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Grid>
     </Border>
 </ContentView>

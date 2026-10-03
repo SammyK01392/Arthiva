@@ -5,7 +5,7 @@ namespace MoneySpend.Views;
 public partial class DashboardPage : ContentPage
 {
     private readonly DashboardViewModel _viewModel;
-    private bool _isBalanceHidden = false;
+    private bool _isBalanceHidden = Preferences.Get("hide_balance_default", false);
     private bool _hasAnimatedOnLoad = false;
 
     public DashboardPage(DashboardViewModel viewModel)
@@ -171,4 +171,5 @@ public partial class DashboardPage : ContentPage
         if (sender is VisualElement el) await AnimateButtonTapAsync(el);
         await Shell.Current.GoToAsync(nameof(BudgetEditViewModel).Replace("ViewModel", "Page"));
     }
+
 }

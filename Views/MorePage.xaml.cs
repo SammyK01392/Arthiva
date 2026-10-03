@@ -52,4 +52,9 @@ public partial class MorePage : ContentPage
     }
     private async void OnBackupRestoreTapped(object? sender, TappedEventArgs e)
     => await Shell.Current.GoToAsync(nameof(BackupRestorePage));
+    private async void OnSettingsTapped(object sender, TappedEventArgs e)
+    => await Shell.Current.GoToAsync(nameof(SettingsPage));
+
+    private async void OnSecurityTapped(object sender, TappedEventArgs e)
+        => await Shell.Current.GoToAsync(nameof(SecurityPage));
 }

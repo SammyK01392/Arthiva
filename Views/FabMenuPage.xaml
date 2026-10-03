@@ -10,12 +10,12 @@
             </Grid.GestureRecognizers>
         </Grid>
 
-        <Border x:Name="Sheet"
+        <Border x:Name="Sheet" 
                 VerticalOptions="End"
                 BackgroundColor="White"
                 StrokeThickness="0"
                 StrokeShape="RoundRectangle 30,30,0,0"
-                Padding="22,12,22,32">
+                Padding="22,12,22,56">
             <Border.Shadow>
                 <Shadow Brush="Black" Opacity="0.25" Radius="30" Offset="0,-6" />
             </Border.Shadow>
