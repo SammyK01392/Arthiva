@@ -142,6 +142,11 @@
             Icon="tab_transactions.png"
             ContentTemplate="{DataTemplate views:TransactionListPage}"
             Route="TransactionListPage" />
+        <ShellContent
+    Title="Add"
+    Icon="tab_add.png"
+    ContentTemplate="{DataTemplate views:AddPlaceholderPage}"
+    Route="AddPlaceholderPage" />
 
         <ShellContent
             Title="Accounts"

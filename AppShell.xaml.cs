@@ -6,274 +6,136 @@ namespace MoneySpend;
 
 public partial class AppShell : Shell
 {
-    // ═══════════════════════════════════════════════════
-    //  BINDABLE PROPERTIES
-    // ═══════════════════════════════════════════════════
-
+    // Bindable properties
     public static readonly BindableProperty UnreadNotificationCountProperty =
-        BindableProperty.Create(
-            nameof(UnreadNotificationCount),
-            typeof(int),
-            typeof(AppShell),
-            0);
-
+        BindableProperty.Create(nameof(UnreadNotificationCount), typeof(int), typeof(AppShell), 0);
     public int UnreadNotificationCount
     {
         get => (int)GetValue(UnreadNotificationCountProperty);
         set => SetValue(UnreadNotificationCountProperty, value);
     }
 
-
     public static readonly BindableProperty UserInitialsProperty =
-        BindableProperty.Create(
-            nameof(UserInitials),
-            typeof(string),
-            typeof(AppShell),
-            "SK");
-
+        BindableProperty.Create(nameof(UserInitials), typeof(string), typeof(AppShell), "SK");
     public string UserInitials
     {
         get => (string)GetValue(UserInitialsProperty);
         set => SetValue(UserInitialsProperty, value);
     }
 
-
     public static readonly BindableProperty CurrentPageTitleProperty =
-        BindableProperty.Create(
-            nameof(CurrentPageTitle),
-            typeof(string),
-            typeof(AppShell),
-            "Dashboard");
-
+        BindableProperty.Create(nameof(CurrentPageTitle), typeof(string), typeof(AppShell), "Dashboard");
     public string CurrentPageTitle
     {
         get => (string)GetValue(CurrentPageTitleProperty);
         set => SetValue(CurrentPageTitleProperty, value);
     }
 
-
-    // ═══════════════════════════════════════════════════
-    //  SERVICES
-    // ═══════════════════════════════════════════════════
-
+    // Services
     private readonly INotificationService _notificationService;
     private readonly IUserProfileService _userProfileService;
+    private readonly AutoRefresh _unreadRefresh; // NEW: bell badge auto-refresh
 
-
-    // ═══════════════════════════════════════════════════
-    //  CONSTRUCTOR
-    // ═══════════════════════════════════════════════════
-
-    public AppShell(
-        INotificationService notificationService,
-        IUserProfileService userProfileService)
+    public AppShell(INotificationService notificationService, IUserProfileService userProfileService)
     {
         InitializeComponent();
 
         _notificationService = notificationService;
         _userProfileService = userProfileService;
+        _unreadRefresh = new AutoRefresh(RefreshUnreadCountAsync); // NEW
 
         RegisterRoutes();
-
-
-        // ═══════════════════════════════════════════════
-        // SHELL LOADED
-        // ═══════════════════════════════════════════════
 
         Loaded += async (_, _) =>
         {
             await EnsureNotificationPermissionAsync();
             await RescheduleNotificationsAsync();
-
             await RefreshUnreadCountAsync();
+            _unreadRefresh.Enabled = true; // NEW
             await LoadUserInitialsAsync();
-
             UpdateCurrentPageTitle();
         };
-
-
-        // ═══════════════════════════════════════════════
-        // NAVIGATION CHANGED
-        // ═══════════════════════════════════════════════
 
         Navigated += async (_, _) =>
         {
             await RefreshUnreadCountAsync();
-
-            // CurrentPage is now the actual visible page.
             UpdateCurrentPageTitle();
         };
     }
 
+    // NEW: "Add" tab par page nahi, popup khulta hai
+    protected override void OnNavigating(ShellNavigatingEventArgs args)
+    {
+        base.OnNavigating(args);
 
-    // ═══════════════════════════════════════════════════
-    //  CURRENT PAGE TITLE
-    // ═══════════════════════════════════════════════════
+        var target = args.Target?.Location.OriginalString ?? string.Empty;
+        if (args.CanCancel &&
+            target.Contains("AddPlaceholderPage", StringComparison.OrdinalIgnoreCase))
+        {
+            args.Cancel();
+            MainThread.BeginInvokeOnMainThread(async () => await ShowAddMenuAsync());
+        }
+    }
 
+    // NEW
+    private async Task ShowAddMenuAsync()
+    {
+        if (Navigation.ModalStack.Count > 0) return; // double-tap guard
+        await Navigation.PushModalAsync(new FabMenuPage(), false);
+    }
+
+    // Current page title
     private void UpdateCurrentPageTitle()
     {
         try
         {
             var currentPage = CurrentPage;
-
             if (currentPage == null)
             {
                 CurrentPageTitle = "MoneySpend";
                 return;
             }
 
-
-            // ═══════════════════════════════════════════
-            // FIRST PRIORITY:
-            // Use the Title directly from ContentPage
-            //
-            // Example:
-            // <ContentPage Title="Bills">
-            // ═══════════════════════════════════════════
-
+            // Page ka apna Title pehle
             if (!string.IsNullOrWhiteSpace(currentPage.Title))
             {
                 CurrentPageTitle = currentPage.Title;
                 return;
             }
 
-
-            // ═══════════════════════════════════════════
-            // FALLBACK:
-            // Determine title using the actual page type
-            // ═══════════════════════════════════════════
-
+            // Fallback: page type se
             CurrentPageTitle = currentPage switch
             {
-                // ───────────────────────────────────────
-                // Main Tabs
-                // ───────────────────────────────────────
-
                 DashboardPage => "Dashboard",
-
                 TransactionListPage => "Transactions",
-
                 AccountListPage => "Accounts",
-
                 MorePage => "More",
-
-
-                // ───────────────────────────────────────
-                // Accounts
-                // ───────────────────────────────────────
-
                 AccountEditPage => "Account",
-
-
-                // ───────────────────────────────────────
-                // Transactions
-                // ───────────────────────────────────────
-
                 AddEditTransactionPage => "Transaction",
-
-
-                // ───────────────────────────────────────
-                // Bills
-                // ───────────────────────────────────────
-
                 BillListPage => "Bills",
-
                 BillEditPage => "Bill",
-
                 RecordBillPaymentPage => "Pay Bill",
-
-
-                // ───────────────────────────────────────
-                // EMI
-                // ───────────────────────────────────────
-
                 EmiListPage => "EMIs",
-
                 EmiEditPage => "EMI",
-
                 EmiDetailPage => "EMI Details",
-
                 RecordEmiPaymentPage => "Pay EMI",
-
-
-                // ───────────────────────────────────────
-                // Budgets
-                // ───────────────────────────────────────
-
                 BudgetListPage => "Budgets",
-
                 BudgetEditPage => "Budget",
-
-
-                // ───────────────────────────────────────
-                // Borrow / Lend
-                // ───────────────────────────────────────
-
                 BorrowLendListPage => "Borrow & Lend",
-
                 BorrowLendEditPage => "Borrow & Lend",
-
                 RecordBorrowLendTransactionPage => "Settle",
-
-
-                // ───────────────────────────────────────
-                // Saving Goals
-                // ───────────────────────────────────────
-
                 SavingGoalListPage => "Saving Goals",
-
                 SavingGoalEditPage => "Saving Goal",
-
                 SavingGoalContributePage => "Contribute",
-
-
-                // ───────────────────────────────────────
-                // Contacts
-                // ───────────────────────────────────────
-
                 ContactListPage => "Contacts",
-
                 ContactEditPage => "Contact",
-
                 ContactDetailPage => "Contact Details",
-
-
-                // ───────────────────────────────────────
-                // Categories
-                // ───────────────────────────────────────
-
                 CategoryListPage => "Categories",
-
                 CategoryEditPage => "Category",
-
-
-                // ───────────────────────────────────────
-                // Profile
-                // ───────────────────────────────────────
-
                 UserProfilePage => "My Profile",
-
-
-                // ───────────────────────────────────────
-                // Notifications
-                // ───────────────────────────────────────
-
                 NotificationListPage => "Notifications",
-
-
-                // ───────────────────────────────────────
-                // Cloud Backup
-                // ───────────────────────────────────────
-
                 BackupRestorePage => "Backup & Restore",
-
                 LoginPage => "Cloud Backup",
-
-
-                // ───────────────────────────────────────
-                // Default
-                // ───────────────────────────────────────
-
                 _ => "MoneySpend"
             };
         }
@@ -283,60 +145,33 @@ public partial class AppShell : Shell
         }
     }
 
-
-    // ═══════════════════════════════════════════════════
-    //  USER INITIALS
-    // ═══════════════════════════════════════════════════
-
+    // User initials
     private async Task LoadUserInitialsAsync()
     {
         try
         {
             var profile = await _userProfileService.GetProfileAsync();
-
-            if (profile != null &&
-                !string.IsNullOrWhiteSpace(profile.FullName))
+            if (profile != null && !string.IsNullOrWhiteSpace(profile.FullName))
             {
-                var names = profile.FullName.Split(
-                    ' ',
-                    StringSplitOptions.RemoveEmptyEntries);
-
+                var names = profile.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                 if (names.Length > 1)
-                {
-                    UserInitials =
-                        $"{names[0][0]}{names[^1][0]}".ToUpper();
-                }
+                    UserInitials = $"{names[0][0]}{names[^1][0]}".ToUpper();
                 else if (names.Length == 1)
-                {
-                    UserInitials =
-                        names[0][0].ToString().ToUpper();
-                }
+                    UserInitials = names[0][0].ToString().ToUpper();
             }
         }
-        catch
-        {
-            // Profile database may not be ready yet.
-        }
+        catch { /* profile DB ready na ho to ignore */ }
     }
 
-
-    // ═══════════════════════════════════════════════════
-    //  NOTIFICATIONS
-    // ═══════════════════════════════════════════════════
-
+    // Notifications
     private async Task RefreshUnreadCountAsync()
     {
         try
         {
-            var unread =
-                await _notificationService.GetUnreadAsync();
-
+            var unread = await _notificationService.GetUnreadAsync();
             UnreadNotificationCount = unread.Count;
         }
-        catch
-        {
-            // Database may not be initialized yet.
-        }
+        catch { /* DB ready na ho to ignore */ }
     }
 
     private static async Task EnsureNotificationPermissionAsync()
@@ -347,206 +182,61 @@ public partial class AppShell : Shell
             if (!isGranted)
                 await LocalNotificationCenter.Current.RequestNotificationPermission();
         }
-        catch
-        {
-            // Permission prompt failing shouldn't block app startup —
-            // reminders just won't fire visibly until the user grants it
-            // later from OS settings.
-        }
+        catch { /* permission fail ho to app na ruke */ }
     }
 
     private async Task RescheduleNotificationsAsync()
     {
         try
         {
-            // Android can drop scheduled exact alarms across a device reboot
-            // or app force-stop, so DB rows can silently fall out of sync with
-            // what the OS will actually fire. Re-arm everything still pending
-            // once per app launch.
+            // Reboot/force-stop ke baad alarms dobara set karo
             await _notificationService.RescheduleAllPendingAsync();
         }
-        catch
-        {
-            // Database may not be initialized yet on very first launch.
-        }
+        catch { /* first launch par DB ready na ho */ }
     }
 
+    private async void OnBellTapped(object? sender, TappedEventArgs e)
+        => await GoToAsync(nameof(NotificationListPage));
 
-    private async void OnBellTapped(
-        object? sender,
-        TappedEventArgs e)
-    {
-        await GoToAsync(nameof(NotificationListPage));
-    }
-
-
-    // ═══════════════════════════════════════════════════
-    //  ROUTES
-    // ═══════════════════════════════════════════════════
-
+    // Routes
     private static void RegisterRoutes()
     {
-        // ═══════════════════════════════════════════════
-        // ACCOUNTS
-        // ═══════════════════════════════════════════════
+        Routing.RegisterRoute(nameof(AccountEditPage), typeof(AccountEditPage));
 
-        Routing.RegisterRoute(
-            nameof(AccountEditPage),
-            typeof(AccountEditPage));
+        Routing.RegisterRoute(nameof(CategoryListPage), typeof(CategoryListPage));
+        Routing.RegisterRoute(nameof(CategoryEditPage), typeof(CategoryEditPage));
 
+        Routing.RegisterRoute(nameof(BillListPage), typeof(BillListPage));
+        Routing.RegisterRoute(nameof(BillEditPage), typeof(BillEditPage));
+        Routing.RegisterRoute(nameof(RecordBillPaymentPage), typeof(RecordBillPaymentPage));
 
-        // ═══════════════════════════════════════════════
-        // CATEGORIES
-        // ═══════════════════════════════════════════════
+        Routing.RegisterRoute(nameof(EmiListPage), typeof(EmiListPage));
+        Routing.RegisterRoute(nameof(EmiEditPage), typeof(EmiEditPage));
+        Routing.RegisterRoute(nameof(RecordEmiPaymentPage), typeof(RecordEmiPaymentPage));
+        Routing.RegisterRoute(nameof(EmiDetailPage), typeof(EmiDetailPage));
 
-        Routing.RegisterRoute(
-            nameof(CategoryListPage),
-            typeof(CategoryListPage));
+        Routing.RegisterRoute(nameof(BorrowLendListPage), typeof(BorrowLendListPage));
+        Routing.RegisterRoute(nameof(BorrowLendEditPage), typeof(BorrowLendEditPage));
+        Routing.RegisterRoute(nameof(RecordBorrowLendTransactionPage), typeof(RecordBorrowLendTransactionPage));
 
-        Routing.RegisterRoute(
-            nameof(CategoryEditPage),
-            typeof(CategoryEditPage));
+        Routing.RegisterRoute(nameof(SavingGoalListPage), typeof(SavingGoalListPage));
+        Routing.RegisterRoute(nameof(SavingGoalEditPage), typeof(SavingGoalEditPage));
+        Routing.RegisterRoute(nameof(SavingGoalContributePage), typeof(SavingGoalContributePage));
 
+        Routing.RegisterRoute(nameof(BudgetListPage), typeof(BudgetListPage));
+        Routing.RegisterRoute(nameof(BudgetEditPage), typeof(BudgetEditPage));
 
-        // ═══════════════════════════════════════════════
-        // BILLS
-        // ═══════════════════════════════════════════════
+        Routing.RegisterRoute(nameof(NotificationListPage), typeof(NotificationListPage));
 
-        Routing.RegisterRoute(
-            nameof(BillListPage),
-            typeof(BillListPage));
+        Routing.RegisterRoute(nameof(ContactListPage), typeof(ContactListPage));
+        Routing.RegisterRoute(nameof(ContactEditPage), typeof(ContactEditPage));
+        Routing.RegisterRoute(nameof(ContactDetailPage), typeof(ContactDetailPage));
 
-        Routing.RegisterRoute(
-            nameof(BillEditPage),
-            typeof(BillEditPage));
+        Routing.RegisterRoute(nameof(UserProfilePage), typeof(UserProfilePage));
 
-        Routing.RegisterRoute(
-            nameof(RecordBillPaymentPage),
-            typeof(RecordBillPaymentPage));
+        Routing.RegisterRoute(nameof(BackupRestorePage), typeof(BackupRestorePage));
+        Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));
 
-
-        // ═══════════════════════════════════════════════
-        // EMI
-        // ═══════════════════════════════════════════════
-
-        Routing.RegisterRoute(
-            nameof(EmiListPage),
-            typeof(EmiListPage));
-
-        Routing.RegisterRoute(
-            nameof(EmiEditPage),
-            typeof(EmiEditPage));
-
-        Routing.RegisterRoute(
-            nameof(RecordEmiPaymentPage),
-            typeof(RecordEmiPaymentPage));
-
-        Routing.RegisterRoute(
-            nameof(EmiDetailPage),
-            typeof(EmiDetailPage));
-
-
-        // ═══════════════════════════════════════════════
-        // BORROW / LEND
-        // ═══════════════════════════════════════════════
-
-        Routing.RegisterRoute(
-            nameof(BorrowLendListPage),
-            typeof(BorrowLendListPage));
-
-        Routing.RegisterRoute(
-            nameof(BorrowLendEditPage),
-            typeof(BorrowLendEditPage));
-
-        Routing.RegisterRoute(
-            nameof(RecordBorrowLendTransactionPage),
-            typeof(RecordBorrowLendTransactionPage));
-
-
-        // ═══════════════════════════════════════════════
-        // SAVING GOALS
-        // ═══════════════════════════════════════════════
-
-        Routing.RegisterRoute(
-            nameof(SavingGoalListPage),
-            typeof(SavingGoalListPage));
-
-        Routing.RegisterRoute(
-            nameof(SavingGoalEditPage),
-            typeof(SavingGoalEditPage));
-
-        Routing.RegisterRoute(
-            nameof(SavingGoalContributePage),
-            typeof(SavingGoalContributePage));
-
-
-        // ═══════════════════════════════════════════════
-        // BUDGET
-        // ═══════════════════════════════════════════════
-
-        Routing.RegisterRoute(
-            nameof(BudgetListPage),
-            typeof(BudgetListPage));
-
-        Routing.RegisterRoute(
-            nameof(BudgetEditPage),
-            typeof(BudgetEditPage));
-
-
-        // ═══════════════════════════════════════════════
-        // NOTIFICATIONS
-        // ═══════════════════════════════════════════════
-
-        Routing.RegisterRoute(
-            nameof(NotificationListPage),
-            typeof(NotificationListPage));
-
-
-        // ═══════════════════════════════════════════════
-        // CONTACTS
-        // ═══════════════════════════════════════════════
-
-        Routing.RegisterRoute(
-            nameof(ContactListPage),
-            typeof(ContactListPage));
-
-        Routing.RegisterRoute(
-            nameof(ContactEditPage),
-            typeof(ContactEditPage));
-
-        Routing.RegisterRoute(
-            nameof(ContactDetailPage),
-            typeof(ContactDetailPage));
-
-
-        // ═══════════════════════════════════════════════
-        // PROFILE
-        // ═══════════════════════════════════════════════
-
-        Routing.RegisterRoute(
-            nameof(UserProfilePage),
-            typeof(UserProfilePage));
-
-
-        // ═══════════════════════════════════════════════
-        // CLOUD BACKUP
-        // ═══════════════════════════════════════════════
-
-        Routing.RegisterRoute(
-            nameof(BackupRestorePage),
-            typeof(BackupRestorePage));
-
-        Routing.RegisterRoute(
-            nameof(LoginPage),
-            typeof(LoginPage));
-
-
-        // ═══════════════════════════════════════════════
-        // TRANSACTIONS
-        // ═══════════════════════════════════════════════
-
-        Routing.RegisterRoute(
-            nameof(AddEditTransactionPage),
-            typeof(AddEditTransactionPage));
+        Routing.RegisterRoute(nameof(AddEditTransactionPage), typeof(AddEditTransactionPage));
     }
 }

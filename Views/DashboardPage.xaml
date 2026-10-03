@@ -9,141 +9,56 @@
     xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
     x:DataType="vm:DashboardViewModel"
     Title="Home"
-    BackgroundColor="{StaticResource Background}">
+    BackgroundColor="#F6F7FB">
 
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
         <ScrollView>
-            <VerticalStackLayout Padding="16,10,16,28" Spacing="16"
-                                 MaximumWidthRequest="500"
-                                 HorizontalOptions="Fill">
+            <VerticalStackLayout Padding="16,12,16,32" Spacing="22"
+                                 MaximumWidthRequest="500" HorizontalOptions="Fill">
 
-                <!-- ═══════════════════════════════════════════ -->
-                <!-- 1. HEADER: Greeting (left) + Period filter  -->
-                <!--    (right)  — Day / Week / Month / Year     -->
-                <!-- ═══════════════════════════════════════════ -->
-                <Grid x:Name="GreetingSection"
-                      ColumnDefinitions="*,Auto" ColumnSpacing="10"
+                <!-- 1. GREETING (NEW) -->
+                <Grid x:Name="GreetingSection" ColumnDefinitions="*,Auto" ColumnSpacing="14"
                       Opacity="0" TranslationY="16">
 
-                    <VerticalStackLayout Grid.Column="0" Spacing="1" VerticalOptions="Center">
-                        <Label FontSize="12" TextColor="{StaticResource TextSecondary}"
-                               Text="{Binding GreetingPrefix, StringFormat='{0},'}" />
-                        <Label FontSize="22" FontAttributes="Bold" TextColor="#1A2B4C"
-                               LineBreakMode="TailTruncation" MaxLines="1">
-                            <Label.Text>
-                                <MultiBinding StringFormat="{}{0} 👋">
-                                    <Binding Path="UserName" />
-                                </MultiBinding>
-                            </Label.Text>
-                        </Label>
+                    <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
+                        <Label Text="{Binding TodayText}" FontSize="11" FontAttributes="Bold"
+                               CharacterSpacing="0.8" TextColor="#FF6A00" />
+                        <Label Text="{Binding GreetingPrefix}" FontSize="15" TextColor="#6B7280" />
+                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8">
+                            <Label Text="{Binding UserName}" FontSize="28" FontAttributes="Bold"
+                                   TextColor="#111827" LineBreakMode="TailTruncation" MaxLines="1"
+                                   VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="👋" FontSize="24" VerticalOptions="Center" />
+                        </Grid>
                     </VerticalStackLayout>
 
-                    <!-- Segmented filter -->
-                    <Border Grid.Column="1"
-                            StrokeThickness="0"
-                            StrokeShape="RoundRectangle 16"
-                            BackgroundColor="#ECEFF4"
-                            Padding="3"
+                    <Border Grid.Column="1" WidthRequest="52" HeightRequest="52"
+                            StrokeThickness="2" Stroke="White" StrokeShape="RoundRectangle 26"
                             VerticalOptions="Center">
-
-                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="2">
-
-                            <!-- DAY -->
-                            <Border Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 13"
-                                    BackgroundColor="Transparent" Padding="9,6">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SetViewModeCommand}" CommandParameter="Day" />
-                                </Border.GestureRecognizers>
-                                <Border.Triggers>
-                                    <DataTrigger TargetType="Border" Binding="{Binding ViewMode}" Value="Day">
-                                        <Setter Property="BackgroundColor" Value="#FF7A00" />
-                                    </DataTrigger>
-                                </Border.Triggers>
-                                <Label Text="Day" FontSize="10.5" FontAttributes="Bold" TextColor="#64748B"
-                                       HorizontalOptions="Center" VerticalOptions="Center">
-                                    <Label.Triggers>
-                                        <DataTrigger TargetType="Label" Binding="{Binding ViewMode}" Value="Day">
-                                            <Setter Property="TextColor" Value="White" />
-                                        </DataTrigger>
-                                    </Label.Triggers>
-                                </Label>
-                            </Border>
-
-                            <!-- WEEK -->
-                            <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 13"
-                                    BackgroundColor="Transparent" Padding="9,6">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SetViewModeCommand}" CommandParameter="Week" />
-                                </Border.GestureRecognizers>
-                                <Border.Triggers>
-                                    <DataTrigger TargetType="Border" Binding="{Binding ViewMode}" Value="Week">
-                                        <Setter Property="BackgroundColor" Value="#FF7A00" />
-                                    </DataTrigger>
-                                </Border.Triggers>
-                                <Label Text="Week" FontSize="10.5" FontAttributes="Bold" TextColor="#64748B"
-                                       HorizontalOptions="Center" VerticalOptions="Center">
-                                    <Label.Triggers>
-                                        <DataTrigger TargetType="Label" Binding="{Binding ViewMode}" Value="Week">
-                                            <Setter Property="TextColor" Value="White" />
-                                        </DataTrigger>
-                                    </Label.Triggers>
-                                </Label>
-                            </Border>
-
-                            <!-- MONTH -->
-                            <Border Grid.Column="2" StrokeThickness="0" StrokeShape="RoundRectangle 13"
-                                    BackgroundColor="Transparent" Padding="9,6">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SetViewModeCommand}" CommandParameter="Month" />
-                                </Border.GestureRecognizers>
-                                <Border.Triggers>
-                                    <DataTrigger TargetType="Border" Binding="{Binding ViewMode}" Value="Month">
-                                        <Setter Property="BackgroundColor" Value="#FF7A00" />
-                                    </DataTrigger>
-                                </Border.Triggers>
-                                <Label Text="Month" FontSize="10.5" FontAttributes="Bold" TextColor="#64748B"
-                                       HorizontalOptions="Center" VerticalOptions="Center">
-                                    <Label.Triggers>
-                                        <DataTrigger TargetType="Label" Binding="{Binding ViewMode}" Value="Month">
-                                            <Setter Property="TextColor" Value="White" />
-                                        </DataTrigger>
-                                    </Label.Triggers>
-                                </Label>
-                            </Border>
-
-                            <!-- YEAR -->
-                            <Border Grid.Column="3" StrokeThickness="0" StrokeShape="RoundRectangle 13"
-                                    BackgroundColor="Transparent" Padding="9,6">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SetViewModeCommand}" CommandParameter="Year" />
-                                </Border.GestureRecognizers>
-                                <Border.Triggers>
-                                    <DataTrigger TargetType="Border" Binding="{Binding ViewMode}" Value="Year">
-                                        <Setter Property="BackgroundColor" Value="#FF7A00" />
-                                    </DataTrigger>
-                                </Border.Triggers>
-                                <Label Text="Year" FontSize="10.5" FontAttributes="Bold" TextColor="#64748B"
-                                       HorizontalOptions="Center" VerticalOptions="Center">
-                                    <Label.Triggers>
-                                        <DataTrigger TargetType="Label" Binding="{Binding ViewMode}" Value="Year">
-                                            <Setter Property="TextColor" Value="White" />
-                                        </DataTrigger>
-                                    </Label.Triggers>
-                                </Label>
-                            </Border>
-                        </Grid>
+                        <Border.Shadow>
+                            <Shadow Brush="#FF5A00" Offset="0,4" Radius="10" Opacity="0.25" />
+                        </Border.Shadow>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#FF9A1F" Offset="0" />
+                                <GradientStop Color="#FF5A00" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnProfileTapped" />
+                        </Border.GestureRecognizers>
+                        <Label Text="{Binding UserInitial}" FontSize="22" FontAttributes="Bold"
+                               TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"
+                               InputTransparent="True" />
                     </Border>
                 </Grid>
 
-                <!-- ═══════════════════════════════════════════ -->
-                <!-- 2. HERO: TOTAL BALANCE                      -->
-                <!-- ═══════════════════════════════════════════ -->
-                <Border x:Name="BalanceCard" StrokeThickness="0" StrokeShape="RoundRectangle 24"
-                        Padding="0" Opacity="0" TranslationY="20">
+                <!-- 2. BALANCE HERO -->
+                <Border x:Name="BalanceCard" StrokeThickness="0" StrokeShape="RoundRectangle 28"
+                        Opacity="0" TranslationY="20">
                     <Border.Shadow>
-                        <Shadow Brush="#FF5500" Offset="0,8" Radius="18" Opacity="0.22" />
+                        <Shadow Brush="#FF5A00" Offset="0,10" Radius="22" Opacity="0.25" />
                     </Border.Shadow>
-
                     <Grid>
                         <Grid.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -152,34 +67,19 @@
                             </LinearGradientBrush>
                         </Grid.Background>
 
-                        <!-- Decorative glow circles -->
-                        <Ellipse Fill="#1FFFFFFF" WidthRequest="170" HeightRequest="170"
+                        <Ellipse Fill="#22FFFFFF" WidthRequest="190" HeightRequest="190"
                                  HorizontalOptions="End" VerticalOptions="Start"
-                                 TranslationX="55" TranslationY="-60" InputTransparent="True" />
-                        <Ellipse Fill="#14FFFFFF" WidthRequest="110" HeightRequest="110"
-                                 HorizontalOptions="Start" VerticalOptions="Start"
-                                 TranslationX="-35" TranslationY="-40" InputTransparent="True" />
+                                 TranslationX="60" TranslationY="-70" InputTransparent="True" />
+                        <Ellipse Fill="#14FFFFFF" WidthRequest="120" HeightRequest="120"
+                                 HorizontalOptions="End" VerticalOptions="End"
+                                 TranslationX="20" TranslationY="40" InputTransparent="True" />
 
-                        <shapes:Path x:Name="Wave1"
-                                     Data="M0,80 C100,30 200,110 320,50 C400,10 460,60 500,40 L500,200 L0,200 Z"
-                                     Fill="#12FFFFFF" Aspect="Fill"
-                                     HorizontalOptions="Fill" VerticalOptions="End"
-                                     HeightRequest="90" InputTransparent="True" />
-                        <shapes:Path x:Name="Wave2"
-                                     Data="M0,110 C120,60 220,140 340,80 C420,40 480,90 500,70 L500,200 L0,200 Z"
-                                     Fill="#1CFFFFFF" Aspect="Fill"
-                                     HorizontalOptions="Fill" VerticalOptions="End"
-                                     HeightRequest="70" InputTransparent="True" />
-
-                        <VerticalStackLayout Padding="20,18,20,18" Spacing="6">
-
+                        <VerticalStackLayout Padding="22,20,22,20" Spacing="4">
                             <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                                <Label Text="Total Balance" TextColor="White"
-                                       Opacity="0.92" FontSize="12.5" FontAttributes="Bold"
-                                       VerticalOptions="Center" />
+                                <Label Text="Total Balance" TextColor="White" Opacity="0.9"
+                                       FontSize="13" FontAttributes="Bold" VerticalOptions="Center" />
                                 <Image x:Name="EyeIcon" Source="icon_eye.png"
-                                       WidthRequest="16" HeightRequest="16"
-                                       Aspect="AspectFit"
+                                       WidthRequest="18" HeightRequest="18" Aspect="AspectFit"
                                        VerticalOptions="Center" Opacity="0.9">
                                     <Image.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="OnEyeIconTapped" />
@@ -187,33 +87,24 @@
                                 </Image>
                             </HorizontalStackLayout>
 
-                            <Label x:Name="BalanceAmountLabel"
-                                   Text="₹0.00"
-                                   TextColor="White"
-                                   FontSize="34"
-                                   FontAttributes="Bold"
-                                   LineBreakMode="TailTruncation"
-                                   MaxLines="1" />
+                            <Label x:Name="BalanceAmountLabel" Text="₹0.00" TextColor="White"
+                                   FontSize="38" FontAttributes="Bold"
+                                   LineBreakMode="TailTruncation" MaxLines="1" />
 
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="0,10,0,0">
-                                <Label Grid.Column="0" Text="Across all accounts"
-                                       FontSize="11.5"
-                                       TextColor="White" Opacity="0.85"
-                                       VerticalOptions="Center" />
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="0,14,0,0">
+                                <Label Text="Across all accounts" FontSize="12"
+                                       TextColor="White" Opacity="0.85" VerticalOptions="Center" />
                                 <Border x:Name="ViewAccountsButton" Grid.Column="1"
-                                        StrokeThickness="0" StrokeShape="RoundRectangle 18"
-                                        BackgroundColor="#3DFFFFFF" Padding="14,8">
+                                        StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                                        BackgroundColor="#40FFFFFF" Padding="14,8">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="OnViewAccountsTapped" />
                                     </Border.GestureRecognizers>
-                                    <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                        <Label Text="View Accounts" FontSize="11.5"
-                                               FontAttributes="Bold" TextColor="White"
-                                               VerticalOptions="Center" />
-                                        <Image Source="icon_chevron_white.png"
-                                               WidthRequest="10" HeightRequest="10"
-                                               Aspect="AspectFit"
-                                               VerticalOptions="Center" />
+                                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                        <Label Text="View Accounts" FontSize="12" FontAttributes="Bold"
+                                               TextColor="White" VerticalOptions="Center" />
+                                        <Image Source="icon_chevron_white.png" WidthRequest="10"
+                                               HeightRequest="10" Aspect="AspectFit" VerticalOptions="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                             </Grid>
@@ -221,523 +112,431 @@
                     </Grid>
                 </Border>
 
-                <!-- ═══════════════════════════════════════════ -->
-                <!-- 3. OVERVIEW (period data)                   -->
-                <!--    Header: title left, date navigator right -->
-                <!-- ═══════════════════════════════════════════ -->
-                <VerticalStackLayout Spacing="10">
+                <!-- 3. OVERVIEW -->
+                <VerticalStackLayout Spacing="12">
 
-                    <Grid ColumnDefinitions="*,Auto" Margin="2,0,0,0">
-                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="0">
-                            <Label Text="Overview" FontSize="15" FontAttributes="Bold"
-                                   TextColor="{StaticResource TextPrimary}" />
-                            <Label Text="Your money at a glance" FontSize="10.5"
-                                   TextColor="{StaticResource TextSecondary}" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="1">
+                            <Label Text="Overview" FontSize="18" FontAttributes="Bold" TextColor="#111827" />
+                            <Label Text="Your money at a glance" FontSize="12" TextColor="#8A94A6" />
                         </VerticalStackLayout>
 
-                        <!-- ‹  This Month  › -->
-                        <Border Grid.Column="1"
-                                StrokeThickness="1" Stroke="#E7EAF0"
-                                StrokeShape="RoundRectangle 18"
-                                BackgroundColor="White" Padding="2"
-                                VerticalOptions="Center">
+                        <Border Grid.Column="1" StrokeThickness="1" Stroke="#E8EBF2"
+                                StrokeShape="RoundRectangle 20" BackgroundColor="White"
+                                Padding="2" VerticalOptions="Center">
                             <HorizontalStackLayout Spacing="0">
-                                <Border WidthRequest="32" HeightRequest="32"
-                                        StrokeThickness="0" StrokeShape="RoundRectangle 16"
-                                        BackgroundColor="Transparent">
+                                <Border WidthRequest="34" HeightRequest="34" StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 17" BackgroundColor="Transparent">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding PreviousPeriodCommand}" />
                                     </Border.GestureRecognizers>
-                                    <Label Text="‹" FontSize="20" FontAttributes="Bold"
-                                           TextColor="#1A2B4C"
+                                    <Label Text="‹" FontSize="22" FontAttributes="Bold" TextColor="#111827"
                                            HorizontalOptions="Center" VerticalOptions="Center" />
                                 </Border>
-
-                                <Label Text="{Binding PeriodLabel}"
-                                       FontSize="12.5" FontAttributes="Bold"
-                                       TextColor="#1A2B4C"
-                                       MinimumWidthRequest="86"
-                                       HorizontalTextAlignment="Center"
-                                       VerticalOptions="Center"
+                                <Label Text="{Binding PeriodLabel}" FontSize="12.5" FontAttributes="Bold"
+                                       TextColor="#111827" MinimumWidthRequest="82"
+                                       HorizontalTextAlignment="Center" VerticalOptions="Center"
                                        LineBreakMode="TailTruncation" MaxLines="1" />
-
-                                <Border WidthRequest="32" HeightRequest="32"
-                                        StrokeThickness="0" StrokeShape="RoundRectangle 16"
-                                        BackgroundColor="Transparent">
+                                <Border WidthRequest="34" HeightRequest="34" StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 17" BackgroundColor="Transparent">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding NextPeriodCommand}" />
                                     </Border.GestureRecognizers>
-                                    <Label Text="›" FontSize="20" FontAttributes="Bold"
-                                           TextColor="#1A2B4C"
+                                    <Label Text="›" FontSize="22" FontAttributes="Bold" TextColor="#111827"
                                            HorizontalOptions="Center" VerticalOptions="Center" />
                                 </Border>
                             </HorizontalStackLayout>
                         </Border>
                     </Grid>
 
-                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto"
-                          ColumnSpacing="10" RowSpacing="10">
+                    <!-- Day / Week / Month / Year -->
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                            BackgroundColor="#E9ECF3" Padding="4">
+                        <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="4">
 
-                        <components:SummaryCardView x:Name="CardIncome"
-                            Grid.Row="0" Grid.Column="0"
-                            IconSource="icon_arrow_up_green.png"
-                            IconBackgroundColor="#E8F5E9" AccentColor="#00B368"
+                            <Border Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 12"
+                                    BackgroundColor="Transparent" Padding="0,9">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SetViewModeCommand}" CommandParameter="Day" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding ViewMode}" Value="Day">
+                                        <Setter Property="BackgroundColor" Value="White" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="Day" FontSize="12" FontAttributes="Bold" TextColor="#6B7280"
+                                       HorizontalOptions="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding ViewMode}" Value="Day">
+                                            <Setter Property="TextColor" Value="#FF6A00" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+
+                            <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 12"
+                                    BackgroundColor="Transparent" Padding="0,9">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SetViewModeCommand}" CommandParameter="Week" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding ViewMode}" Value="Week">
+                                        <Setter Property="BackgroundColor" Value="White" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="Week" FontSize="12" FontAttributes="Bold" TextColor="#6B7280"
+                                       HorizontalOptions="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding ViewMode}" Value="Week">
+                                            <Setter Property="TextColor" Value="#FF6A00" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+
+                            <Border Grid.Column="2" StrokeThickness="0" StrokeShape="RoundRectangle 12"
+                                    BackgroundColor="Transparent" Padding="0,9">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SetViewModeCommand}" CommandParameter="Month" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding ViewMode}" Value="Month">
+                                        <Setter Property="BackgroundColor" Value="White" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="Month" FontSize="12" FontAttributes="Bold" TextColor="#6B7280"
+                                       HorizontalOptions="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding ViewMode}" Value="Month">
+                                            <Setter Property="TextColor" Value="#FF6A00" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+
+                            <Border Grid.Column="3" StrokeThickness="0" StrokeShape="RoundRectangle 12"
+                                    BackgroundColor="Transparent" Padding="0,9">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SetViewModeCommand}" CommandParameter="Year" />
+                                </Border.GestureRecognizers>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding ViewMode}" Value="Year">
+                                        <Setter Property="BackgroundColor" Value="White" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="Year" FontSize="12" FontAttributes="Bold" TextColor="#6B7280"
+                                       HorizontalOptions="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding ViewMode}" Value="Year">
+                                            <Setter Property="TextColor" Value="#FF6A00" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                        <components:SummaryCardView x:Name="CardIncome" Grid.Row="0" Grid.Column="0"
+                            IconSource="icon_arrow_up_green.png" IconBackgroundColor="#E8F5E9" AccentColor="#00B368"
                             CardTitle="Income"
                             CardAmount="{Binding PeriodIncome, Converter={StaticResource CurrencyConverter}}"
                             CardCaption="{Binding PeriodIncomeCount, StringFormat='{0} transactions'}"
-                            ShowDot="True" DotColor="#00B368"
-                            Opacity="0" TranslationY="18" />
+                            ShowDot="True" DotColor="#00B368" Opacity="0" TranslationY="18" />
 
-                        <components:SummaryCardView x:Name="CardExpense"
-                            Grid.Row="0" Grid.Column="1"
-                            IconSource="icon_arrow_down_red.png"
-                            IconBackgroundColor="#FFEBEE" AccentColor="#E53935"
+                        <components:SummaryCardView x:Name="CardExpense" Grid.Row="0" Grid.Column="1"
+                            IconSource="icon_arrow_down_red.png" IconBackgroundColor="#FFEBEE" AccentColor="#E53935"
                             CardTitle="Expense"
                             CardAmount="{Binding PeriodExpense, Converter={StaticResource CurrencyConverter}}"
                             CardCaption="{Binding PeriodExpenseCount, StringFormat='{0} transactions'}"
-                            ShowDot="True" DotColor="#E53935"
-                            Opacity="0" TranslationY="18" />
+                            ShowDot="True" DotColor="#E53935" Opacity="0" TranslationY="18" />
 
-                        <components:SummaryCardView x:Name="CardSavings"
-                            Grid.Row="1" Grid.Column="0"
-                            IconSource="icon_piggy_blue.png"
-                            IconBackgroundColor="#E3F2FD" AccentColor="#1E88E5"
+                        <components:SummaryCardView x:Name="CardSavings" Grid.Row="1" Grid.Column="0"
+                            IconSource="icon_piggy_blue.png" IconBackgroundColor="#E3F2FD" AccentColor="#1E88E5"
                             CardTitle="Savings"
                             CardAmount="{Binding PeriodSaving, Converter={StaticResource CurrencyConverter}}"
-                            CardCaption="Income − Expense"
-                            Opacity="0" TranslationY="18" />
+                            CardCaption="Income − Expense" Opacity="0" TranslationY="18" />
 
-                        <components:SummaryCardView x:Name="CardNetBalance"
-                            Grid.Row="1" Grid.Column="1"
-                            IconSource="icon_bank_purple.png"
-                            IconBackgroundColor="#F3E5F5" AccentColor="#8E24AA"
+                        <components:SummaryCardView x:Name="CardNetBalance" Grid.Row="1" Grid.Column="1"
+                            IconSource="icon_bank_purple.png" IconBackgroundColor="#F3E5F5" AccentColor="#8E24AA"
                             CardTitle="Net Balance"
                             CardAmount="{Binding TotalBalance, Converter={StaticResource CurrencyConverter}}"
-                            CardCaption="Cash + Bank + UPI"
-                            Opacity="0" TranslationY="18" />
+                            CardCaption="Cash + Bank + UPI" Opacity="0" TranslationY="18" />
                     </Grid>
 
-                    <!-- Spending insight: simple, beginner-friendly -->
-                    <Border x:Name="InsightCard"
-                            StrokeThickness="1" Stroke="#EEF0F3"
-                            StrokeShape="RoundRectangle 18"
-                            BackgroundColor="White" Padding="14,12">
-                        <VerticalStackLayout Spacing="9">
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                                <Border Grid.Column="0" WidthRequest="26" HeightRequest="26"
-                                        StrokeThickness="0" StrokeShape="RoundRectangle 13"
-                                        BackgroundColor="#FFF1E3" VerticalOptions="Center">
-                                    <shapes:Path WidthRequest="14" HeightRequest="14" Aspect="Uniform"
+                    <!-- Spending insight -->
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                            BackgroundColor="White" Padding="16">
+                        <VerticalStackLayout Spacing="10">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <Border WidthRequest="30" HeightRequest="30" StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 15" BackgroundColor="#FFF1E3"
+                                        VerticalOptions="Center">
+                                    <shapes:Path WidthRequest="15" HeightRequest="15" Aspect="Uniform"
                                                  Stroke="#FF7A00" StrokeThickness="2"
                                                  StrokeLineCap="Round" StrokeLineJoin="Round"
                                                  HorizontalOptions="Center" VerticalOptions="Center"
                                                  Data="M4,20 V10 M10,20 V4 M16,20 V13 M22,20 H2" />
                                 </Border>
-                                <Label Grid.Column="1" Text="Spending vs Income"
-                                       FontSize="13" FontAttributes="Bold"
-                                       TextColor="{StaticResource TextPrimary}"
-                                       VerticalOptions="Center" />
-                                <Label Grid.Column="2" Text="{Binding SpendPercentText}"
-                                       FontSize="13" FontAttributes="Bold"
-                                       TextColor="#FF7A00" VerticalOptions="Center" />
+                                <Label Grid.Column="1" Text="Spending vs Income" FontSize="14"
+                                       FontAttributes="Bold" TextColor="#111827" VerticalOptions="Center" />
+                                <Label Grid.Column="2" Text="{Binding SpendPercentText}" FontSize="14"
+                                       FontAttributes="Bold" TextColor="#FF7A00" VerticalOptions="Center" />
                             </Grid>
-
-                            <ProgressBar Progress="{Binding SpendRatio}"
-                                         ProgressColor="#FF7A00"
-                                         BackgroundColor="#F1F4F8"
-                                         HeightRequest="8" />
-
-                            <Label Text="{Binding SpendInsight}"
-                                   FontSize="11"
-                                   TextColor="{StaticResource TextSecondary}" />
+                            <ProgressBar Progress="{Binding SpendRatio}" ProgressColor="#FF7A00"
+                                         BackgroundColor="#F1F3F8" HeightRequest="8" />
+                            <Label Text="{Binding SpendInsight}" FontSize="12" TextColor="#6B7280" />
                         </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>
 
-                <!-- ═══════════════════════════════════════════ -->
-                <!-- 4. QUICK ACTIONS                            -->
-                <!-- ═══════════════════════════════════════════ -->
-                <Border x:Name="QuickActionsSection"
-                        StrokeThickness="1" Stroke="#EEF0F3"
-                        StrokeShape="RoundRectangle 22"
-                        BackgroundColor="White" Padding="16"
-                        Opacity="0" TranslationY="18">
-
-                    <VerticalStackLayout Spacing="14">
-
-                        <!-- Header -->
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="Quick Add"
-                                   FontSize="16" FontAttributes="Bold"
-                                   TextColor="{StaticResource TextPrimary}" />
-                            <Label Text="What would you like to record?"
-                                   FontSize="11.5"
-                                   TextColor="{StaticResource TextSecondary}" />
-                        </VerticalStackLayout>
-
-                        <!-- ═════════ PRIMARY: Income + Expense (big buttons) ═════════ -->
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-
-                            <!-- ADD INCOME -->
-                            <Border Grid.Column="0"
-                                    StrokeThickness="0" StrokeShape="RoundRectangle 18"
-                                    Padding="0">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnQuickAddIncomeTapped" />
-                                </Border.GestureRecognizers>
-
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Padding="12,14">
-                                    <Grid.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                            <GradientStop Color="#34D399" Offset="0.0" />
-                                            <GradientStop Color="#059669" Offset="1.0" />
-                                        </LinearGradientBrush>
-                                    </Grid.Background>
-
-                                    <Border Grid.Column="0" WidthRequest="38" HeightRequest="38"
-                                            StrokeThickness="0" StrokeShape="RoundRectangle 19"
-                                            BackgroundColor="#33FFFFFF" VerticalOptions="Center">
-                                        <!-- arrow down-left : money IN -->
-                                        <shapes:Path WidthRequest="20" HeightRequest="20" Aspect="Uniform"
-                                                     Stroke="White" StrokeThickness="2"
-                                                     StrokeLineCap="Round" StrokeLineJoin="Round"
-                                                     HorizontalOptions="Center" VerticalOptions="Center"
-                                                     Data="M17,7 L7,17 M17,17 H7 V7" />
-                                    </Border>
-
-                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
-                                        <Label Text="Income" FontSize="14" FontAttributes="Bold" TextColor="White"
-                                               LineBreakMode="TailTruncation" MaxLines="1" />
-                                        <Label Text="Money received" FontSize="10" TextColor="White" Opacity="0.88"
-                                               LineBreakMode="TailTruncation" MaxLines="1" />
-                                    </VerticalStackLayout>
-
-                                    <Border Grid.Column="2" WidthRequest="24" HeightRequest="24"
-                                            StrokeThickness="0" StrokeShape="RoundRectangle 12"
-                                            BackgroundColor="White" VerticalOptions="Center">
-                                        <shapes:Path WidthRequest="11" HeightRequest="11" Aspect="Uniform"
-                                                     Stroke="#059669" StrokeThickness="3"
-                                                     StrokeLineCap="Round"
-                                                     HorizontalOptions="Center" VerticalOptions="Center"
-                                                     Data="M12,5 V19 M5,12 H19" />
-                                    </Border>
-                                </Grid>
-                            </Border>
-
-                            <!-- ADD EXPENSE -->
-                            <Border Grid.Column="1"
-                                    StrokeThickness="0" StrokeShape="RoundRectangle 18"
-                                    Padding="0">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnQuickAddExpenseTapped" />
-                                </Border.GestureRecognizers>
-
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Padding="12,14">
-                                    <Grid.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                            <GradientStop Color="#FB7185" Offset="0.0" />
-                                            <GradientStop Color="#E11D48" Offset="1.0" />
-                                        </LinearGradientBrush>
-                                    </Grid.Background>
-
-                                    <Border Grid.Column="0" WidthRequest="38" HeightRequest="38"
-                                            StrokeThickness="0" StrokeShape="RoundRectangle 19"
-                                            BackgroundColor="#33FFFFFF" VerticalOptions="Center">
-                                        <!-- arrow up-right : money OUT -->
-                                        <shapes:Path WidthRequest="20" HeightRequest="20" Aspect="Uniform"
-                                                     Stroke="White" StrokeThickness="2"
-                                                     StrokeLineCap="Round" StrokeLineJoin="Round"
-                                                     HorizontalOptions="Center" VerticalOptions="Center"
-                                                     Data="M7,17 L17,7 M7,7 H17 V17" />
-                                    </Border>
-
-                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
-                                        <Label Text="Expense" FontSize="14" FontAttributes="Bold" TextColor="White"
-                                               LineBreakMode="TailTruncation" MaxLines="1" />
-                                        <Label Text="Money spent" FontSize="10" TextColor="White" Opacity="0.88"
-                                               LineBreakMode="TailTruncation" MaxLines="1" />
-                                    </VerticalStackLayout>
-
-                                    <Border Grid.Column="2" WidthRequest="24" HeightRequest="24"
-                                            StrokeThickness="0" StrokeShape="RoundRectangle 12"
-                                            BackgroundColor="White" VerticalOptions="Center">
-                                        <shapes:Path WidthRequest="11" HeightRequest="11" Aspect="Uniform"
-                                                     Stroke="#E11D48" StrokeThickness="3"
-                                                     StrokeLineCap="Round"
-                                                     HorizontalOptions="Center" VerticalOptions="Center"
-                                                     Data="M12,5 V19 M5,12 H19" />
-                                    </Border>
-                                </Grid>
-                            </Border>
-                        </Grid>
-
-                        <!-- ═════════ SECONDARY: More ways to add ═════════ -->
-                        <Label Text="MORE WAYS TO ADD"
-                               FontSize="10" FontAttributes="Bold" CharacterSpacing="1.2"
-                               TextColor="#94A3B8" Margin="2,2,0,-4" />
-
-                        <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="6">
-
-                            <!-- BORROW -->
-                            <Border Grid.Column="0"
-                                    StrokeThickness="1" Stroke="#EEF0F3" StrokeShape="RoundRectangle 16"
-                                    BackgroundColor="#FAFBFD" Padding="2,10">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnQuickBorrowTapped" />
-                                </Border.GestureRecognizers>
-                                <VerticalStackLayout Spacing="7">
-                                    <Grid WidthRequest="46" HeightRequest="44" HorizontalOptions="Center">
-                                        <Border WidthRequest="38" HeightRequest="38"
-                                                StrokeThickness="0" StrokeShape="RoundRectangle 19"
-                                                BackgroundColor="#DBEAFE"
-                                                HorizontalOptions="Center" VerticalOptions="Center">
-                                            <!-- tray + arrow down : receive -->
-                                            <shapes:Path WidthRequest="20" HeightRequest="20" Aspect="Uniform"
-                                                         Stroke="#2563EB" StrokeThickness="1.9"
-                                                         StrokeLineCap="Round" StrokeLineJoin="Round"
-                                                         HorizontalOptions="Center" VerticalOptions="Center"
-                                                         Data="M12,4 V15 M7,10 L12,15 L17,10 M5,20 H19" />
-                                        </Border>
-                                        <Border WidthRequest="16" HeightRequest="16"
-                                                StrokeThickness="1.5" Stroke="White" StrokeShape="RoundRectangle 8"
-                                                BackgroundColor="#2563EB"
-                                                HorizontalOptions="End" VerticalOptions="Start">
-                                            <shapes:Path WidthRequest="7" HeightRequest="7" Aspect="Uniform"
-                                                         Stroke="White" StrokeThickness="3" StrokeLineCap="Round"
-                                                         HorizontalOptions="Center" VerticalOptions="Center"
-                                                         Data="M12,5 V19 M5,12 H19" />
-                                        </Border>
-                                    </Grid>
-                                    <Label Text="Borrow" FontSize="10.5" FontAttributes="Bold" TextColor="#1E293B"
-                                           HorizontalTextAlignment="Center" LineBreakMode="NoWrap" MaxLines="1" />
-                                </VerticalStackLayout>
-                            </Border>
-
-                            <!-- LEND -->
-                            <Border Grid.Column="1"
-                                    StrokeThickness="1" Stroke="#EEF0F3" StrokeShape="RoundRectangle 16"
-                                    BackgroundColor="#FAFBFD" Padding="2,10">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnQuickLendTapped" />
-                                </Border.GestureRecognizers>
-                                <VerticalStackLayout Spacing="7">
-                                    <Grid WidthRequest="46" HeightRequest="44" HorizontalOptions="Center">
-                                        <Border WidthRequest="38" HeightRequest="38"
-                                                StrokeThickness="0" StrokeShape="RoundRectangle 19"
-                                                BackgroundColor="#EDE9FE"
-                                                HorizontalOptions="Center" VerticalOptions="Center">
-                                            <!-- tray + arrow up : give -->
-                                            <shapes:Path WidthRequest="20" HeightRequest="20" Aspect="Uniform"
-                                                         Stroke="#7C3AED" StrokeThickness="1.9"
-                                                         StrokeLineCap="Round" StrokeLineJoin="Round"
-                                                         HorizontalOptions="Center" VerticalOptions="Center"
-                                                         Data="M12,16 V5 M7,10 L12,5 L17,10 M5,20 H19" />
-                                        </Border>
-                                        <Border WidthRequest="16" HeightRequest="16"
-                                                StrokeThickness="1.5" Stroke="White" StrokeShape="RoundRectangle 8"
-                                                BackgroundColor="#7C3AED"
-                                                HorizontalOptions="End" VerticalOptions="Start">
-                                            <shapes:Path WidthRequest="7" HeightRequest="7" Aspect="Uniform"
-                                                         Stroke="White" StrokeThickness="3" StrokeLineCap="Round"
-                                                         HorizontalOptions="Center" VerticalOptions="Center"
-                                                         Data="M12,5 V19 M5,12 H19" />
-                                        </Border>
-                                    </Grid>
-                                    <Label Text="Lend" FontSize="10.5" FontAttributes="Bold" TextColor="#1E293B"
-                                           HorizontalTextAlignment="Center" LineBreakMode="NoWrap" MaxLines="1" />
-                                </VerticalStackLayout>
-                            </Border>
-
-                            <!-- EMI -->
-                            <Border Grid.Column="2"
-                                    StrokeThickness="1" Stroke="#EEF0F3" StrokeShape="RoundRectangle 16"
-                                    BackgroundColor="#FAFBFD" Padding="2,10">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnQuickEmiTapped" />
-                                </Border.GestureRecognizers>
-                                <VerticalStackLayout Spacing="7">
-                                    <Grid WidthRequest="46" HeightRequest="44" HorizontalOptions="Center">
-                                        <Border WidthRequest="38" HeightRequest="38"
-                                                StrokeThickness="0" StrokeShape="RoundRectangle 19"
-                                                BackgroundColor="#E0F2FE"
-                                                HorizontalOptions="Center" VerticalOptions="Center">
-                                            <!-- credit card -->
-                                            <shapes:Path WidthRequest="20" HeightRequest="20" Aspect="Uniform"
-                                                         Stroke="#0284C7" StrokeThickness="1.9"
-                                                         StrokeLineCap="Round" StrokeLineJoin="Round"
-                                                         HorizontalOptions="Center" VerticalOptions="Center"
-                                                         Data="M3,7 C3,5.9 3.9,5 5,5 H19 C20.1,5 21,5.9 21,7 V17 C21,18.1 20.1,19 19,19 H5 C3.9,19 3,18.1 3,17 Z M3,10 H21 M7,15 H10" />
-                                        </Border>
-                                        <Border WidthRequest="16" HeightRequest="16"
-                                                StrokeThickness="1.5" Stroke="White" StrokeShape="RoundRectangle 8"
-                                                BackgroundColor="#0284C7"
-                                                HorizontalOptions="End" VerticalOptions="Start">
-                                            <shapes:Path WidthRequest="7" HeightRequest="7" Aspect="Uniform"
-                                                         Stroke="White" StrokeThickness="3" StrokeLineCap="Round"
-                                                         HorizontalOptions="Center" VerticalOptions="Center"
-                                                         Data="M12,5 V19 M5,12 H19" />
-                                        </Border>
-                                    </Grid>
-                                    <Label Text="EMI" FontSize="10.5" FontAttributes="Bold" TextColor="#1E293B"
-                                           HorizontalTextAlignment="Center" LineBreakMode="NoWrap" MaxLines="1" />
-                                </VerticalStackLayout>
-                            </Border>
-
-                            <!-- SAVING -->
-                            <Border Grid.Column="3"
-                                    StrokeThickness="1" Stroke="#EEF0F3" StrokeShape="RoundRectangle 16"
-                                    BackgroundColor="#FAFBFD" Padding="2,10">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnQuickSavingTapped" />
-                                </Border.GestureRecognizers>
-                                <VerticalStackLayout Spacing="7">
-                                    <Grid WidthRequest="46" HeightRequest="44" HorizontalOptions="Center">
-                                        <Border WidthRequest="38" HeightRequest="38"
-                                                StrokeThickness="0" StrokeShape="RoundRectangle 19"
-                                                BackgroundColor="#D1FAE5"
-                                                HorizontalOptions="Center" VerticalOptions="Center">
-                                            <!-- piggy bank -->
-                                            <shapes:Path WidthRequest="20" HeightRequest="20" Aspect="Uniform"
-                                                         Stroke="#059669" StrokeThickness="1.8"
-                                                         StrokeLineCap="Round" StrokeLineJoin="Round"
-                                                         HorizontalOptions="Center" VerticalOptions="Center"
-                                                         Data="M4.5,13 C4.5,9.9 7.4,7.5 11,7.5 H14 C17.3,7.5 20,9.9 20,13 C20,15 19,16.5 17.5,17.4 V19.5 H14.5 V18.5 H10 V19.5 H7 V17.4 C5.5,16.5 4.5,15 4.5,13 Z M20,12 H21.5 M9.5,5 C10.5,4 12.5,4 13.5,5 M15.5,11.5 H15.51 M8.5,11 H11.5" />
-                                        </Border>
-                                        <Border WidthRequest="16" HeightRequest="16"
-                                                StrokeThickness="1.5" Stroke="White" StrokeShape="RoundRectangle 8"
-                                                BackgroundColor="#059669"
-                                                HorizontalOptions="End" VerticalOptions="Start">
-                                            <shapes:Path WidthRequest="7" HeightRequest="7" Aspect="Uniform"
-                                                         Stroke="White" StrokeThickness="3" StrokeLineCap="Round"
-                                                         HorizontalOptions="Center" VerticalOptions="Center"
-                                                         Data="M12,5 V19 M5,12 H19" />
-                                        </Border>
-                                    </Grid>
-                                    <Label Text="Saving" FontSize="10.5" FontAttributes="Bold" TextColor="#1E293B"
-                                           HorizontalTextAlignment="Center" LineBreakMode="NoWrap" MaxLines="1" />
-                                </VerticalStackLayout>
-                            </Border>
-
-                            <!-- BUDGET -->
-                            <Border Grid.Column="4"
-                                    StrokeThickness="1" Stroke="#EEF0F3" StrokeShape="RoundRectangle 16"
-                                    BackgroundColor="#FAFBFD" Padding="2,10">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnQuickBudgetTapped" />
-                                </Border.GestureRecognizers>
-                                <VerticalStackLayout Spacing="7">
-                                    <Grid WidthRequest="46" HeightRequest="44" HorizontalOptions="Center">
-                                        <Border WidthRequest="38" HeightRequest="38"
-                                                StrokeThickness="0" StrokeShape="RoundRectangle 19"
-                                                BackgroundColor="#FEF3C7"
-                                                HorizontalOptions="Center" VerticalOptions="Center">
-                                            <!-- pie chart -->
-                                            <shapes:Path WidthRequest="20" HeightRequest="20" Aspect="Uniform"
-                                                         Stroke="#D97706" StrokeThickness="1.9"
-                                                         StrokeLineCap="Round" StrokeLineJoin="Round"
-                                                         HorizontalOptions="Center" VerticalOptions="Center"
-                                                         Data="M12,3 A9,9 0 1 0 21,12 H12 Z M15,3.5 A9,9 0 0 1 20.5,9 H15 Z" />
-                                        </Border>
-                                        <Border WidthRequest="16" HeightRequest="16"
-                                                StrokeThickness="1.5" Stroke="White" StrokeShape="RoundRectangle 8"
-                                                BackgroundColor="#D97706"
-                                                HorizontalOptions="End" VerticalOptions="Start">
-                                            <shapes:Path WidthRequest="7" HeightRequest="7" Aspect="Uniform"
-                                                         Stroke="White" StrokeThickness="3" StrokeLineCap="Round"
-                                                         HorizontalOptions="Center" VerticalOptions="Center"
-                                                         Data="M12,5 V19 M5,12 H19" />
-                                        </Border>
-                                    </Grid>
-                                    <Label Text="Budget" FontSize="10.5" FontAttributes="Bold" TextColor="#1E293B"
-                                           HorizontalTextAlignment="Center" LineBreakMode="NoWrap" MaxLines="1" />
-                                </VerticalStackLayout>
-                            </Border>
-                        </Grid>
+                <!-- 4. QUICK ACCESS (NEW) -->
+                <VerticalStackLayout x:Name="QuickActionsSection" Spacing="12"
+                                     Opacity="0" TranslationY="18">
+                    <VerticalStackLayout Spacing="1">
+                        <Label Text="Quick Access" FontSize="18" FontAttributes="Bold" TextColor="#111827" />
+                        <Label Text="Record or plan in one tap" FontSize="12" TextColor="#8A94A6" />
                     </VerticalStackLayout>
-                </Border>
 
-                <!-- ═══════════════════════════════════════════ -->
-                <!-- 5. BORROW - LEND                            -->
-                <!-- ═══════════════════════════════════════════ -->
-                <Border x:Name="BorrowLendCard"
-                        StrokeThickness="0" StrokeShape="RoundRectangle 20" Padding="16"
-                        Opacity="0" TranslationY="18">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnBorrowLendTapped" />
-                    </Border.GestureRecognizers>
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                            <GradientStop Color="#FFF8F0" Offset="0.0" />
-                            <GradientStop Color="#FFEBD6" Offset="1.0" />
-                        </LinearGradientBrush>
-                    </Border.Background>
+                    <!-- Income + Expense -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
 
-                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
-                        <Border Grid.Column="0" WidthRequest="42" HeightRequest="42"
-                                StrokeThickness="0" StrokeShape="RoundRectangle 21"
-                                BackgroundColor="#FFE0B2" VerticalOptions="Center">
-                            <Image Source="icon_users_orange.png"
-                                   WidthRequest="20" HeightRequest="20" Aspect="AspectFit"
-                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        <Border Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 22">
+                            <Border.Shadow>
+                                <Shadow Brush="#059669" Offset="0,6" Radius="14" Opacity="0.22" />
+                            </Border.Shadow>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnQuickAddIncomeTapped" />
+                            </Border.GestureRecognizers>
+                            <Grid Padding="14,16" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Grid.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#34D399" Offset="0" />
+                                        <GradientStop Color="#059669" Offset="1" />
+                                    </LinearGradientBrush>
+                                </Grid.Background>
+                                <Border WidthRequest="40" HeightRequest="40" StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 20" BackgroundColor="#33FFFFFF"
+                                        VerticalOptions="Center" InputTransparent="True">
+                                    <shapes:Path WidthRequest="20" HeightRequest="20" Aspect="Uniform"
+                                                 Stroke="White" StrokeThickness="2.2"
+                                                 StrokeLineCap="Round" StrokeLineJoin="Round"
+                                                 HorizontalOptions="Center" VerticalOptions="Center"
+                                                 Data="M12,5 V19 M6,13 L12,19 L18,13" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1"
+                                                     InputTransparent="True">
+                                    <Label Text="Income" FontSize="15" FontAttributes="Bold" TextColor="White" />
+                                    <Label Text="Money in" FontSize="11" TextColor="White" Opacity="0.9" />
+                                </VerticalStackLayout>
+                            </Grid>
                         </Border>
 
-                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                            <Label FontSize="14" FontAttributes="Bold" Text="Borrow - Lend"
-                                   TextColor="#1A2B4C" LineBreakMode="TailTruncation" />
-                            <Label FontSize="10" TextColor="#6B7A90"
-                                   LineBreakMode="TailTruncation" MaxLines="1"
-                                   Text="Track what you owe and you're owed" />
-                        </VerticalStackLayout>
-
-                        <Label Grid.Column="2" FontSize="15" FontAttributes="Bold"
-                               TextColor="#FF7A00" VerticalOptions="Center" LineBreakMode="NoWrap"
-                               Text="{Binding NetBorrowLend, Converter={StaticResource CurrencyConverter}}" />
-
-                        <Image Grid.Column="3" Source="icon_chevron_orange.png"
-                               WidthRequest="12" HeightRequest="12" Aspect="AspectFit"
-                               VerticalOptions="Center" />
+                        <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 22">
+                            <Border.Shadow>
+                                <Shadow Brush="#E11D48" Offset="0,6" Radius="14" Opacity="0.22" />
+                            </Border.Shadow>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnQuickAddExpenseTapped" />
+                            </Border.GestureRecognizers>
+                            <Grid Padding="14,16" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Grid.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#FB7185" Offset="0" />
+                                        <GradientStop Color="#E11D48" Offset="1" />
+                                    </LinearGradientBrush>
+                                </Grid.Background>
+                                <Border WidthRequest="40" HeightRequest="40" StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 20" BackgroundColor="#33FFFFFF"
+                                        VerticalOptions="Center" InputTransparent="True">
+                                    <shapes:Path WidthRequest="20" HeightRequest="20" Aspect="Uniform"
+                                                 Stroke="White" StrokeThickness="2.2"
+                                                 StrokeLineCap="Round" StrokeLineJoin="Round"
+                                                 HorizontalOptions="Center" VerticalOptions="Center"
+                                                 Data="M12,19 V5 M6,11 L12,5 L18,11" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1"
+                                                     InputTransparent="True">
+                                    <Label Text="Expense" FontSize="15" FontAttributes="Bold" TextColor="White" />
+                                    <Label Text="Money out" FontSize="11" TextColor="White" Opacity="0.9" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
                     </Grid>
-                </Border>
 
-                <!-- ═══════════════════════════════════════════ -->
-                <!-- 6. RECENT TRANSACTIONS                      -->
-                <!-- ═══════════════════════════════════════════ -->
-                <Border x:Name="RecentTransactionsCard"
-                        Style="{StaticResource ListCardBorder}"
-                        StrokeShape="RoundRectangle 20"
-                        Padding="4,0,4,12"
-                        Opacity="0" TranslationY="18"
-                        IsVisible="{Binding RecentTransactions.Count, Converter={StaticResource CountToBoolConverter}}">
+                    <!-- EMI / Saving / Budget -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
 
-                    <VerticalStackLayout Spacing="0">
+                        <Border Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                                BackgroundColor="White" Padding="8,16">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnQuickEmiTapped" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="10" InputTransparent="True">
+                                <Border WidthRequest="46" HeightRequest="46" StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 23" BackgroundColor="#E0F2FE"
+                                        HorizontalOptions="Center">
+                                    <shapes:Path WidthRequest="22" HeightRequest="22" Aspect="Uniform"
+                                                 Stroke="#0284C7" StrokeThickness="1.9"
+                                                 StrokeLineCap="Round" StrokeLineJoin="Round"
+                                                 HorizontalOptions="Center" VerticalOptions="Center"
+                                                 Data="M3,7 C3,5.9 3.9,5 5,5 H19 C20.1,5 21,5.9 21,7 V17 C21,18.1 20.1,19 19,19 H5 C3.9,19 3,18.1 3,17 Z M3,10 H21 M7,15 H10" />
+                                </Border>
+                                <Label Text="EMI" FontSize="13" FontAttributes="Bold" TextColor="#111827"
+                                       HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                        </Border>
 
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Padding="12,14,12,8">
-                            <Border Grid.Column="0" WidthRequest="30" HeightRequest="30"
-                                    StrokeThickness="0" StrokeShape="RoundRectangle 15"
-                                    BackgroundColor="#E3F2FD" VerticalOptions="Center">
-                                <Image Source="icon_calendar_blue.png"
-                                       WidthRequest="15" HeightRequest="15" Aspect="AspectFit"
-                                       HorizontalOptions="Center" VerticalOptions="Center" />
-                            </Border>
-                            <Label Grid.Column="1" Text="Recent Transactions"
-                                   FontSize="14" FontAttributes="Bold"
-                                   TextColor="{StaticResource TextPrimary}" VerticalOptions="Center" />
-                            <Label Grid.Column="2" Text="View All ›"
-                                   FontSize="11.5" FontAttributes="Bold" TextColor="#1E88E5"
-                                   VerticalOptions="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnRecentTransactionsViewAllTapped" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </Grid>
+                        <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                                BackgroundColor="White" Padding="8,16">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnQuickSavingTapped" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="10" InputTransparent="True">
+                                <Border WidthRequest="46" HeightRequest="46" StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 23" BackgroundColor="#D1FAE5"
+                                        HorizontalOptions="Center">
+                                    <shapes:Path WidthRequest="22" HeightRequest="22" Aspect="Uniform"
+                                                 Stroke="#059669" StrokeThickness="1.8"
+                                                 StrokeLineCap="Round" StrokeLineJoin="Round"
+                                                 HorizontalOptions="Center" VerticalOptions="Center"
+                                                 Data="M4.5,13 C4.5,9.9 7.4,7.5 11,7.5 H14 C17.3,7.5 20,9.9 20,13 C20,15 19,16.5 17.5,17.4 V19.5 H14.5 V18.5 H10 V19.5 H7 V17.4 C5.5,16.5 4.5,15 4.5,13 Z M20,12 H21.5 M9.5,5 C10.5,4 12.5,4 13.5,5 M15.5,11.5 H15.51" />
+                                </Border>
+                                <Label Text="Saving" FontSize="13" FontAttributes="Bold" TextColor="#111827"
+                                       HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                        </Border>
 
+                        <Border Grid.Column="2" StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                                BackgroundColor="White" Padding="8,16">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnQuickBudgetTapped" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="10" InputTransparent="True">
+                                <Border WidthRequest="46" HeightRequest="46" StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 23" BackgroundColor="#FEF3C7"
+                                        HorizontalOptions="Center">
+                                    <shapes:Path WidthRequest="22" HeightRequest="22" Aspect="Uniform"
+                                                 Stroke="#D97706" StrokeThickness="1.9"
+                                                 StrokeLineCap="Round" StrokeLineJoin="Round"
+                                                 HorizontalOptions="Center" VerticalOptions="Center"
+                                                 Data="M12,3 A9,9 0 1 0 21,12 H12 Z M15,3.5 A9,9 0 0 1 20.5,9 H15 Z" />
+                                </Border>
+                                <Label Text="Budget" FontSize="13" FontAttributes="Bold" TextColor="#111827"
+                                       HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- 5. BORROW & LEND -->
+                <VerticalStackLayout x:Name="BorrowLendCard" Spacing="12"
+                                     Opacity="0" TranslationY="18">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="1">
+                            <Label Text="Borrow &amp; Lend" FontSize="18" FontAttributes="Bold" TextColor="#111827" />
+                            <Label Text="What you owe and what you'll get" FontSize="12" TextColor="#8A94A6" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Text="View All ›" FontSize="12.5" FontAttributes="Bold"
+                               TextColor="#FF6A00" VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnBorrowLendTapped" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <Border Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 22"
+                                BackgroundColor="#ECFDF5" Padding="16">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnBorrowLendTapped" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="14" InputTransparent="True">
+                                <Border WidthRequest="40" HeightRequest="40" StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 20" HorizontalOptions="Start">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#34D399" Offset="0" />
+                                            <GradientStop Color="#059669" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <shapes:Path WidthRequest="18" HeightRequest="18" Aspect="Uniform"
+                                                 Stroke="White" StrokeThickness="2.2"
+                                                 StrokeLineCap="Round" StrokeLineJoin="Round"
+                                                 HorizontalOptions="Center" VerticalOptions="Center"
+                                                 Data="M12,16 V5 M7,10 L12,5 L17,10 M5,20 H19" />
+                                </Border>
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="You will get" FontSize="12" FontAttributes="Bold" TextColor="#065F46" />
+                                    <Label FontSize="20" FontAttributes="Bold" TextColor="#047857"
+                                           LineBreakMode="TailTruncation" MaxLines="1"
+                                           Text="{Binding TotalReceivable, Converter={StaticResource CurrencyConverter}}" />
+                                    <Label Text="From people you lent" FontSize="10.5" TextColor="#6B7280"
+                                           LineBreakMode="TailTruncation" MaxLines="1" />
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 22"
+                                BackgroundColor="#FFF7ED" Padding="16">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnBorrowLendTapped" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="14" InputTransparent="True">
+                                <Border WidthRequest="40" HeightRequest="40" StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 20" HorizontalOptions="Start">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#FDBA74" Offset="0" />
+                                            <GradientStop Color="#EA580C" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <shapes:Path WidthRequest="18" HeightRequest="18" Aspect="Uniform"
+                                                 Stroke="White" StrokeThickness="2.2"
+                                                 StrokeLineCap="Round" StrokeLineJoin="Round"
+                                                 HorizontalOptions="Center" VerticalOptions="Center"
+                                                 Data="M12,4 V15 M7,10 L12,15 L17,10 M5,20 H19" />
+                                </Border>
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="You owe" FontSize="12" FontAttributes="Bold" TextColor="#9A3412" />
+                                    <Label FontSize="20" FontAttributes="Bold" TextColor="#EA580C"
+                                           LineBreakMode="TailTruncation" MaxLines="1"
+                                           Text="{Binding TotalPayable, Converter={StaticResource CurrencyConverter}}" />
+                                    <Label Text="To people you borrowed from" FontSize="10.5" TextColor="#6B7280"
+                                           LineBreakMode="TailTruncation" MaxLines="1" />
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- 6. RECENT TRANSACTIONS -->
+                <VerticalStackLayout x:Name="RecentTransactionsCard" Spacing="12"
+                                     Opacity="0" TranslationY="18">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="1">
+                            <Label Text="Recent Transactions" FontSize="18" FontAttributes="Bold" TextColor="#111827" />
+                            <Label Text="Your latest activity" FontSize="12" TextColor="#8A94A6" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Text="View All ›" FontSize="12.5" FontAttributes="Bold"
+                               TextColor="#FF6A00" VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnRecentTransactionsViewAllTapped" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
+
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 22"
+                            BackgroundColor="White" Padding="6,4"
+                            IsVisible="{Binding RecentTransactions.Count, Converter={StaticResource CountToBoolConverter}}">
                         <VerticalStackLayout Spacing="0"
                             BindableLayout.ItemsSource="{Binding RecentTransactions}">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="models:Transaction">
-                                    <Grid ColumnDefinitions="40,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="8" Padding="12,8,12,0">
-                                        <Border Grid.Column="0" WidthRequest="40" HeightRequest="40"
-                                                StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                                    <Grid ColumnDefinitions="44,*,Auto" RowDefinitions="Auto,Auto"
+                                          ColumnSpacing="12" RowSpacing="10" Padding="10,10,10,0">
+                                        <Border Grid.Column="0" WidthRequest="44" HeightRequest="44"
+                                                StrokeThickness="0" StrokeShape="RoundRectangle 22"
                                                 VerticalOptions="Center">
                                             <Border.Triggers>
                                                 <DataTrigger TargetType="Border" Binding="{Binding TransactionType}" Value="Income">
@@ -747,7 +546,7 @@
                                                     <Setter Property="BackgroundColor" Value="#FFEBEE" />
                                                 </DataTrigger>
                                             </Border.Triggers>
-                                            <Image Aspect="AspectFit" WidthRequest="18" HeightRequest="18"
+                                            <Image Aspect="AspectFit" WidthRequest="20" HeightRequest="20"
                                                    HorizontalOptions="Center" VerticalOptions="Center">
                                                 <Image.Triggers>
                                                     <DataTrigger TargetType="Image" Binding="{Binding TransactionType}" Value="Income">
@@ -761,17 +560,15 @@
                                         </Border>
 
                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                            <Label FontSize="13" FontAttributes="Bold"
-                                                   TextColor="{StaticResource TextPrimary}"
+                                            <Label FontSize="14" FontAttributes="Bold" TextColor="#111827"
                                                    Text="{Binding Description, TargetNullValue='Transaction'}"
                                                    LineBreakMode="TailTruncation" MaxLines="1" />
-                                            <Label FontSize="10"
-                                                   TextColor="{StaticResource TextSecondary}"
+                                            <Label FontSize="11" TextColor="#8A94A6"
                                                    Text="{Binding TransactionDate, StringFormat='{0:dd MMM, hh:mm tt}'}" />
                                         </VerticalStackLayout>
 
                                         <Label Grid.Column="2" VerticalOptions="Center"
-                                               FontSize="13.5" FontAttributes="Bold" LineBreakMode="NoWrap"
+                                               FontSize="14" FontAttributes="Bold" LineBreakMode="NoWrap"
                                                Text="{Binding ., Converter={StaticResource TransactionAmountTextConverter}}">
                                             <Label.Triggers>
                                                 <DataTrigger TargetType="Label" Binding="{Binding TransactionType}" Value="Income">
@@ -784,157 +581,133 @@
                                         </Label>
 
                                         <BoxView Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
-                                                 HeightRequest="1" Color="#F1F4F8" />
+                                                 HeightRequest="1" Color="#F1F3F8" />
                                     </Grid>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
-                    </VerticalStackLayout>
-                </Border>
+                    </Border>
 
-                <VerticalStackLayout Spacing="8" HorizontalOptions="Center" Padding="0,8"
-                    IsVisible="{Binding RecentTransactions.Count, Converter={StaticResource CountToInverseBoolConverter}}">
-                    <Label Text="No transactions yet"
-                           FontSize="14" FontAttributes="Bold"
-                           TextColor="{StaticResource TextPrimary}"
-                           HorizontalTextAlignment="Center" />
-                    <Label Text="Tap Income or Expense in Quick Add to record your first one."
-                           FontSize="11.5" TextColor="{StaticResource TextSecondary}"
-                           HorizontalTextAlignment="Center" />
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 22"
+                            BackgroundColor="White" Padding="20,24"
+                            IsVisible="{Binding RecentTransactions.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                        <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                            <Label Text="No transactions yet" FontSize="15" FontAttributes="Bold"
+                                   TextColor="#111827" HorizontalTextAlignment="Center" />
+                            <Label Text="Tap the Add tab below to record your first one."
+                                   FontSize="12" TextColor="#8A94A6" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Border>
                 </VerticalStackLayout>
 
-                <!-- ═══════════════════════════════════════════ -->
-                <!-- 7. UPCOMING BILLS + ACTIVE EMIs             -->
-                <!-- ═══════════════════════════════════════════ -->
-                <VerticalStackLayout Spacing="12" Margin="0,0,0,8">
+                <!-- 7. UPCOMING BILLS -->
+                <VerticalStackLayout x:Name="BillsCard" Spacing="12"
+                                     Opacity="0" TranslationY="18">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="1">
+                            <Label Text="Upcoming Bills" FontSize="18" FontAttributes="Bold" TextColor="#111827" />
+                            <Label Text="Due in the next 7 days" FontSize="12" TextColor="#8A94A6" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Text="View All ›" FontSize="12.5" FontAttributes="Bold"
+                               TextColor="#FF6A00" VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnUpcomingBillsViewAllTapped" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
 
-                    <!-- Upcoming Bills -->
-                    <Border x:Name="BillsCard"
-                            Style="{StaticResource ListCardBorder}"
-                            StrokeShape="RoundRectangle 20" Padding="14"
-                            Opacity="0" TranslationY="18"
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 22"
+                            BackgroundColor="White" Padding="16,6"
                             IsVisible="{Binding UpcomingBills.Count, Converter={StaticResource CountToBoolConverter}}">
-
-                        <VerticalStackLayout Spacing="0">
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Margin="0,0,0,8">
-                                <Border Grid.Column="0" WidthRequest="28" HeightRequest="28"
-                                        StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                                        BackgroundColor="#E3F2FD">
-                                    <Image Source="icon_calendar_blue.png"
-                                           WidthRequest="14" HeightRequest="14" Aspect="AspectFit"
-                                           HorizontalOptions="Center" VerticalOptions="Center" />
-                                </Border>
-                                <Label Grid.Column="1" Text="Upcoming Bills" FontSize="13.5" FontAttributes="Bold"
-                                       TextColor="{StaticResource TextPrimary}"
-                                       VerticalOptions="Center" LineBreakMode="TailTruncation" />
-                                <Label Grid.Column="2" Text="View All ›"
-                                       FontSize="11" FontAttributes="Bold" TextColor="#1E88E5"
-                                       VerticalOptions="Center">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="OnUpcomingBillsViewAllTapped" />
-                                    </Label.GestureRecognizers>
-                                </Label>
-                            </Grid>
-
-                            <VerticalStackLayout Spacing="0"
-                                BindableLayout.ItemsSource="{Binding UpcomingBills}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="models:Bill">
-                                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto"
-                                              ColumnSpacing="8" Margin="0,4">
-                                            <Label Grid.Row="0" Grid.Column="0" FontSize="12.5" FontAttributes="Bold"
-                                                   TextColor="{StaticResource TextPrimary}"
-                                                   LineBreakMode="TailTruncation"
-                                                   Text="{Binding Name}" VerticalOptions="Center" />
-                                            <Label Grid.Row="0" Grid.Column="1" FontSize="12.5" FontAttributes="Bold"
-                                                   TextColor="#E53935" LineBreakMode="NoWrap"
-                                                   Text="{Binding Amount, Converter={StaticResource CurrencyConverter}}"
-                                                   VerticalOptions="Center" />
-                                            <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                                    StrokeThickness="0" StrokeShape="RoundRectangle 8"
-                                                    BackgroundColor="#FEF3C7" Padding="8,3"
-                                                    HorizontalOptions="Start" Margin="0,3,0,0">
-                                                <Label FontSize="10" FontAttributes="Bold" TextColor="#B45309"
-                                                       Text="{Binding DueDate, StringFormat='Due {0:dd MMM}'}" />
-                                            </Border>
-                                        </Grid>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="0"
+                            BindableLayout.ItemsSource="{Binding UpcomingBills}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:Bill">
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto"
+                                          ColumnSpacing="8" RowSpacing="4" Padding="0,10,0,0">
+                                        <Label Grid.Row="0" FontSize="14" FontAttributes="Bold" TextColor="#111827"
+                                               LineBreakMode="TailTruncation" MaxLines="1"
+                                               Text="{Binding Name}" VerticalOptions="Center" />
+                                        <Label Grid.Row="0" Grid.Column="1" FontSize="14" FontAttributes="Bold"
+                                               TextColor="#E53935" LineBreakMode="NoWrap"
+                                               Text="{Binding Amount, Converter={StaticResource CurrencyConverter}}"
+                                               VerticalOptions="Center" />
+                                        <Border Grid.Row="1" Grid.ColumnSpan="2" StrokeThickness="0"
+                                                StrokeShape="RoundRectangle 8" BackgroundColor="#FEF3C7"
+                                                Padding="8,3" HorizontalOptions="Start">
+                                            <Label FontSize="10.5" FontAttributes="Bold" TextColor="#B45309"
+                                                   Text="{Binding DueDate, StringFormat='Due {0:dd MMM}'}" />
+                                        </Border>
+                                        <BoxView Grid.Row="2" Grid.ColumnSpan="2" HeightRequest="1"
+                                                 Color="#F1F3F8" Margin="0,8,0,0" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
                     </Border>
 
-                    <VerticalStackLayout Spacing="6" HorizontalOptions="Center" Padding="0,4"
-                        IsVisible="{Binding UpcomingBills.Count, Converter={StaticResource CountToInverseBoolConverter}}">
-                        <Label Text="No bills due in the next 7 days."
-                               FontSize="11.5" TextColor="{StaticResource TextSecondary}"
-                               HorizontalTextAlignment="Center" />
-                    </VerticalStackLayout>
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 22"
+                            BackgroundColor="White" Padding="20,18"
+                            IsVisible="{Binding UpcomingBills.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                        <Label Text="No bills due in the next 7 days. 🎉" FontSize="12.5"
+                               TextColor="#8A94A6" HorizontalTextAlignment="Center" />
+                    </Border>
+                </VerticalStackLayout>
 
-                    <!-- Active EMIs -->
-                    <Border x:Name="EmisCard"
-                            Style="{StaticResource ListCardBorder}"
-                            StrokeShape="RoundRectangle 20" Padding="14"
-                            Opacity="0" TranslationY="18"
+                <!-- 8. ACTIVE EMIs -->
+                <VerticalStackLayout x:Name="EmisCard" Spacing="12"
+                                     Opacity="0" TranslationY="18">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="1">
+                            <Label Text="Active EMIs" FontSize="18" FontAttributes="Bold" TextColor="#111827" />
+                            <Label Text="Installments in progress" FontSize="12" TextColor="#8A94A6" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Text="View All ›" FontSize="12.5" FontAttributes="Bold"
+                               TextColor="#FF6A00" VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnActiveEmisViewAllTapped" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
+
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 22"
+                            BackgroundColor="White" Padding="16,6"
                             IsVisible="{Binding ActiveEmis.Count, Converter={StaticResource CountToBoolConverter}}">
-
-                        <VerticalStackLayout Spacing="0">
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Margin="0,0,0,8">
-                                <Border Grid.Column="0" WidthRequest="28" HeightRequest="28"
-                                        StrokeThickness="0" StrokeShape="RoundRectangle 14"
-                                        BackgroundColor="#E3F2FD">
-                                    <Image Source="icon_card_blue.png"
-                                           WidthRequest="14" HeightRequest="14" Aspect="AspectFit"
-                                           HorizontalOptions="Center" VerticalOptions="Center" />
-                                </Border>
-                                <Label Grid.Column="1" Text="Active EMIs" FontSize="13.5" FontAttributes="Bold"
-                                       TextColor="{StaticResource TextPrimary}"
-                                       VerticalOptions="Center" LineBreakMode="TailTruncation" />
-                                <Label Grid.Column="2" Text="View All ›"
-                                       FontSize="11" FontAttributes="Bold" TextColor="#1E88E5"
-                                       VerticalOptions="Center">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="OnActiveEmisViewAllTapped" />
-                                    </Label.GestureRecognizers>
-                                </Label>
-                            </Grid>
-
-                            <VerticalStackLayout Spacing="0"
-                                BindableLayout.ItemsSource="{Binding ActiveEmis}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="models:EmiMaster">
-                                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto"
-                                              ColumnSpacing="8" Margin="0,4">
-                                            <Label Grid.Row="0" Grid.Column="0" FontSize="12.5" FontAttributes="Bold"
-                                                   TextColor="{StaticResource TextPrimary}"
-                                                   LineBreakMode="TailTruncation"
-                                                   Text="{Binding Title}" VerticalOptions="Center" />
-                                            <Label Grid.Row="0" Grid.Column="1" FontSize="12.5" FontAttributes="Bold"
-                                                   LineBreakMode="NoWrap"
-                                                   Text="{Binding EmiAmount, Converter={StaticResource CurrencyConverter}}"
-                                                   VerticalOptions="Center" />
-                                            <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                                   FontSize="10.5" TextColor="{StaticResource TextSecondary}">
-                                                <Label.Text>
-                                                    <MultiBinding StringFormat="{}{0} of {1} paid">
-                                                        <Binding Path="PaidInstallment" />
-                                                        <Binding Path="TotalInstallment" />
-                                                    </MultiBinding>
-                                                </Label.Text>
-                                            </Label>
-                                        </Grid>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="0"
+                            BindableLayout.ItemsSource="{Binding ActiveEmis}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:EmiMaster">
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto"
+                                          ColumnSpacing="8" RowSpacing="4" Padding="0,10,0,0">
+                                        <Label Grid.Row="0" FontSize="14" FontAttributes="Bold" TextColor="#111827"
+                                               LineBreakMode="TailTruncation" MaxLines="1"
+                                               Text="{Binding Title}" VerticalOptions="Center" />
+                                        <Label Grid.Row="0" Grid.Column="1" FontSize="14" FontAttributes="Bold"
+                                               TextColor="#0284C7" LineBreakMode="NoWrap"
+                                               Text="{Binding EmiAmount, Converter={StaticResource CurrencyConverter}}"
+                                               VerticalOptions="Center" />
+                                        <Label Grid.Row="1" Grid.ColumnSpan="2" FontSize="11" TextColor="#8A94A6">
+                                            <Label.Text>
+                                                <MultiBinding StringFormat="{}{0} of {1} paid">
+                                                    <Binding Path="PaidInstallment" />
+                                                    <Binding Path="TotalInstallment" />
+                                                </MultiBinding>
+                                            </Label.Text>
+                                        </Label>
+                                        <BoxView Grid.Row="2" Grid.ColumnSpan="2" HeightRequest="1"
+                                                 Color="#F1F3F8" Margin="0,8,0,0" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
                     </Border>
 
-                    <VerticalStackLayout Spacing="6" HorizontalOptions="Center" Padding="0,4"
-                        IsVisible="{Binding ActiveEmis.Count, Converter={StaticResource CountToInverseBoolConverter}}">
-                        <Label Text="No active EMIs."
-                               FontSize="11.5" TextColor="{StaticResource TextSecondary}"
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 22"
+                            BackgroundColor="White" Padding="20,18"
+                            IsVisible="{Binding ActiveEmis.Count, Converter={StaticResource CountToInverseBoolConverter}}">
+                        <Label Text="No active EMIs." FontSize="12.5" TextColor="#8A94A6"
                                HorizontalTextAlignment="Center" />
-                    </VerticalStackLayout>
+                    </Border>
                 </VerticalStackLayout>
 
                 <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Expense}"

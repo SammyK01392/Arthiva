@@ -14,7 +14,6 @@ public partial class DashboardPage : ContentPage
         _viewModel = viewModel;
         BindingContext = _viewModel;
 
-        // CHANGED: balance badalte hi label turant update ho (auto-refresh ke liye)
         _viewModel.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(DashboardViewModel.TotalBalance))
@@ -22,7 +21,6 @@ public partial class DashboardPage : ContentPage
         };
     }
 
-    // CHANGED: label update ek hi jagah se, hidden/visible dono respect karta hai
     private void UpdateBalanceLabel()
     {
         BalanceAmountLabel.Text = _isBalanceHidden
@@ -34,89 +32,71 @@ public partial class DashboardPage : ContentPage
     {
         base.OnAppearing();
 
-        // Load (and AWAIT) the data first. Every figure on screen is
-        // correct before anything becomes visible or animates — no more
-        // stale numbers flashing while a long animation plays out.
         await _viewModel.LoadCommand.ExecuteAsync(null);
-
-        UpdateBalanceLabel(); // CHANGED
+        UpdateBalanceLabel();
 
         if (!_hasAnimatedOnLoad)
         {
             _hasAnimatedOnLoad = true;
-            // Fire-and-forget: purely cosmetic now, doesn't gate correctness.
             _ = RunEntranceAnimationsAsync();
         }
     }
 
-    // ============================================================
-    // ENTRANCE ANIMATIONS — fast, parallel fade + slide from bottom.
-    // Data is already loaded and correct by the time this runs, so
-    // this is now pure polish, not something the user waits on.
-    // ============================================================
+    // Entrance animations
     private async Task RunEntranceAnimationsAsync()
     {
         const uint fast = 180;
         const uint slower = 220;
 
-        // 1 + 2. Greeting and Balance card together
         await Task.WhenAll(
             AnimateInAsync(GreetingSection, slower),
-            AnimateInAsync(BalanceCard, slower)
-        );
+            AnimateInAsync(BalanceCard, slower));
 
-        // 2b. Quick Actions strip — right after the balance, before
-        // anything else, since it's the primary "do something" surface.
         await AnimateInAsync(QuickActionsSection, fast);
 
-        // 3. Summary cards — all together, tiny stagger for polish only
         var summaryCards = new VisualElement[] { CardIncome, CardExpense, CardSavings, CardNetBalance };
         await Task.WhenAll(summaryCards.Select(c => AnimateInAsync(c, fast)));
 
-        // 4-6. Everything else together
         await Task.WhenAll(
             AnimateInAsync(BorrowLendCard, fast),
             AnimateInAsync(RecentTransactionsCard, fast),
             AnimateInAsync(BillsCard, fast),
-            AnimateInAsync(EmisCard, fast)
-        );
+            AnimateInAsync(EmisCard, fast));
     }
 
     private static Task AnimateInAsync(VisualElement element, uint duration)
     {
         return Task.WhenAll(
             element.FadeTo(1, duration, Easing.CubicOut),
-            element.TranslateTo(0, 0, duration, Easing.CubicOut)
-        );
+            element.TranslateTo(0, 0, duration, Easing.CubicOut));
     }
 
-    // ============================================================
-    // EYE ICON — toggle balance visibility with fade
-    // ============================================================
+    // Eye icon
     private async void OnEyeIconTapped(object sender, TappedEventArgs e)
     {
         _isBalanceHidden = !_isBalanceHidden;
 
         await BalanceAmountLabel.FadeTo(0, 120, Easing.CubicIn);
-
-        UpdateBalanceLabel(); // CHANGED: same helper, duplicate code hata diya
+        UpdateBalanceLabel();
         EyeIcon.Opacity = _isBalanceHidden ? 0.5 : 0.9;
-
         await BalanceAmountLabel.FadeTo(1, 180, Easing.CubicOut);
     }
 
-    // ============================================================
-    // BUTTON SCALE FEEDBACK
-    // ============================================================
+    // Tap feedback
     private async Task AnimateButtonTapAsync(VisualElement element)
     {
         await element.ScaleTo(0.95, 80, Easing.CubicOut);
         await element.ScaleTo(1.0, 100, Easing.CubicIn);
     }
 
-    // ============================================================
-    // NAVIGATION HANDLERS
-    // ============================================================
+    // NEW: avatar tap -> profile
+    private async void OnProfileTapped(object sender, TappedEventArgs e)
+    {
+        if (sender is VisualElement el) await AnimateButtonTapAsync(el);
+        await Shell.Current.GoToAsync(nameof(UserProfilePage));
+    }
+
+    // Navigation
     private async void OnRecentTransactionsViewAllTapped(object sender, TappedEventArgs e)
     {
         if (sender is VisualElement el) await AnimateButtonTapAsync(el);
@@ -137,7 +117,6 @@ public partial class DashboardPage : ContentPage
 
     private async void OnViewAccountsTapped(object sender, TappedEventArgs e)
     {
-        // Scale the actual button (sender may not be the Border directly)
         await AnimateButtonTapAsync(ViewAccountsButton);
         await Shell.Current.GoToAsync("///AccountListPage");
     }
@@ -148,16 +127,7 @@ public partial class DashboardPage : ContentPage
         await Shell.Current.GoToAsync(nameof(BorrowLendListPage));
     }
 
-    // ============================================================
-    // QUICK ACTIONS — one tap, straight to the right form.
-    // AddEditTransactionPage is a pushed route (Routing.RegisterRoute
-    // in AppShell), NOT a TabBar item — only Home/Transactions/Accounts/
-    // More are tabs — so this is a plain relative GoToAsync, same as
-    // TransactionListViewModel's own GoToAddCommand uses. The "Type"
-    // query param pre-selects Income/Expense there. Borrow/Lend/EMI/
-    // Saving/Budget use the same routes their own "Add" buttons already
-    // use (see e.g. BorrowLendListViewModel.GoToAddAsync, EmiListViewModel.GoToAddAsync).
-    // ============================================================
+    // Quick actions
     private async void OnQuickAddIncomeTapped(object sender, TappedEventArgs e)
     {
         if (sender is VisualElement el) await AnimateButtonTapAsync(el);

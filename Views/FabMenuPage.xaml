@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MoneySpend.Views.FabMenuPage"
+             BackgroundColor="Transparent">
+    <Grid>
+        <Grid x:Name="Backdrop" BackgroundColor="#99000000">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnBackdropTapped" />
+            </Grid.GestureRecognizers>
+        </Grid>
+
+        <Border x:Name="Sheet"
+                VerticalOptions="End"
+                BackgroundColor="White"
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 30,30,0,0"
+                Padding="22,12,22,32">
+            <Border.Shadow>
+                <Shadow Brush="Black" Opacity="0.25" Radius="30" Offset="0,-6" />
+            </Border.Shadow>
+
+            <VerticalStackLayout Spacing="18">
+
+                <BoxView WidthRequest="44" HeightRequest="5" CornerRadius="3"
+                         Color="#E5E7EB" HorizontalOptions="Center" />
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="Add New" FontSize="24" FontAttributes="Bold" TextColor="#111827" />
+                        <Label Text="Kya record karna hai?" FontSize="13" TextColor="#6B7280" />
+                    </VerticalStackLayout>
+                    <Border Grid.Column="1" WidthRequest="38" HeightRequest="38"
+                            BackgroundColor="#F3F4F6" StrokeThickness="0"
+                            StrokeShape="RoundRectangle 19" VerticalOptions="Center">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnBackdropTapped" />
+                        </Border.GestureRecognizers>
+                        <Path Data="M6 6 L18 18 M18 6 L6 18" Stroke="#374151" StrokeThickness="2"
+                              StrokeLineCap="Round" Aspect="Uniform" WidthRequest="14" HeightRequest="14"
+                              HorizontalOptions="Center" VerticalOptions="Center" InputTransparent="True" />
+                    </Border>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="14" RowSpacing="14">
+
+                    <Border x:Name="ItemIncome" Grid.Row="0" Grid.Column="0"
+                            BackgroundColor="#F0FDF4" Stroke="#BBF7D0" StrokeThickness="1"
+                            StrokeShape="RoundRectangle 22" Padding="16">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnIncomeTapped" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="12" InputTransparent="True">
+                            <Border WidthRequest="46" HeightRequest="46" StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 23" HorizontalOptions="Start">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#34D399" Offset="0" />
+                                        <GradientStop Color="#059669" Offset="1" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Path Data="M12 5 L12 19 M6 13 L12 19 L18 13" Stroke="White" StrokeThickness="2.4"
+                                      StrokeLineCap="Round" StrokeLineJoin="Round" Aspect="Uniform"
+                                      WidthRequest="20" HeightRequest="20"
+                                      HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Income" FontSize="16" FontAttributes="Bold" TextColor="#065F46" />
+                                <Label Text="Paisa aaya" FontSize="12" TextColor="#6B7280" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border x:Name="ItemExpense" Grid.Row="0" Grid.Column="1"
+                            BackgroundColor="#FEF2F2" Stroke="#FECACA" StrokeThickness="1"
+                            StrokeShape="RoundRectangle 22" Padding="16">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnExpenseTapped" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="12" InputTransparent="True">
+                            <Border WidthRequest="46" HeightRequest="46" StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 23" HorizontalOptions="Start">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#F87171" Offset="0" />
+                                        <GradientStop Color="#DC2626" Offset="1" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Path Data="M12 19 L12 5 M6 11 L12 5 L18 11" Stroke="White" StrokeThickness="2.4"
+                                      StrokeLineCap="Round" StrokeLineJoin="Round" Aspect="Uniform"
+                                      WidthRequest="20" HeightRequest="20"
+                                      HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Expense" FontSize="16" FontAttributes="Bold" TextColor="#991B1B" />
+                                <Label Text="Paisa gaya" FontSize="12" TextColor="#6B7280" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border x:Name="ItemBorrow" Grid.Row="1" Grid.Column="0"
+                            BackgroundColor="#EFF6FF" Stroke="#BFDBFE" StrokeThickness="1"
+                            StrokeShape="RoundRectangle 22" Padding="16">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnBorrowTapped" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="12" InputTransparent="True">
+                            <Border WidthRequest="46" HeightRequest="46" StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 23" HorizontalOptions="Start">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#60A5FA" Offset="0" />
+                                        <GradientStop Color="#2563EB" Offset="1" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Path Data="M12 4 L12 14 M7 10 L12 15 L17 10 M5 20 L19 20" Stroke="White" StrokeThickness="2.4"
+                                      StrokeLineCap="Round" StrokeLineJoin="Round" Aspect="Uniform"
+                                      WidthRequest="20" HeightRequest="20"
+                                      HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Borrow" FontSize="16" FontAttributes="Bold" TextColor="#1E40AF" />
+                                <Label Text="Udhaar liya" FontSize="12" TextColor="#6B7280" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border x:Name="ItemLend" Grid.Row="1" Grid.Column="1"
+                            BackgroundColor="#FAF5FF" Stroke="#E9D5FF" StrokeThickness="1"
+                            StrokeShape="RoundRectangle 22" Padding="16">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnLendTapped" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="12" InputTransparent="True">
+                            <Border WidthRequest="46" HeightRequest="46" StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 23" HorizontalOptions="Start">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#A78BFA" Offset="0" />
+                                        <GradientStop Color="#7C3AED" Offset="1" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Path Data="M12 15 L12 5 M7 9 L12 4 L17 9 M5 20 L19 20" Stroke="White" StrokeThickness="2.4"
+                                      StrokeLineCap="Round" StrokeLineJoin="Round" Aspect="Uniform"
+                                      WidthRequest="20" HeightRequest="20"
+                                      HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Lend" FontSize="16" FontAttributes="Bold" TextColor="#5B21B6" />
+                                <Label Text="Udhaar diya" FontSize="12" TextColor="#6B7280" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

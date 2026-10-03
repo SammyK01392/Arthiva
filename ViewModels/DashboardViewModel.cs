@@ -16,56 +16,35 @@ public partial class DashboardViewModel : BaseViewModel
     private readonly IEmiService _emiService;
     private readonly IBorrowLendService _borrowLendService;
     private readonly IUserProfileService _userProfileService;
-
-    // CHANGED: auto-refresh field
     private readonly AutoRefresh _autoRefresh;
 
-    [ObservableProperty]
-    private string userName = "there";
-
-    [ObservableProperty]
-    private decimal totalBalance;
-
-    [ObservableProperty]
-    private decimal totalReceivable;
-
-    [ObservableProperty]
-    private decimal totalPayable;
-
-    [ObservableProperty]
-    private string viewMode = "Month";
-
-    [ObservableProperty]
-    private DateTime selectedPeriod = DateTime.Today;
-
-    [ObservableProperty]
-    private string periodLabel = string.Empty;
-
-    [ObservableProperty]
-    private decimal periodIncome;
-
-    [ObservableProperty]
-    private decimal periodExpense;
-
-    [ObservableProperty]
-    private decimal periodSaving;
-
-    [ObservableProperty]
-    private int periodIncomeCount;
-
-    [ObservableProperty]
-    private int periodExpenseCount;
-
-    [ObservableProperty]
-    private double spendRatio;
-
-    [ObservableProperty]
-    private string spendPercentText = "0%";
-
-    [ObservableProperty]
-    private string spendInsight = "No transactions in this period yet.";
+    [ObservableProperty] private string userName = "there";
+    [ObservableProperty] private decimal totalBalance;
+    [ObservableProperty] private decimal totalReceivable;
+    [ObservableProperty] private decimal totalPayable;
+    [ObservableProperty] private string viewMode = "Month";
+    [ObservableProperty] private DateTime selectedPeriod = DateTime.Today;
+    [ObservableProperty] private string periodLabel = string.Empty;
+    [ObservableProperty] private decimal periodIncome;
+    [ObservableProperty] private decimal periodExpense;
+    [ObservableProperty] private decimal periodSaving;
+    [ObservableProperty] private int periodIncomeCount;
+    [ObservableProperty] private int periodExpenseCount;
+    [ObservableProperty] private double spendRatio;
+    [ObservableProperty] private string spendPercentText = "0%";
+    [ObservableProperty] private string spendInsight = "No transactions in this period yet.";
 
     public decimal NetBorrowLend => TotalReceivable - TotalPayable;
+
+    // NEW
+    public string TodayText => DateTime.Now.ToString("dddd, dd MMM");
+
+    // NEW
+    public string UserInitial =>
+        string.IsNullOrWhiteSpace(UserName) ? "?" : UserName.Trim()[0].ToString().ToUpper();
+
+    // NEW
+    partial void OnUserNameChanged(string value) => OnPropertyChanged(nameof(UserInitial));
 
     public string GreetingPrefix
     {
@@ -82,9 +61,7 @@ public partial class DashboardViewModel : BaseViewModel
     }
 
     public ObservableCollection<Transaction> RecentTransactions { get; } = new();
-
     public ObservableCollection<Bill> UpcomingBills { get; } = new();
-
     public ObservableCollection<EmiMaster> ActiveEmis { get; } = new();
 
     public DashboardViewModel(
@@ -102,12 +79,9 @@ public partial class DashboardViewModel : BaseViewModel
         _borrowLendService = borrowLendService;
         _userProfileService = userProfileService;
         Title = "Dashboard";
-
-        // CHANGED: DB change aate hi ReloadAsync chalega
         _autoRefresh = new AutoRefresh(ReloadAsync);
     }
 
-    // CHANGED: asli load logic yahan (silent, spinner nahi)
     private async Task ReloadAsync()
     {
         var profile = await _userProfileService.GetProfileAsync();
@@ -125,7 +99,6 @@ public partial class DashboardViewModel : BaseViewModel
         var upcoming = await _billService.GetUpcomingAsync(7);
         var emis = await _emiService.GetAllAsync();
 
-        // ObservableCollection updates must happen on the main thread (Android).
         await MainThread.InvokeOnMainThreadAsync(() =>
         {
             RecentTransactions.Clear();
@@ -142,7 +115,6 @@ public partial class DashboardViewModel : BaseViewModel
         });
     }
 
-    // CHANGED: command ab ReloadAsync use karta hai, aur pehli load ke baad auto-refresh on
     [RelayCommand]
     private async Task LoadAsync()
     {
@@ -228,7 +200,7 @@ public partial class DashboardViewModel : BaseViewModel
                     : SelectedPeriod.Year.ToString();
                 break;
 
-            default: // Month
+            default:
                 from = new DateTime(SelectedPeriod.Year, SelectedPeriod.Month, 1);
                 to = from.AddMonths(1).AddTicks(-1);
                 PeriodLabel = SelectedPeriod.Year == today.Year && SelectedPeriod.Month == today.Month

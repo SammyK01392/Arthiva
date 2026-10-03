@@ -12,30 +12,42 @@ public partial class ContactListViewModel : BaseViewModel
 {
     private readonly IContactService _contactService;
 
+    // CHANGED: auto-refresh field
+    private readonly AutoRefresh _autoRefresh;
+
     public ObservableCollection<Contact> Contacts { get; } = new();
 
     [ObservableProperty]
     private string searchText = string.Empty;
 
+    // CHANGED: search badalne par guard-free, serialized refresh
     partial void OnSearchTextChanged(string value)
-        => _ = LoadAsync();
+        => _autoRefresh.Request();
 
     public ContactListViewModel(IContactService contactService)
     {
         _contactService = contactService;
         Title = "Contacts";
+
+        // CHANGED
+        _autoRefresh = new AutoRefresh(ReloadAsync);
     }
 
+    // CHANGED: asli load logic yahan (silent, spinner nahi)
+    private async Task ReloadAsync()
+    {
+        var contacts = await _contactService.SearchAsync(SearchText);
+        Contacts.Clear();
+        foreach (var c in contacts)
+            Contacts.Add(c);
+    }
+
+    // CHANGED: command ab ReloadAsync use karta hai, pehli load ke baad auto-refresh on
     [RelayCommand]
     private async Task LoadAsync()
     {
-        await ExecuteAsync(async () =>
-        {
-            var contacts = await _contactService.SearchAsync(SearchText);
-            Contacts.Clear();
-            foreach (var c in contacts)
-                Contacts.Add(c);
-        });
+        await ExecuteAsync(ReloadAsync);
+        _autoRefresh.Enabled = true;
     }
 
     [RelayCommand]
@@ -72,7 +84,7 @@ public partial class ContactListViewModel : BaseViewModel
         await ExecuteAsync(async () =>
         {
             await _contactService.SoftDeleteAsync(contact.Id);
-            Contacts.Remove(contact);
+            Contacts.Remove(contact); // turant gayab ho; baaki refresh auto-publish se
         });
     }
 }
