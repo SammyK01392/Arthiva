@@ -36,6 +36,7 @@
 
             <converters:HexToColorConverter x:Key="HexToColorConverter" />
             <converters:HexToTintConverter  x:Key="HexToTintConverter" />
+            <converters:InitialsConverter x:Key="InitialsConverter" />
         </ResourceDictionary>
     </Application.Resources>
 

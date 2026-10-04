@@ -7,12 +7,16 @@
     xmlns:vm="clr-namespace:MoneySpend.ViewModels"
     xmlns:models="clr-namespace:MoneySpend.Models"
     x:DataType="vm:CategoryListViewModel"
-    Title="Categories">
+    Title="Categories"
+    BackgroundColor="#F6F7FB">
 
     <ContentPage.Resources>
-        <!-- Shared card template for both Income and Expense grids -->
-        <DataTemplate x:Key="CategoryCardTemplate" x:DataType="models:Category">
-            <Border Style="{StaticResource CardBorder}" Padding="10">
+        <DataTemplate x:Key="ExpenseCardTemplate" x:DataType="models:Category">
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 18"
+                    BackgroundColor="White" Padding="8,14,8,12">
+                <Border.Shadow>
+                    <Shadow Brush="#000000" Offset="0,2" Radius="8" Opacity="0.05" />
+                </Border.Shadow>
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer
                         Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.ToggleFavoriteCommand}"
@@ -20,29 +24,66 @@
                 </Border.GestureRecognizers>
 
                 <Grid>
-                    <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
-                        <Border WidthRequest="40" HeightRequest="40" StrokeThickness="0"
-                                StrokeShape="RoundRectangle 20" HorizontalOptions="Center">
-                            <Border.Triggers>
-                                <DataTrigger TargetType="Border" Binding="{Binding Type}" Value="Income">
-                                    <Setter Property="BackgroundColor" Value="{StaticResource IncomeTint}" />
-                                </DataTrigger>
-                                <DataTrigger TargetType="Border" Binding="{Binding Type}" Value="Expense">
-                                    <Setter Property="BackgroundColor" Value="{StaticResource ExpenseTint}" />
-                                </DataTrigger>
-                            </Border.Triggers>
+                    <VerticalStackLayout Spacing="8" HorizontalOptions="Center" InputTransparent="True">
+                        <Border WidthRequest="46" HeightRequest="46" StrokeThickness="0"
+                                StrokeShape="RoundRectangle 23" BackgroundColor="#FFEBEE"
+                                HorizontalOptions="Center">
+                            <Label Text="{Binding Name, StringFormat='{0:.1}'}"
+                                   FontSize="18" FontAttributes="Bold" TextColor="#E53935"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
-                        <Label Text="{Binding Name}" Style="{StaticResource CaptionLabel}"
-                               HorizontalTextAlignment="Center" LineBreakMode="TailTruncation" />
+                        <Label Text="{Binding Name}" FontSize="12" FontAttributes="Bold"
+                               TextColor="#111827" HorizontalTextAlignment="Center"
+                               LineBreakMode="TailTruncation" MaxLines="1" />
                     </VerticalStackLayout>
 
-                    <!-- Favorite star, top-right corner -->
-                    <Label FontSize="14" Text="&#9734;" TextColor="{StaticResource TextSecondary}"
-                           HorizontalOptions="End" VerticalOptions="Start">
+                    <Label FontSize="15" Text="&#9734;" TextColor="#C7CCD6"
+                           HorizontalOptions="End" VerticalOptions="Start"
+                           Margin="0,-6,-2,0" InputTransparent="True">
                         <Label.Triggers>
                             <DataTrigger TargetType="Label" Binding="{Binding IsFavorite}" Value="True">
                                 <Setter Property="Text" Value="&#9733;" />
-                                <Setter Property="TextColor" Value="{StaticResource Warning}" />
+                                <Setter Property="TextColor" Value="#F59E0B" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="IncomeCardTemplate" x:DataType="models:Category">
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 18"
+                    BackgroundColor="White" Padding="8,14,8,12">
+                <Border.Shadow>
+                    <Shadow Brush="#000000" Offset="0,2" Radius="8" Opacity="0.05" />
+                </Border.Shadow>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.ToggleFavoriteCommand}"
+                        CommandParameter="{Binding .}" />
+                </Border.GestureRecognizers>
+
+                <Grid>
+                    <VerticalStackLayout Spacing="8" HorizontalOptions="Center" InputTransparent="True">
+                        <Border WidthRequest="46" HeightRequest="46" StrokeThickness="0"
+                                StrokeShape="RoundRectangle 23" BackgroundColor="#E8F5E9"
+                                HorizontalOptions="Center">
+                            <Label Text="{Binding Name, StringFormat='{0:.1}'}"
+                                   FontSize="18" FontAttributes="Bold" TextColor="#00B368"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <Label Text="{Binding Name}" FontSize="12" FontAttributes="Bold"
+                               TextColor="#111827" HorizontalTextAlignment="Center"
+                               LineBreakMode="TailTruncation" MaxLines="1" />
+                    </VerticalStackLayout>
+
+                    <Label FontSize="15" Text="&#9734;" TextColor="#C7CCD6"
+                           HorizontalOptions="End" VerticalOptions="Start"
+                           Margin="0,-6,-2,0" InputTransparent="True">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsFavorite}" Value="True">
+                                <Setter Property="Text" Value="&#9733;" />
+                                <Setter Property="TextColor" Value="#F59E0B" />
                             </DataTrigger>
                         </Label.Triggers>
                     </Label>
@@ -52,31 +93,88 @@
     </ContentPage.Resources>
 
     <Grid>
-        <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
+        <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}"
+                     RefreshColor="#FF6A00">
             <ScrollView>
-                <VerticalStackLayout Padding="16" Spacing="8">
+                <VerticalStackLayout Padding="16,12,16,110" Spacing="22" MaximumWidthRequest="500">
 
-                    <Label Style="{StaticResource SectionHeaderLabel}" Text="EXPENSE" />
-                    <CollectionView ItemsSource="{Binding ExpenseCategories}"
-                                    ItemTemplate="{StaticResource CategoryCardTemplate}">
-                        <CollectionView.ItemsLayout>
-                            <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="8" VerticalItemSpacing="8" />
-                        </CollectionView.ItemsLayout>
-                    </CollectionView>
+                    <!-- Hint -->
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                            BackgroundColor="#FFF1E3" Padding="14,10">
+                        <Label Text="Tap a category to mark it as favourite. Favourites appear first when adding a transaction."
+                               FontSize="12" TextColor="#C2410C" />
+                    </Border>
 
-                    <Label Style="{StaticResource SectionHeaderLabel}" Text="INCOME" />
-                    <CollectionView ItemsSource="{Binding IncomeCategories}"
-                                    ItemTemplate="{StaticResource CategoryCardTemplate}">
-                        <CollectionView.ItemsLayout>
-                            <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="8" VerticalItemSpacing="8" />
-                        </CollectionView.ItemsLayout>
-                    </CollectionView>
+                    <!-- EXPENSE -->
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Spacing="1">
+                                <Label Text="Expense" FontSize="18" FontAttributes="Bold" TextColor="#111827" />
+                                <Label Text="Where your money goes" FontSize="12" TextColor="#8A94A6" />
+                            </VerticalStackLayout>
+                            <Border Grid.Column="1" BackgroundColor="#FFEBEE" StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 12" Padding="10,4" VerticalOptions="Center">
+                                <Label Text="{Binding ExpenseCategories.Count}" FontSize="12"
+                                       FontAttributes="Bold" TextColor="#E53935" />
+                            </Border>
+                        </Grid>
+
+                        <CollectionView ItemsSource="{Binding ExpenseCategories}"
+                                        ItemTemplate="{StaticResource ExpenseCardTemplate}"
+                                        SelectionMode="None">
+                            <CollectionView.ItemsLayout>
+                                <GridItemsLayout Orientation="Vertical" Span="3"
+                                                 HorizontalItemSpacing="10" VerticalItemSpacing="10" />
+                            </CollectionView.ItemsLayout>
+                        </CollectionView>
+                    </VerticalStackLayout>
+
+                    <!-- INCOME -->
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Spacing="1">
+                                <Label Text="Income" FontSize="18" FontAttributes="Bold" TextColor="#111827" />
+                                <Label Text="Where your money comes from" FontSize="12" TextColor="#8A94A6" />
+                            </VerticalStackLayout>
+                            <Border Grid.Column="1" BackgroundColor="#E8F5E9" StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 12" Padding="10,4" VerticalOptions="Center">
+                                <Label Text="{Binding IncomeCategories.Count}" FontSize="12"
+                                       FontAttributes="Bold" TextColor="#00B368" />
+                            </Border>
+                        </Grid>
+
+                        <CollectionView ItemsSource="{Binding IncomeCategories}"
+                                        ItemTemplate="{StaticResource IncomeCardTemplate}"
+                                        SelectionMode="None">
+                            <CollectionView.ItemsLayout>
+                                <GridItemsLayout Orientation="Vertical" Span="3"
+                                                 HorizontalItemSpacing="10" VerticalItemSpacing="10" />
+                            </CollectionView.ItemsLayout>
+                        </CollectionView>
+                    </VerticalStackLayout>
 
                 </VerticalStackLayout>
             </ScrollView>
         </RefreshView>
 
-        <Button Style="{StaticResource FabButton}" Text="+" Command="{Binding GoToAddCommand}" />
+        <!-- FAB -->
+        <Border WidthRequest="58" HeightRequest="58" StrokeThickness="0"
+                StrokeShape="RoundRectangle 29"
+                HorizontalOptions="End" VerticalOptions="End" Margin="0,0,20,24">
+            <Border.Shadow>
+                <Shadow Brush="#FF6B00" Offset="0,8" Radius="18" Opacity="0.45" />
+            </Border.Shadow>
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#FF9A1F" Offset="0" />
+                    <GradientStop Color="#FF5A00" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding GoToAddCommand}" />
+            </Border.GestureRecognizers>
+            <Label Text="+" FontSize="30" TextColor="White"
+                   HorizontalOptions="Center" VerticalOptions="Center" />
+        </Border>
     </Grid>
-
 </ContentPage>

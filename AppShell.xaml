@@ -11,15 +11,17 @@
     Shell.NavBarIsVisible="True"
     Shell.NavBarHasShadow="False"
 
-    Shell.BackgroundColor="#F25C00"
-    Shell.ForegroundColor="White"
-    Shell.DisabledColor="#80FFFFFF"
-    Shell.UnselectedColor="#CCFFFFFF"
+    Shell.BackgroundColor="White"
+    Shell.ForegroundColor="#111827"
+    Shell.TitleColor="#111827"
+    Shell.DisabledColor="#C7CCD6"
+    Shell.UnselectedColor="#9CA3AF"
 
-    Shell.TabBarBackgroundColor="{StaticResource Surface}"
-    Shell.TabBarForegroundColor="{StaticResource Primary}"
-    Shell.TabBarUnselectedColor="{StaticResource TextSecondary}"
-    Shell.TabBarTitleColor="{StaticResource Primary}"
+    Shell.TabBarBackgroundColor="White"
+    Shell.TabBarForegroundColor="#FF6A00"
+    Shell.TabBarUnselectedColor="#9CA3AF"
+    Shell.TabBarTitleColor="#FF6A00"
+    Shell.TabBarDisabledColor="#C7CCD6"
 
     Title="MoneySpend">
 
@@ -30,105 +32,115 @@
         </ResourceDictionary>
     </Shell.Resources>
 
-    <!-- ═══════════════════════════════════════════════════ -->
-    <!--  PREMIUM TOP APP BAR (White / Black text)           -->
-    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- ═══════════ TOP APP BAR ═══════════ -->
     <Shell.TitleView>
-        <Grid RowDefinitions="*,Auto" HeightRequest="60">
+        <Grid RowDefinitions="*,Auto" HeightRequest="60" BackgroundColor="White">
 
             <Grid Grid.Row="0"
-              Padding="20,0,16,0"
-              ColumnDefinitions="Auto,*,Auto"
-              BackgroundColor="White">
+                  Padding="16,0,16,0"
+                  ColumnDefinitions="Auto,*,Auto"
+                  ColumnSpacing="12"
+                  BackgroundColor="White">
 
-                <!-- Small brand accent mark -->
-                <BoxView Grid.Column="0"
-                     WidthRequest="4"
-                     HeightRequest="22"
-                     CornerRadius="2"
-                     Color="#F97316"
-                     VerticalOptions="Center"
-                     Margin="0,0,10,0" />
+                <!-- Brand mark -->
+                <Border Grid.Column="0"
+                        WidthRequest="36" HeightRequest="36"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        VerticalOptions="Center">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#FF9A1F" Offset="0" />
+                            <GradientStop Color="#FF5A00" Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Label Text="₹"
+                           FontSize="19"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+                </Border>
 
                 <!-- Title -->
                 <Label Grid.Column="1"
-                   Text="{Binding CurrentPageTitle, Source={x:Reference RootShell}}"
-                   FontSize="21"
-                   FontAttributes="Bold"
-                   CharacterSpacing="-0.4"
-                   TextColor="#111111"
-                   VerticalOptions="Center" />
+                       Text="{Binding CurrentPageTitle, Source={x:Reference RootShell}}"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       CharacterSpacing="-0.3"
+                       TextColor="#111827"
+                       LineBreakMode="TailTruncation"
+                       MaxLines="1"
+                       VerticalOptions="Center" />
 
                 <!-- Bell -->
                 <Grid Grid.Column="2"
-                  WidthRequest="42"
-                  HeightRequest="42"
-                  HorizontalOptions="End"
-                  VerticalOptions="Center">
+                      WidthRequest="44"
+                      HeightRequest="44"
+                      HorizontalOptions="End"
+                      VerticalOptions="Center">
 
                     <Grid.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnBellTapped" />
                     </Grid.GestureRecognizers>
 
-                    <Border BackgroundColor="#FAFAFA"
-                        Stroke="#EFEFEF"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 21"
-                        WidthRequest="38"
-                        HeightRequest="38"
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center">
+                    <Border BackgroundColor="#F6F7FB"
+                            Stroke="#ECEEF3"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            WidthRequest="40"
+                            HeightRequest="40"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center">
 
-                        <Path WidthRequest="17" HeightRequest="17"
-                          Aspect="Uniform"
-                          Fill="Transparent"
-                          Stroke="#2A2A2A"
-                          StrokeThickness="1.8"
-                          StrokeLineCap="Round"
-                          StrokeLineJoin="Round"
-                          HorizontalOptions="Center"
-                          VerticalOptions="Center"
-                          Data="M18,8 C18,4.7 15.3,2 12,2 C8.7,2 6,4.7 6,8 C6,15 3,17 3,17 L21,17 C21,17 18,15 18,8 Z M13.7,21 C13.3,21.7 12.7,22 12,22 C11.3,22 10.7,21.7 10.3,21" />
+                        <Path WidthRequest="18" HeightRequest="18"
+                              Aspect="Uniform"
+                              Fill="Transparent"
+                              Stroke="#1F2937"
+                              StrokeThickness="1.8"
+                              StrokeLineCap="Round"
+                              StrokeLineJoin="Round"
+                              HorizontalOptions="Center"
+                              VerticalOptions="Center"
+                              Data="M18,8 C18,4.7 15.3,2 12,2 C8.7,2 6,4.7 6,8 C6,15 3,17 3,17 L21,17 C21,17 18,15 18,8 Z M13.7,21 C13.3,21.7 12.7,22 12,22 C11.3,22 10.7,21.7 10.3,21" />
                     </Border>
 
+                    <!-- Unread badge -->
                     <Border IsVisible="{Binding UnreadNotificationCount,
-                            Source={x:Reference RootShell},
-                            Converter={StaticResource LocalIntGreaterThanZeroConverter}}"
-                        BackgroundColor="#F97316"
-                        Stroke="White"
-                        StrokeThickness="2"
-                        StrokeShape="RoundRectangle 8"
-                        WidthRequest="16"
-                        HeightRequest="16"
-                        HorizontalOptions="End"
-                        VerticalOptions="Start"
-                        TranslationX="0"
-                        TranslationY="1"
-                        Padding="0">
-
+                                        Source={x:Reference RootShell},
+                                        Converter={StaticResource LocalIntGreaterThanZeroConverter}}"
+                            BackgroundColor="#F97316"
+                            Stroke="White"
+                            StrokeThickness="2"
+                            StrokeShape="RoundRectangle 9"
+                            MinimumWidthRequest="18"
+                            HeightRequest="18"
+                            HorizontalOptions="End"
+                            VerticalOptions="Start"
+                            Padding="3,0">
+                        <Border.Shadow>
+                            <Shadow Brush="#F97316" Offset="0,2" Radius="6" Opacity="0.35" />
+                        </Border.Shadow>
                         <Label Text="{Binding UnreadNotificationCount, Source={x:Reference RootShell}}"
-                           TextColor="White"
-                           FontSize="9"
-                           FontAttributes="Bold"
-                           HorizontalTextAlignment="Center"
-                           VerticalTextAlignment="Center"
-                           HorizontalOptions="Center"
-                           VerticalOptions="Center" />
+                               TextColor="White"
+                               FontSize="9.5"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               VerticalTextAlignment="Center"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
                     </Border>
                 </Grid>
             </Grid>
 
-            <!-- Soft shadow instead of flat border -->
+            <!-- Hairline -->
             <BoxView Grid.Row="1"
-                 HeightRequest="1"
-                 Color="#F0F0F0" />
+                     HeightRequest="1"
+                     Color="#F0F1F5" />
         </Grid>
     </Shell.TitleView>
 
-
-    <!-- ═══════════════════════════════════════════════════ -->
-    <!--  BOTTOM NAVIGATION                                  -->
-    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- ═══════════ BOTTOM NAVIGATION ═══════════ -->
     <TabBar>
 
         <ShellContent
@@ -142,11 +154,12 @@
             Icon="tab_transactions.png"
             ContentTemplate="{DataTemplate views:TransactionListPage}"
             Route="TransactionListPage" />
+
         <ShellContent
-    Title="Add"
-    Icon="tab_add.png"
-    ContentTemplate="{DataTemplate views:AddPlaceholderPage}"
-    Route="AddPlaceholderPage" />
+            Title="Add"
+            Icon="tab_add.png"
+            ContentTemplate="{DataTemplate views:AddPlaceholderPage}"
+            Route="AddPlaceholderPage" />
 
         <ShellContent
             Title="Accounts"

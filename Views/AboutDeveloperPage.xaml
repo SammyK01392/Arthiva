@@ -1,0 +1,224 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="MoneySpend.Views.AboutDeveloperPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="About"
+    BackgroundColor="#F6F7FB">
+
+    <ContentPage.Resources>
+        <Style x:Key="SectionLabel" TargetType="Label">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="CharacterSpacing" Value="1" />
+            <Setter Property="TextColor" Value="#8A94A6" />
+            <Setter Property="Margin" Value="4,0,4,8" />
+        </Style>
+        <Style x:Key="IconBox" TargetType="Border">
+            <Setter Property="WidthRequest" Value="40" />
+            <Setter Property="HeightRequest" Value="40" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 13" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="RowTitle" TargetType="Label">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="TextColor" Value="#111827" />
+        </Style>
+        <Style x:Key="RowSub" TargetType="Label">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextColor" Value="#8A94A6" />
+        </Style>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,12,16,32" Spacing="22" MaximumWidthRequest="500">
+
+            <!-- APP HEADER -->
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 28">
+                <Border.Shadow>
+                    <Shadow Brush="#FF5A00" Offset="0,10" Radius="22" Opacity="0.25" />
+                </Border.Shadow>
+                <Grid>
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#FF9A1F" Offset="0" />
+                            <GradientStop Color="#FF5A00" Offset="1" />
+                        </LinearGradientBrush>
+                    </Grid.Background>
+                    <Ellipse Fill="#22FFFFFF" WidthRequest="170" HeightRequest="170"
+                             HorizontalOptions="End" VerticalOptions="Start"
+                             TranslationX="55" TranslationY="-55" InputTransparent="True" />
+
+                    <VerticalStackLayout Padding="24,26" Spacing="6" HorizontalOptions="Center">
+                        <Border WidthRequest="72" HeightRequest="72" StrokeShape="RoundRectangle 22"
+                                BackgroundColor="White" StrokeThickness="0" HorizontalOptions="Center">
+                            <Label Text="₹" FontSize="38" FontAttributes="Bold" TextColor="#FF6A00"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <Label Text="MoneySpend" FontSize="24" FontAttributes="Bold"
+                               TextColor="White" HorizontalTextAlignment="Center" Margin="0,8,0,0" />
+                        <Label Text="Your personal money manager" FontSize="13" TextColor="White"
+                               Opacity="0.9" HorizontalTextAlignment="Center" />
+                        <Border BackgroundColor="#33FFFFFF" StrokeThickness="0"
+                                StrokeShape="RoundRectangle 14" Padding="12,5"
+                                HorizontalOptions="Center" Margin="0,8,0,0">
+                            <Label x:Name="VersionLabel" FontSize="11.5" FontAttributes="Bold" TextColor="White" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <!-- WHAT YOU CAN DO -->
+            <VerticalStackLayout>
+                <Label Style="{StaticResource SectionLabel}" Text="WHAT YOU CAN DO" />
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                        BackgroundColor="White" Padding="16,6">
+                    <VerticalStackLayout Spacing="0">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14" Padding="0,10">
+                            <Border Style="{StaticResource IconBox}" BackgroundColor="#ECFDF5">
+                                <Label Text="💸" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Style="{StaticResource RowTitle}" Text="Track income and expenses" />
+                                <Label Style="{StaticResource RowSub}" Text="Know where your money goes every day" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <BoxView HeightRequest="1" Color="#F1F3F8" />
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14" Padding="0,10">
+                            <Border Style="{StaticResource IconBox}" BackgroundColor="#FEF3C7">
+                                <Label Text="🔔" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Style="{StaticResource RowTitle}" Text="Bills and EMI reminders" />
+                                <Label Style="{StaticResource RowSub}" Text="Never miss a due date again" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <BoxView HeightRequest="1" Color="#F1F3F8" />
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14" Padding="0,10">
+                            <Border Style="{StaticResource IconBox}" BackgroundColor="#E0F2FE">
+                                <Label Text="🤝" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Style="{StaticResource RowTitle}" Text="Borrow and lend" />
+                                <Label Style="{StaticResource RowSub}" Text="Keep a clear record of who owes what" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <BoxView HeightRequest="1" Color="#F1F3F8" />
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14" Padding="0,10">
+                            <Border Style="{StaticResource IconBox}" BackgroundColor="#FFF1E3">
+                                <Label Text="🎯" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Style="{StaticResource RowTitle}" Text="Budgets and saving goals" />
+                                <Label Style="{StaticResource RowSub}" Text="Plan ahead and reach your goals" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- DEVELOPER -->
+            <VerticalStackLayout>
+                <Label Style="{StaticResource SectionLabel}" Text="DEVELOPED BY" />
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                        BackgroundColor="White" Padding="16">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                        <Border WidthRequest="76" HeightRequest="76" StrokeShape="RoundRectangle 38"
+                                StrokeThickness="3" Stroke="#FFE0C2" BackgroundColor="#FFF1E3"
+                                VerticalOptions="Center">
+                            <Image Source="developer.png" Aspect="AspectFill" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="3">
+                            <Label x:Name="NameLabel" FontSize="18" FontAttributes="Bold" TextColor="#111827" />
+                            <Label x:Name="RoleLabel" FontSize="12.5" TextColor="#8A94A6" />
+                            <Label x:Name="StudioLabel" FontSize="12.5" FontAttributes="Bold" TextColor="#FF6A00" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- CONTACT -->
+            <VerticalStackLayout Spacing="10">
+                <Label Style="{StaticResource SectionLabel}" Text="CONTACT US" Margin="4,0,4,0" />
+
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 18"
+                        BackgroundColor="White" Padding="14">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnEmailTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                        <Border Style="{StaticResource IconBox}" BackgroundColor="#E0F2FE">
+                            <Label Text="✉️" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Style="{StaticResource RowTitle}" Text="Email" />
+                            <Label x:Name="EmailLabel" Style="{StaticResource RowSub}" LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="2" Text="›" FontSize="22" TextColor="#9CA3AF" VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 18"
+                        BackgroundColor="White" Padding="14">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnComingSoonTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                        <Border Style="{StaticResource IconBox}" BackgroundColor="#ECFDF5">
+                            <Label Text="🌐" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Style="{StaticResource RowTitle}" Text="Website" />
+                            <Label Style="{StaticResource RowSub}" Text="Our website is on the way" />
+                        </VerticalStackLayout>
+                        <Border BackgroundColor="#FFF1E3" StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                Padding="9,4" VerticalOptions="Center">
+                            <Label Text="Coming soon" FontSize="10.5" FontAttributes="Bold" TextColor="#C2410C" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 18"
+                        BackgroundColor="White" Padding="14">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnComingSoonTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                        <Border Style="{StaticResource IconBox}" BackgroundColor="#FEF3C7">
+                            <Label Text="⭐" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Style="{StaticResource RowTitle}" Text="Feedback" />
+                            <Label Style="{StaticResource RowSub}" Text="Rate and review the app" />
+                        </VerticalStackLayout>
+                        <Border BackgroundColor="#FFF1E3" StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                                Padding="9,4" VerticalOptions="Center">
+                            <Label Text="Coming soon" FontSize="10.5" FontAttributes="Bold" TextColor="#C2410C" />
+                        </Border>
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- PRIVACY -->
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                    BackgroundColor="#ECFDF5" Padding="16">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                    <Label Text="🔒" FontSize="22" VerticalOptions="Start" />
+                    <VerticalStackLayout Grid.Column="1" Spacing="3">
+                        <Label Text="Your data stays with you" FontSize="14" FontAttributes="Bold" TextColor="#065F46" />
+                        <Label FontSize="12" LineHeight="1.35" TextColor="#047857"
+                               Text="Everything is stored on your phone and protected by your PIN. We never sell or share your financial data." />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <!-- FOOTER -->
+            <VerticalStackLayout Spacing="3" Margin="0,4,0,0">
+                <Label x:Name="CopyrightLabel" FontSize="11.5" TextColor="#9CA3AF" HorizontalOptions="Center" />
+                <Label Text="Made with ❤ in India" FontSize="11.5" TextColor="#9CA3AF" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -47,11 +47,15 @@ public class UserProfileService : IUserProfileService
     {
         var profile = await GetProfileAsync();
         if (profile is not null)
-            await _repo.DeleteAsync(profile);
+        {
+            // Image file bhi hata do, warna orphan file bachi rahegi
+            if (!string.IsNullOrEmpty(profile.ProfileImage) && File.Exists(profile.ProfileImage))
+                File.Delete(profile.ProfileImage);
 
-        // NOTE: MoneySpend is single-profile, but this only deletes UserProfile.
-        // Agar transactions/budgets waghera dusri tables mein hain, unhe bhi
+            await _repo.DeleteAsync(profile);
+        }
+
+        // NOTE: Agar transactions/budgets waghera dusri tables mein hain, unhe bhi
         // yahin delete karna padega taaki koi orphan financial data na bache.
-        // e.g. await _transactionRepo.DeleteAllAsync(); etc.
     }
 }

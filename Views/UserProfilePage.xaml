@@ -10,10 +10,28 @@
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="14">
 
-            <Border StrokeThickness="0" StrokeShape="RoundRectangle 40" WidthRequest="80" HeightRequest="80"
-                    BackgroundColor="{StaticResource PrimaryTint}" HorizontalOptions="Center" Margin="0,10,0,0">
-                <Label Text="&#128100;" FontSize="34" HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
+            <VerticalStackLayout HorizontalOptions="Center" Spacing="6" Margin="0,10,0,0">
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 50"
+                        WidthRequest="100" HeightRequest="100"
+                        BackgroundColor="{StaticResource PrimaryTint}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAvatarTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid>
+                        <Image Source="{Binding ProfileImageSource}" Aspect="AspectFill"
+                               IsVisible="{Binding HasProfileImage}" />
+                        <Label Text="&#128100;" FontSize="40"
+                               HorizontalOptions="Center" VerticalOptions="Center"
+                               IsVisible="{Binding ShowPlaceholder}" />
+                    </Grid>
+                </Border>
+                <Label Text="Change photo" FontSize="12"
+                       TextColor="{StaticResource Primary}" HorizontalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAvatarTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </VerticalStackLayout>
 
             <Label Style="{StaticResource FormLabel}" Text="FULL NAME" />
             <Entry Style="{StaticResource FormEntry}" Text="{Binding FullName}" Placeholder="e.g. Rahul Sharma" />

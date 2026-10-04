@@ -297,7 +297,7 @@
                                                 </SwipeItems>
                                             </SwipeView.RightItems>
 
-                                            <!-- ══ CARD ══ -->
+                                            <!-- ══ CARD (tap se edit nahi, sirf swipe se) ══ -->
                                             <Border Padding="10,8"
                                                     StrokeThickness="1"
                                                     Stroke="{StaticResource CardStroke}"
@@ -307,19 +307,13 @@
                                                     <Shadow Brush="#2B1A0A" Offset="0,2" Radius="8" Opacity="0.05" />
                                                 </Border.Shadow>
 
-                                                <Border.GestureRecognizers>
-                                                    <TapGestureRecognizer
-                                                        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
-                                                        CommandParameter="{Binding .}" />
-                                                </Border.GestureRecognizers>
-
-                                                <Grid ColumnDefinitions="30,*,Auto" ColumnSpacing="10">
+                                                <Grid ColumnDefinitions="36,*,Auto" ColumnSpacing="10">
 
                                                     <!-- Icon box (4 types) -->
                                                     <Border Grid.Column="0"
-                                                            WidthRequest="30" HeightRequest="30"
+                                                            WidthRequest="36" HeightRequest="36"
                                                             StrokeThickness="0" VerticalOptions="Center"
-                                                            StrokeShape="RoundRectangle 9"
+                                                            StrokeShape="RoundRectangle 11"
                                                             BackgroundColor="{StaticResource ExpenseTint}">
                                                         <Border.Triggers>
                                                             <DataTrigger TargetType="Border"
@@ -336,10 +330,10 @@
                                                             </DataTrigger>
                                                         </Border.Triggers>
 
-                                                        <Path WidthRequest="8" HeightRequest="8"
+                                                        <Path WidthRequest="16" HeightRequest="16"
                                                               Aspect="Uniform"
                                                               StrokeLineCap="Round" StrokeLineJoin="Round"
-                                                              StrokeThickness="2.6"
+                                                              StrokeThickness="2.2"
                                                               Stroke="{StaticResource Expense}"
                                                               HorizontalOptions="Center" VerticalOptions="Center"
                                                               Data="M12,20 L12,4 M6,10 L12,4 L18,10">

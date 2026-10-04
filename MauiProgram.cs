@@ -44,7 +44,7 @@ public static class MauiProgram
         // One Shell instance for the app's lifetime — it owns the
         // notification-badge state shown in the global title bar.
         builder.Services.AddSingleton<AppShell>();
-
+        SwipeHint.Register();
         return builder.Build();
     }
 
@@ -84,7 +84,7 @@ public static class MauiProgram
 
         // App PIN lock — stateless, safe as a singleton.
         services.AddSingleton<IPinService, PinService>();
-
+        services.AddTransient<ChangePinPage>();
         // Cloud backup — Firebase Auth (Email/Password) + Realtime Database sync.
         services.AddSingleton<IFirebaseAuthService, FirebaseAuthService>();
         services.AddSingleton<IFirebaseSyncService, FirebaseSyncService>();

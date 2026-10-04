@@ -37,20 +37,24 @@ public partial class AppLockPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        PinPad.Clear();
-        ErrorLabel.IsVisible = false;
 
         try
         {
             _profile = await _userProfileService.GetProfileAsync();
-            UserNameLabel.Text = string.IsNullOrWhiteSpace(_profile?.FullName)
-                ? "MoneySpend User"
-                : _profile.FullName;
+
+            // Lock not enabled (or no PIN set): open the app directly
+            if (!SettingsPage.IsLockEnabled(_profile))
+            {
+                Application.Current!.MainPage = _serviceProvider.GetRequiredService<AppShell>();
+                return;
+            }
+
+            PinPad.Clear();
+            ErrorLabel.IsVisible = false;
         }
         catch (Exception ex)
         {
             CrashLogger.Log(ex, "AppLockPage.OnAppearing");
-            UserNameLabel.Text = "MoneySpend User";
         }
     }
 

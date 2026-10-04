@@ -13,12 +13,12 @@
 
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding LoadCommand}">
         <ScrollView>
-            <VerticalStackLayout Padding="16,12,16,32" Spacing="18"
+            <VerticalStackLayout Padding="16,12,16,32" Spacing="20"
                                  MaximumWidthRequest="500" HorizontalOptions="Fill">
 
-                <!-- 1. GREETING -->
+                <!-- 1. GREETING (sirf fade, TranslationY nahi) -->
                 <Grid x:Name="GreetingSection" ColumnDefinitions="*,Auto" ColumnSpacing="14"
-                      Opacity="0" TranslationY="16">
+                      Opacity="0">
 
                     <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
                         <Label Text="{Binding TodayText}" FontSize="11" FontAttributes="Bold"
@@ -47,15 +47,18 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnProfileTapped" />
                         </Border.GestureRecognizers>
-                        <Label Text="{Binding UserInitial}" FontSize="22" FontAttributes="Bold"
-                               TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"
-                               InputTransparent="True" />
+                        <Grid InputTransparent="True">
+                            <Label x:Name="AvatarInitialLabel" Text="{Binding UserInitial}"
+                                   FontSize="22" FontAttributes="Bold" TextColor="White"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                            <Image x:Name="AvatarImage" Aspect="AspectFill" IsVisible="False" />
+                        </Grid>
                     </Border>
                 </Grid>
 
-                <!-- 2. BALANCE (compact) -->
+                <!-- 2. BALANCE (compact, sirf fade) -->
                 <Border x:Name="BalanceCard" StrokeThickness="0" StrokeShape="RoundRectangle 22"
-                        Opacity="0" TranslationY="20">
+                        Opacity="0" Margin="0,0,0,6">
                     <Border.Shadow>
                         <Shadow Brush="#FF5A00" Offset="0,6" Radius="14" Opacity="0.22" />
                     </Border.Shadow>
@@ -67,9 +70,10 @@
                             </LinearGradientBrush>
                         </Grid.Background>
 
+                        <!-- Negative margin: layout me extra height nahi leta (TranslationX/Y hata diya) -->
                         <Ellipse Fill="#22FFFFFF" WidthRequest="130" HeightRequest="130"
                                  HorizontalOptions="End" VerticalOptions="Start"
-                                 TranslationX="40" TranslationY="-50" InputTransparent="True" />
+                                 Margin="0,-50,-40,0" InputTransparent="True" />
 
                         <VerticalStackLayout Padding="18,14,18,14" Spacing="2">
                             <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
@@ -110,7 +114,7 @@
                 </Border>
 
                 <!-- 3. OVERVIEW -->
-                <VerticalStackLayout Spacing="10">
+                <VerticalStackLayout Spacing="10" Margin="0,8,0,0">
 
                     <Grid ColumnDefinitions="*,Auto">
                         <VerticalStackLayout VerticalOptions="Center" Spacing="1">

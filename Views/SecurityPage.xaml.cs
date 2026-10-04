@@ -17,8 +17,9 @@ public partial class SecurityPage : ContentPage
         Preferences.Set("hide_balance_default", e.Value);
     }
 
+
     private async void OnPinTapped(object sender, TappedEventArgs e)
-        => await Shell.Current.GoToAsync(nameof(CreatePinPage));
+    => await Shell.Current.GoToAsync(nameof(ChangePinPage));
 
     private async void OnBackupTapped(object sender, TappedEventArgs e)
         => await Shell.Current.GoToAsync(nameof(BackupRestorePage));

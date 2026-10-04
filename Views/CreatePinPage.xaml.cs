@@ -147,7 +147,32 @@ public partial class CreatePinPage : ContentPage
             _isSaving = false;
         }
     }
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        try
+        {
+            // No PIN by default: create the profile and open the app directly
+            var profile = new UserProfile
+            {
+                FullName = _fullName,
+                MobileNo = _mobileNo,
+                CurrencyCode = "INR",
+                PinHash = string.Empty,
+                IsActive = true
+            };
+            await _userProfileService.CreateAsync(profile);
 
+            Preferences.Set(SettingsPage.AppLockKey, false);
+            Application.Current!.MainPage = _serviceProvider.GetRequiredService<AppShell>();
+        }
+        catch (Exception ex)
+        {
+            CrashLogger.Log(ex, "CreatePinPage.OnAppearing");
+            ErrorLabel.Text = "Something went wrong. Please restart the app.";
+            ErrorLabel.IsVisible = true;
+        }
+    }
     protected override bool OnBackButtonPressed()
     {
         // Deliberately simplified: PIN setup can't be backed out of once

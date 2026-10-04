@@ -10,6 +10,8 @@ namespace MoneySpend.ViewModels;
 
 public partial class DashboardViewModel : BaseViewModel
 {
+    private const int DashboardListLimit = 5;
+
     private readonly IAccountService _accountService;
     private readonly ITransactionService _transactionService;
     private readonly IBillService _billService;
@@ -36,14 +38,11 @@ public partial class DashboardViewModel : BaseViewModel
 
     public decimal NetBorrowLend => TotalReceivable - TotalPayable;
 
-    // NEW
     public string TodayText => DateTime.Now.ToString("dddd, dd MMM");
 
-    // NEW
     public string UserInitial =>
         string.IsNullOrWhiteSpace(UserName) ? "?" : UserName.Trim()[0].ToString().ToUpper();
 
-    // NEW
     partial void OnUserNameChanged(string value) => OnPropertyChanged(nameof(UserInitial));
 
     public string GreetingPrefix
@@ -99,18 +98,35 @@ public partial class DashboardViewModel : BaseViewModel
         var upcoming = await _billService.GetUpcomingAsync(7);
         var emis = await _emiService.GetAllAsync();
 
+        // Dashboard par har list me sirf top 5
+        var recentTop = recent
+            .OrderByDescending(t => t.TransactionDate)
+            .Take(DashboardListLimit)
+            .ToList();
+
+        var upcomingTop = upcoming
+            .OrderBy(b => b.DueDate)
+            .Take(DashboardListLimit)
+            .ToList();
+
+        // Sirf wahi EMIs jinki installments baki hain
+        var emisTop = emis
+            .Where(e => e.PaidInstallment < e.TotalInstallment)
+            .Take(DashboardListLimit)
+            .ToList();
+
         await MainThread.InvokeOnMainThreadAsync(() =>
         {
             RecentTransactions.Clear();
-            foreach (var t in recent.Take(10))
+            foreach (var t in recentTop)
                 RecentTransactions.Add(t);
 
             UpcomingBills.Clear();
-            foreach (var b in upcoming)
+            foreach (var b in upcomingTop)
                 UpcomingBills.Add(b);
 
             ActiveEmis.Clear();
-            foreach (var e in emis)
+            foreach (var e in emisTop)
                 ActiveEmis.Add(e);
         });
     }

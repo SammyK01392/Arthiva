@@ -53,7 +53,24 @@
                     </Grid>
                 </Border>
             </VerticalStackLayout>
+            <VerticalStackLayout Spacing="1">
+                <Label Text="SECURITY" FontSize="11" FontAttributes="Bold"
+           CharacterSpacing="1" TextColor="#8A94A6" Margin="4,0,4,6" />
 
+                <Border Style="{StaticResource RowBorder}" StrokeShape="RoundRectangle 16">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                        <Border Style="{StaticResource IconBox}" BackgroundColor="#FFF1E3">
+                            <Label Text="🔒" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Style="{StaticResource RowTitle}" Text="App Lock" />
+                            <Label Style="{StaticResource RowSub}" Text="Ask for a PIN every time the app opens" />
+                        </VerticalStackLayout>
+                        <Switch x:Name="AppLockSwitch" Grid.Column="2" OnColor="#FF7A00"
+                    VerticalOptions="Center" Toggled="OnAppLockToggled" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
             <VerticalStackLayout Spacing="1">
                 <Label Text="HELP" FontSize="11" FontAttributes="Bold"
                        CharacterSpacing="1" TextColor="#8A94A6" Margin="4,0,4,6" />

@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+﻿<?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage
-    x:Class="MoneySpend.Views.CreatePinPage"
+    x:Class="MoneySpend.Views.ChangePinPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:MoneySpend.Controls"
-    Shell.NavBarIsVisible="False">
+    Title="Change PIN">
 
     <ContentPage.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -18,27 +18,27 @@
 
         <!-- Glow behind logo -->
         <Ellipse Grid.Row="0"
-                 WidthRequest="320"
-                 HeightRequest="320"
+                 WidthRequest="300"
+                 HeightRequest="300"
                  Fill="#FF6B00"
                  Opacity="0.08"
                  HorizontalOptions="Center"
                  VerticalOptions="Start"
-                 TranslationY="-120"
+                 TranslationY="-130"
                  InputTransparent="True" />
 
         <ScrollView Grid.Row="0" VerticalScrollBarVisibility="Never">
-            <VerticalStackLayout Padding="24,40,24,12"
+            <VerticalStackLayout Padding="24,20,24,12"
                                  Spacing="0"
                                  HorizontalOptions="Fill">
 
                 <!-- LOGO -->
-                <Border WidthRequest="128"
-                        HeightRequest="128"
+                <Border WidthRequest="112"
+                        HeightRequest="112"
                         BackgroundColor="White"
                         Stroke="#F6E7D6"
                         StrokeThickness="1"
-                        StrokeShape="RoundRectangle 36"
+                        StrokeShape="RoundRectangle 32"
                         HorizontalOptions="Center">
                     <Border.Shadow>
                         <Shadow Brush="#FF6B00"
@@ -48,8 +48,8 @@
                     </Border.Shadow>
 
                     <Image Source="headerlogo.png"
-                           WidthRequest="104"
-                           HeightRequest="104"
+                           WidthRequest="88"
+                           HeightRequest="88"
                            Aspect="AspectFit"
                            HorizontalOptions="Center"
                            VerticalOptions="Center" />
@@ -57,15 +57,13 @@
 
                 <!-- HEADER -->
                 <Label x:Name="HeaderLabel"
-                       Text="Create your App PIN"
-                       Margin="0,24,0,0"
-                       FontSize="26"
+                       Margin="0,22,0,0"
+                       FontSize="24"
                        FontAttributes="Bold"
                        TextColor="#1A1410"
                        HorizontalTextAlignment="Center" />
 
                 <Label x:Name="SubHeaderLabel"
-                       Text="Choose a 4-digit PIN to protect your financial data."
                        Margin="0,8,0,0"
                        FontSize="14"
                        TextColor="#8A7B6E"
@@ -77,7 +75,6 @@
                 <!-- Error line (fixed 20px, no jumping) -->
                 <Grid HeightRequest="20" Margin="0,10,0,0">
                     <Label x:Name="ErrorLabel"
-                           Text="PINs don't match. Please try again."
                            FontSize="13"
                            FontAttributes="Bold"
                            TextColor="#DC2626"
@@ -98,19 +95,13 @@
         <!-- FOOTER -->
         <HorizontalStackLayout Grid.Row="1"
                                Spacing="8"
-                               Padding="28,8,28,20"
+                               Padding="0,8,0,20"
                                HorizontalOptions="Center">
-            <Path Data="M7,11 L7,8 C7,5.2 9.2,3 12,3 C14.8,3 17,5.2 17,8 L17,11 M6,11 L18,11 C18.55,11 19,11.45 19,12 L19,20 C19,20.55 18.55,21 18,21 L6,21 C5.45,21 5,20.55 5,20 L5,12 C5,11.45 5.45,11 6,11 Z"
-                  Stroke="#8A7B6E"
-                  StrokeThickness="1.8"
-                  StrokeLineCap="Round"
-                  StrokeLineJoin="Round"
-                  Fill="Transparent"
-                  Aspect="Uniform"
-                  WidthRequest="13"
-                  HeightRequest="13"
-                  VerticalOptions="Center" />
-            <Label Text="Used only to unlock MoneySpend on this device."
+            <Ellipse WidthRequest="6"
+                     HeightRequest="6"
+                     Fill="#22C55E"
+                     VerticalOptions="Center" />
+            <Label Text="Your data stays secured on this device"
                    FontSize="12"
                    TextColor="#8A7B6E"
                    VerticalOptions="Center" />

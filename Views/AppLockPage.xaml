@@ -4,105 +4,153 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:MoneySpend.Controls"
-    BackgroundColor="#FFFFFF"
     Shell.NavBarIsVisible="False">
 
-    <ScrollView>
-        <Grid Padding="28,48,28,24" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="0">
+    <ContentPage.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#FFF6EC" Offset="0.0" />
+            <GradientStop Color="#FFFFFF" Offset="0.55" />
+            <GradientStop Color="#FFFAF4" Offset="1.0" />
+        </LinearGradientBrush>
+    </ContentPage.Background>
 
-            <!-- ═══════════════════════════════════════════ -->
-            <!--  BRANDING                                    -->
-            <!-- ═══════════════════════════════════════════ -->
-            <VerticalStackLayout Grid.Row="0" Spacing="4" HorizontalOptions="Center">
-                <Border BackgroundColor="#FFF1E3"
-                        WidthRequest="56" HeightRequest="56"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 18"
+    <Grid RowDefinitions="*,Auto">
+
+        <!-- Glow behind logo -->
+        <Ellipse Grid.Row="0"
+                 WidthRequest="300"
+                 HeightRequest="300"
+                 Fill="#FF6B00"
+                 Opacity="0.08"
+                 HorizontalOptions="Center"
+                 VerticalOptions="Start"
+                 TranslationY="-110"
+                 InputTransparent="True" />
+
+        <ScrollView Grid.Row="0" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Padding="24,24,24,8"
+                                 Spacing="0"
+                                 HorizontalOptions="Fill">
+
+                <!-- LOGO -->
+                <Border WidthRequest="120"
+                        HeightRequest="120"
+                        BackgroundColor="White"
+                        Stroke="#F6E7D6"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 34"
                         HorizontalOptions="Center">
-                    <Label Text="MS"
-                           FontSize="26"
-                           FontAttributes="Bold"
-                           TextColor="#FF6B00"
+                    <Border.Shadow>
+                        <Shadow Brush="#FF6B00"
+                                Opacity="0.22"
+                                Offset="0,10"
+                                Radius="24" />
+                    </Border.Shadow>
+                    <Image Source="headerlogo.png"
+                           WidthRequest="100"
+                           HeightRequest="100"
+                           Aspect="AspectFit"
                            HorizontalOptions="Center"
                            VerticalOptions="Center" />
                 </Border>
 
-                <Label Text="MoneySpend"
-                       FontSize="13"
-                       FontAttributes="Bold"
-                       CharacterSpacing="2"
-                       TextColor="#FF6B00"
-                       Margin="0,10,0,0"
-                       HorizontalOptions="Center" />
-            </VerticalStackLayout>
-
-            <!-- ═══════════════════════════════════════════ -->
-            <!--  WELCOME + PROMPT                            -->
-            <!-- ═══════════════════════════════════════════ -->
-            <VerticalStackLayout Grid.Row="1" Margin="0,24,0,0" Spacing="6" HorizontalOptions="Center">
+                <!-- TITLE -->
                 <Label Text="Welcome back"
-                       FontSize="15"
-                       TextColor="#7A6B5E"
-                       HorizontalTextAlignment="Center" />
-
-                <Label x:Name="UserNameLabel"
-                       Text=" "
-                       FontSize="22"
+                       Margin="0,18,0,0"
+                       FontSize="24"
                        FontAttributes="Bold"
                        TextColor="#1A1410"
                        HorizontalTextAlignment="Center" />
 
-                <Label Text="Enter your 4-digit PIN"
-                       FontSize="14"
-                       TextColor="#7A6B5E"
-                       Margin="0,10,0,0"
-                       HorizontalTextAlignment="Center" />
+                <!-- Prompt chip -->
+                <Border BackgroundColor="#FFF1E3"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 18"
+                        Padding="14,7"
+                        Margin="0,8,0,0"
+                        HorizontalOptions="Center">
+                    <HorizontalStackLayout Spacing="8">
+                        <Path Data="M7,11 L7,8 C7,5.2 9.2,3 12,3 C14.8,3 17,5.2 17,8 L17,11 M6,11 L18,11 C18.55,11 19,11.45 19,12 L19,20 C19,20.55 18.55,21 18,21 L6,21 C5.45,21 5,20.55 5,20 L5,12 C5,11.45 5.45,11 6,11 Z"
+                              Stroke="#FF6B00"
+                              StrokeThickness="1.8"
+                              StrokeLineCap="Round"
+                              StrokeLineJoin="Round"
+                              Fill="Transparent"
+                              Aspect="Uniform"
+                              WidthRequest="14"
+                              HeightRequest="14"
+                              VerticalOptions="Center" />
+                        <Label Text="Enter your 4-digit PIN"
+                               FontSize="13"
+                               FontAttributes="Bold"
+                               TextColor="#C2510A"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
 
-                <Label x:Name="ErrorLabel"
-                       Text="Incorrect PIN. Please try again."
-                       FontSize="13"
-                       FontAttributes="Bold"
-                       TextColor="#DC2626"
-                       IsVisible="False"
-                       Margin="0,8,0,0"
-                       HorizontalTextAlignment="Center" />
-            </VerticalStackLayout>
+                <!-- Error line: fixed 18px, layout nahi hilega -->
+                <Grid HeightRequest="18" Margin="0,6,0,0">
+                    <Label x:Name="ErrorLabel"
+                           Text="Incorrect PIN. Please try again."
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           TextColor="#DC2626"
+                           IsVisible="False"
+                           HorizontalTextAlignment="Center"
+                           VerticalOptions="Center" />
+                </Grid>
 
-            <!-- ═══════════════════════════════════════════ -->
-            <!--  PIN PAD                                     -->
-            <!-- ═══════════════════════════════════════════ -->
-            <VerticalStackLayout Grid.Row="2" Margin="0,24,0,0" HorizontalOptions="Center">
-                <controls:PinPadView x:Name="PinPad" PinChanged="OnPinPadChanged" />
+                <!-- PIN PAD (negative top margin = dots ke upar ka extra gap kam) -->
+                <controls:PinPadView x:Name="PinPad"
+                                     Margin="0,-12,0,0"
+                                     HorizontalOptions="Center"
+                                     PinChanged="OnPinPadChanged" />
+
                 <ActivityIndicator x:Name="VerifyingIndicator"
                                    IsRunning="False"
                                    IsVisible="False"
                                    Color="#FF6B00"
-                                   Margin="0,16,0,0" />
+                                   HeightRequest="24"
+                                   WidthRequest="24"
+                                   Margin="0,8,0,0" />
 
-                <Label x:Name="ForgotPinLabel"
-                       Text="Forgot PIN?"
-                       FontSize="14"
-                       FontAttributes="Bold"
-                       TextColor="#FF6B00"
-                       Margin="0,22,0,0"
-                       HorizontalOptions="Center">
-                    <Label.GestureRecognizers>
+                <!-- Forgot PIN -->
+                <Border x:Name="ForgotPinBorder"
+                        BackgroundColor="Transparent"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 18"
+                        Padding="18,8"
+                        Margin="0,4,0,0"
+                        HorizontalOptions="Center">
+                    <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnForgotPinTapped" />
-                    </Label.GestureRecognizers>
-                </Label>
+                    </Border.GestureRecognizers>
+
+                    <Label x:Name="ForgotPinLabel"
+                           Text="Forgot PIN?"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="#FF6B00"
+                           InputTransparent="True" />
+                </Border>
+
             </VerticalStackLayout>
+        </ScrollView>
 
-            <!-- ═══════════════════════════════════════════ -->
-            <!--  FOOTER                                      -->
-            <!-- ═══════════════════════════════════════════ -->
-            <Label Grid.Row="3"
-                   Text="Your data stays secured on this device."
+        <!-- FOOTER -->
+        <HorizontalStackLayout Grid.Row="1"
+                               Spacing="8"
+                               Padding="0,6,0,16"
+                               HorizontalOptions="Center">
+            <Ellipse WidthRequest="6"
+                     HeightRequest="6"
+                     Fill="#22C55E"
+                     VerticalOptions="Center" />
+            <Label Text="Your data stays secured on this device"
                    FontSize="12"
-                   TextColor="#7A6B5E"
-                   Margin="0,24,0,0"
-                   HorizontalTextAlignment="Center" />
+                   TextColor="#8A7B6E"
+                   VerticalOptions="Center" />
+        </HorizontalStackLayout>
 
-        </Grid>
-    </ScrollView>
-
+    </Grid>
 </ContentPage>

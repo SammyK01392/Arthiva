@@ -1,11 +1,13 @@
+using Microsoft.Extensions.DependencyInjection;
+using MoneySpend.Models;
+using MoneySpend.Services;
+
 namespace MoneySpend.Views;
 
 /// <summary>
 /// First screen shown when no UserProfile exists yet. Collects Full Name
-/// and Mobile Number, then hands off to CreatePinPage. This page is the
-/// root of its NavigationPage (see App.xaml.cs) — pressing Android Back
-/// here exits the app rather than revealing AppShell/Dashboard, since
-/// AppShell isn't created until PIN setup succeeds.
+/// and Mobile Number, creates the profile (no PIN by default) and opens
+/// the app directly. A PIN can be enabled later from Settings > App Lock.
 /// </summary>
 public partial class FirstTimeSetupPage : ContentPage
 {
@@ -26,8 +28,7 @@ public partial class FirstTimeSetupPage : ContentPage
     {
         MobileNoErrorLabel.IsVisible = false;
 
-        // Belt-and-braces: keep only digits even though the numeric
-        // keyboard already restricts input on most devices/IMEs.
+        // Keep only digits, max 10
         var digitsOnly = new string(Array.FindAll((e.NewTextValue ?? string.Empty).ToCharArray(), char.IsDigit));
         if (digitsOnly.Length > 10)
             digitsOnly = digitsOnly[..10];
@@ -68,10 +69,28 @@ public partial class FirstTimeSetupPage : ContentPage
             _isSubmitting = true;
             SetBusy(true);
 
-            var createPinPage = _serviceProvider.GetRequiredService<CreatePinPage>();
-            createPinPage.Initialize(fullName, mobileNo);
+            // No PIN by default: create the profile and open the app directly
+            var userProfileService = _serviceProvider.GetRequiredService<IUserProfileService>();
+            await userProfileService.CreateAsync(new UserProfile
+            {
+                FullName = fullName,
+                MobileNo = mobileNo,
+                CurrencyCode = "INR",
+                PinHash = string.Empty,
+                IsActive = true
+            });
 
-            await Navigation.PushAsync(createPinPage);
+            // App Lock stays off until the user enables it in Settings
+            Preferences.Set(SettingsPage.AppLockKey, false);
+
+            var appShell = _serviceProvider.GetRequiredService<AppShell>();
+            Application.Current!.MainPage = appShell;
+        }
+        catch (Exception ex)
+        {
+            CrashLogger.Log(ex, "FirstTimeSetupPage.OnContinueTapped");
+            await DisplayAlert("Something went wrong",
+                "Couldn't save your details. Please try again.", "OK");
         }
         finally
         {
