@@ -39,8 +39,6 @@
 
         <Grid RowDefinitions="Auto,*">
 
-  
-
             <!-- ═══════════ CONTENT SHEET ═══════════ -->
             <Border Grid.Row="1" Margin="0,-14,0,0"
                     StrokeThickness="0" BackgroundColor="{StaticResource PageBg}"
@@ -53,7 +51,7 @@
                           ColumnDefinitions="*,*"
                           ColumnSpacing="10">
 
-                        <!-- ══ YOU'LL RECEIVE (Lend = green) ══ -->
+                        <!-- ══ YOU'LL RECEIVE (green, arrow DOWN = money coming in) ══ -->
                         <Border Grid.Column="0"
                                 Padding="14,12"
                                 StrokeThickness="1"
@@ -99,7 +97,7 @@
                             </Grid>
                         </Border>
 
-                        <!-- ══ YOU OWE (Borrow = red) ══ -->
+                        <!-- ══ YOU OWE (red, arrow UP = money going out) ══ -->
                         <Border Grid.Column="1"
                                 Padding="14,12"
                                 StrokeThickness="1"
@@ -258,9 +256,7 @@
 
                                         <SwipeView Margin="0,0,0,10">
 
-                                            <!-- ══════════════════════════════════════════ -->
-                                            <!-- LEFT SWIPE (finger →) → SETTLE (Green)   -->
-                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- LEFT SWIPE → SETTLE (Green) -->
                                             <SwipeView.LeftItems>
                                                 <SwipeItems Mode="Reveal"
                                                             SwipeBehaviorOnInvoked="Close">
@@ -306,9 +302,7 @@
                                                 </SwipeItems>
                                             </SwipeView.LeftItems>
 
-                                            <!-- ══════════════════════════════════════════ -->
-                                            <!-- RIGHT SWIPE (finger ←) → DELETE (Red)     -->
-                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- RIGHT SWIPE → DELETE (Red) -->
                                             <SwipeView.RightItems>
                                                 <SwipeItems Mode="Reveal"
                                                             SwipeBehaviorOnInvoked="Close">
@@ -331,11 +325,17 @@
                                                                         StrokeShape="RoundRectangle 18"
                                                                         BackgroundColor="#33FFFFFF"
                                                                         HorizontalOptions="Center">
-                                                                    <Image Source="icon_delete_white.png"
-                                                                           WidthRequest="18" HeightRequest="18"
-                                                                           Aspect="AspectFit"
-                                                                           HorizontalOptions="Center"
-                                                                           VerticalOptions="Center" />
+                                                                    <!-- Trash icon (Path, same style as other icons) -->
+                                                                    <Path WidthRequest="18" HeightRequest="18"
+                                                                          Aspect="Uniform"
+                                                                          Fill="Transparent"
+                                                                          Stroke="White"
+                                                                          StrokeThickness="2"
+                                                                          StrokeLineCap="Round"
+                                                                          StrokeLineJoin="Round"
+                                                                          HorizontalOptions="Center"
+                                                                          VerticalOptions="Center"
+                                                                          Data="M3,6 H21 M8,6 V4 C8,3.4 8.4,3 9,3 H15 C15.6,3 16,3.4 16,4 V6 M19,6 L18,20 C18,20.6 17.6,21 17,21 H7 C6.4,21 6,20.6 6,20 L5,6 M10,11 V17 M14,11 V17" />
                                                                 </Border>
                                                                 <Label Text="Delete"
                                                                        FontSize="11"
@@ -358,7 +358,6 @@
                                                     <Shadow Brush="#3D1E00" Offset="0,5" Radius="14" Opacity="0.07" />
                                                 </Border.Shadow>
 
-                                                <!-- Windows right-click menu -->
                                                 <Border.GestureRecognizers>
                                                     <TapGestureRecognizer
                                                         Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToRecordTransactionCommand}"
@@ -368,7 +367,7 @@
                                                 <Grid ColumnDefinitions="5,*"
                                                       BackgroundColor="{StaticResource CardBg}">
 
-                                                    <!-- ══ LEFT ACCENT (Lend=Green / Borrow=Red) ══ -->
+                                                    <!-- LEFT ACCENT (Lend=Green / Borrow=Red) -->
                                                     <BoxView Grid.Column="0"
                                                              Color="{StaticResource Borrow}"
                                                              VerticalOptions="Fill">
@@ -380,13 +379,13 @@
                                                         </BoxView.Triggers>
                                                     </BoxView>
 
-                                                    <!-- ══ MAIN CONTENT ══ -->
+                                                    <!-- MAIN CONTENT -->
                                                     <Grid Grid.Column="1"
                                                           Padding="12,12"
                                                           ColumnDefinitions="44,*,Auto"
                                                           ColumnSpacing="12">
 
-                                                        <!-- ══ AVATAR (initial) ══ -->
+                                                        <!-- AVATAR (initial) -->
                                                         <Border Grid.Column="0"
                                                                 WidthRequest="44" HeightRequest="44"
                                                                 StrokeThickness="0"
@@ -427,7 +426,7 @@
                                                             </Label>
                                                         </Border>
 
-                                                        <!-- ══ NAME + META ══ -->
+                                                        <!-- NAME + META -->
                                                         <VerticalStackLayout Grid.Column="1"
                                                                              Spacing="5"
                                                                              VerticalOptions="Center">
@@ -440,7 +439,9 @@
 
                                                             <HorizontalStackLayout Spacing="6">
 
-                                                                <!-- Lend/Borrow badge -->
+                                                                <!-- Lend/Borrow badge
+                                                                     Lend   = arrow UP   (money went out)
+                                                                     Borrow = arrow DOWN (money came in) -->
                                                                 <Border Padding="6,2"
                                                                         StrokeThickness="0"
                                                                         VerticalOptions="Center"
@@ -461,12 +462,12 @@
                                                                               StrokeLineCap="Round"
                                                                               StrokeLineJoin="Round"
                                                                               VerticalOptions="Center"
-                                                                              Data="M12,4 L12,20 M6,14 L12,20 L18,14">
+                                                                              Data="M12,20 L12,4 M6,10 L12,4 L18,10">
                                                                             <Path.Triggers>
                                                                                 <DataTrigger TargetType="Path"
                                                                                              Binding="{Binding Record.Type}" Value="Borrow">
                                                                                     <Setter Property="Stroke" Value="{StaticResource Borrow}" />
-                                                                                    <Setter Property="Data" Value="M12,20 L12,4 M6,10 L12,4 L18,10" />
+                                                                                    <Setter Property="Data" Value="M12,4 L12,20 M6,14 L12,20 L18,14" />
                                                                                 </DataTrigger>
                                                                             </Path.Triggers>
                                                                         </Path>
@@ -514,7 +515,7 @@
                                                             </HorizontalStackLayout>
                                                         </VerticalStackLayout>
 
-                                                        <!-- ══ AMOUNT + SETTLE BUTTON ══ -->
+                                                        <!-- AMOUNT + SETTLE BUTTON -->
                                                         <VerticalStackLayout Grid.Column="2"
                                                                              Spacing="6"
                                                                              VerticalOptions="Center"
@@ -593,6 +594,7 @@
                                         StrokeThickness="0" HorizontalOptions="Center"
                                         StrokeShape="RoundRectangle 26"
                                         BackgroundColor="{StaticResource PrimaryTint}">
+                                    <!-- Swap arrows icon -->
                                     <Path WidthRequest="36" HeightRequest="36"
                                           Aspect="Uniform"
                                           Fill="Transparent"
@@ -602,7 +604,7 @@
                                           StrokeLineJoin="Round"
                                           HorizontalOptions="Center"
                                           VerticalOptions="Center"
-                                          Data="M12,3 L12,21 M5,21 L19,21 M5,8 L12,3 L19,8 M3,14 L7,14 M17,14 L21,14 M3,14 L5,8 M7,14 L5,8 M17,14 L19,8 M21,14 L19,8" />
+                                          Data="M17,3 L21,7 L17,11 M21,7 H8 M7,13 L3,17 L7,21 M3,17 H16" />
                                 </Border>
                                 <Label Text="Nothing here yet" FontSize="16"
                                        FontAttributes="Bold" HorizontalOptions="Center"

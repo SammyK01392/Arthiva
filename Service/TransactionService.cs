@@ -5,37 +5,59 @@ namespace MoneySpend.Services;
 public class TransactionService : ITransactionService
 {
     private readonly IGenericRepository<Transaction> _repo;
+    private readonly IGenericRepository<Category> _categoryRepo;
     private readonly IAccountService _accountService;
 
-    public TransactionService(IGenericRepository<Transaction> repo, IAccountService accountService)
+    public TransactionService(
+        IGenericRepository<Transaction> repo,
+        IGenericRepository<Category> categoryRepo,
+        IAccountService accountService)
     {
         _repo = repo;
+        _categoryRepo = categoryRepo;
         _accountService = accountService;
+    }
+
+    // ─────────────────────────────────────────────────────────
+    //  Category naam fill karna (UI ke liye, DB mein save nahi hota)
+    // ─────────────────────────────────────────────────────────
+    private async Task<List<Transaction>> WithCategoryAsync(IEnumerable<Transaction> transactions)
+    {
+        var list = transactions.OrderByDescending(t => t.TransactionDate).ToList();
+        if (list.Count == 0) return list;
+
+        var categories = await _categoryRepo.FindAsync(c => true);
+        var names = categories.ToDictionary(c => c.Id, c => c.Name);
+
+        foreach (var t in list)
+            t.Category = names.TryGetValue(t.CategoryId, out var name) ? name : null;
+
+        return list;
     }
 
     public async Task<List<Transaction>> GetAllAsync()
     {
         var transactions = await _repo.FindAsync(t => !t.IsDeleted);
-        return transactions.OrderByDescending(t => t.TransactionDate).ToList();
+        return await WithCategoryAsync(transactions);
     }
 
     public async Task<List<Transaction>> GetByAccountAsync(int accountId)
     {
         var transactions = await _repo.FindAsync(t => !t.IsDeleted && t.AccountId == accountId);
-        return transactions.OrderByDescending(t => t.TransactionDate).ToList();
+        return await WithCategoryAsync(transactions);
     }
 
     public async Task<List<Transaction>> GetByCategoryAsync(int categoryId)
     {
         var transactions = await _repo.FindAsync(t => !t.IsDeleted && t.CategoryId == categoryId);
-        return transactions.OrderByDescending(t => t.TransactionDate).ToList();
+        return await WithCategoryAsync(transactions);
     }
 
     public async Task<List<Transaction>> GetByDateRangeAsync(DateTime from, DateTime to)
     {
         var transactions = await _repo.FindAsync(t =>
             !t.IsDeleted && t.TransactionDate >= from && t.TransactionDate <= to);
-        return transactions.OrderByDescending(t => t.TransactionDate).ToList();
+        return await WithCategoryAsync(transactions);
     }
 
     public Task<Transaction?> GetByIdAsync(int id)

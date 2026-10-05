@@ -71,54 +71,32 @@ public partial class TransactionListViewModel : BaseViewModel
     }
 
     // ─────────────────────────────────────────────────────────
-    //  Classification helpers — SourceType + TransactionType
+    //  Classification ab Transaction model mein hai
+    //  (IsIncome / IsExpense / IsBorrow / IsLend) — XAML aur
+    //  ViewModel dono ek hi logic use karte hain.
     // ─────────────────────────────────────────────────────────
-    //  Regular Income     : Type = "Income"  & SourceType != "BorrowLend"
-    //  Regular Expense    : Type = "Expense" & SourceType != "BorrowLend"
-    //  Borrow             : SourceType = "BorrowLend" & Type = "Income"   (money aa raha)
-    //  Lend               : SourceType = "BorrowLend" & Type = "Expense"  (money ja raha)
-    // ─────────────────────────────────────────────────────────
-
-    private static bool IsBorrowLend(Transaction t)
-        => string.Equals(t.SourceType, "BorrowLend", StringComparison.OrdinalIgnoreCase);
-
-    private static bool IsIncome(Transaction t)
-        => !IsBorrowLend(t)
-        && string.Equals(t.TransactionType, "Income", StringComparison.OrdinalIgnoreCase);
-
-    private static bool IsExpense(Transaction t)
-        => !IsBorrowLend(t)
-        && string.Equals(t.TransactionType, "Expense", StringComparison.OrdinalIgnoreCase);
-
-    private static bool IsBorrow(Transaction t)
-        => IsBorrowLend(t)
-        && string.Equals(t.TransactionType, "Income", StringComparison.OrdinalIgnoreCase);
-
-    private static bool IsLend(Transaction t)
-        => IsBorrowLend(t)
-        && string.Equals(t.TransactionType, "Expense", StringComparison.OrdinalIgnoreCase);
 
     private void RecalculateTotals()
     {
-        TotalIncome = _allTransactions.Where(IsIncome).Sum(t => t.Amount);
-        TotalExpense = _allTransactions.Where(IsExpense).Sum(t => t.Amount);
-        IncomeCount = _allTransactions.Count(IsIncome);
-        ExpenseCount = _allTransactions.Count(IsExpense);
+        TotalIncome = _allTransactions.Where(t => t.IsIncome).Sum(t => t.Amount);
+        TotalExpense = _allTransactions.Where(t => t.IsExpense).Sum(t => t.Amount);
+        IncomeCount = _allTransactions.Count(t => t.IsIncome);
+        ExpenseCount = _allTransactions.Count(t => t.IsExpense);
 
-        BorrowTotal = _allTransactions.Where(IsBorrow).Sum(t => t.Amount);
-        LendTotal = _allTransactions.Where(IsLend).Sum(t => t.Amount);
-        BorrowCount = _allTransactions.Count(IsBorrow);
-        LendCount = _allTransactions.Count(IsLend);
+        BorrowTotal = _allTransactions.Where(t => t.IsBorrow).Sum(t => t.Amount);
+        LendTotal = _allTransactions.Where(t => t.IsLend).Sum(t => t.Amount);
+        BorrowCount = _allTransactions.Count(t => t.IsBorrow);
+        LendCount = _allTransactions.Count(t => t.IsLend);
     }
 
     private void ApplyFilter()
     {
         var filtered = SelectedFilter switch
         {
-            "Income" => _allTransactions.Where(IsIncome),
-            "Expense" => _allTransactions.Where(IsExpense),
-            "Borrow" => _allTransactions.Where(IsBorrow),
-            "Lend" => _allTransactions.Where(IsLend),
+            "Income" => _allTransactions.Where(t => t.IsIncome),
+            "Expense" => _allTransactions.Where(t => t.IsExpense),
+            "Borrow" => _allTransactions.Where(t => t.IsBorrow),
+            "Lend" => _allTransactions.Where(t => t.IsLend),
             _ => _allTransactions.AsEnumerable()
         };
 

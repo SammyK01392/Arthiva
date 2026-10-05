@@ -74,4 +74,31 @@ public class Transaction
     /// </summary>
     [Indexed]
     public SyncStatus SyncStatus { get; set; } = SyncStatus.Pending;
+
+    // ═══════════════════════════════════════════════════
+    //  UI-ONLY (DB mein save nahi hote)
+    // ═══════════════════════════════════════════════════
+
+    /// <summary>
+    /// Category ka naam, list screen par dikhane ke liye.
+    /// Service GetAllAsync mein CategoryId se fill karegi.
+    /// </summary>
+    [Ignore]
+    public string? Category { get; set; }
+
+    // Classification rules (ViewModel + XAML dono yahi use karte hain):
+    //   Borrow  = SourceType BorrowLend + Income   (money aa raha)
+    //   Lend    = SourceType BorrowLend + Expense  (money ja raha)
+    //   Income  = normal + Income
+    //   Expense = normal + baaki sab
+    private bool IsBL =>
+        string.Equals(SourceType, "BorrowLend", StringComparison.OrdinalIgnoreCase);
+
+    private bool IsTypeIncome =>
+        string.Equals(TransactionType, "Income", StringComparison.OrdinalIgnoreCase);
+
+    [Ignore] public bool IsBorrow => IsBL && IsTypeIncome;
+    [Ignore] public bool IsLend => IsBL && !IsTypeIncome;
+    [Ignore] public bool IsIncome => !IsBL && IsTypeIncome;
+    [Ignore] public bool IsExpense => !IsBL && !IsTypeIncome;
 }

@@ -189,7 +189,6 @@
                 </Border>
 
                 <!-- ═══ List ═══ -->
-                <!-- IsRefreshing OneWay: loop / double-load nahi banega -->
                 <RefreshView Grid.Row="1"
                              IsRefreshing="{Binding IsBusy, Mode=OneWay}"
                              Command="{Binding LoadCommand}"
@@ -239,7 +238,7 @@
                                                                       StrokeLineJoin="Round"
                                                                       HorizontalOptions="Center"
                                                                       VerticalOptions="Center"
-                                                                      Data="M14.06,9 L15,9.94 L5.92,19 H5 V18.08 L14.06,9 M17.66,3 C17.41,3 17.15,3.1 16.96,3.29 L15.13,5.12 L18.88,8.87 L20.71,7.04 C21.1,6.65 21.1,6.02 20.71,5.63 L18.37,3.29 C18.17,3.09 17.92,3 17.66,3 M14.06,6.19 L3,17.25 V21 H6.75 L17.81,9.94 L14.06,6.19 Z" />
+                                                                      Data="M17,3 L21,7 L8,20 L3,21 L4,16 Z M14,6 L18,10" />
                                                             </Border>
                                                             <Label Text="Edit"
                                                                    FontSize="11"
@@ -276,11 +275,16 @@
                                                                     StrokeShape="RoundRectangle 18"
                                                                     BackgroundColor="#33FFFFFF"
                                                                     HorizontalOptions="Center">
-                                                                <Image Source="icon_delete_white.png"
-                                                                       WidthRequest="18" HeightRequest="18"
-                                                                       Aspect="AspectFit"
-                                                                       HorizontalOptions="Center"
-                                                                       VerticalOptions="Center" />
+                                                                <Path WidthRequest="18" HeightRequest="18"
+                                                                      Aspect="Uniform"
+                                                                      Fill="Transparent"
+                                                                      Stroke="White"
+                                                                      StrokeThickness="2"
+                                                                      StrokeLineCap="Round"
+                                                                      StrokeLineJoin="Round"
+                                                                      HorizontalOptions="Center"
+                                                                      VerticalOptions="Center"
+                                                                      Data="M3,6 H21 M8,6 V4 C8,3.4 8.4,3 9,3 H15 C15.6,3 16,3.4 16,4 V6 M19,6 L18,20 C18,20.6 17.6,21 17,21 H7 C6.4,21 6,20.6 6,20 L5,6 M10,11 V17 M14,11 V17" />
                                                             </Border>
                                                             <Label Text="Delete"
                                                                    FontSize="11"
@@ -306,7 +310,11 @@
 
                                             <Grid ColumnDefinitions="36,*,Auto" ColumnSpacing="10">
 
-                                                <!-- Icon box (4 types, DisplayType se) -->
+                                                <!-- Icon box (bool flags from Transaction model)
+                                                     Expense = UP   red
+                                                     Income  = DOWN green
+                                                     Borrow  = DOWN blue
+                                                     Lend    = UP   purple -->
                                                 <Border Grid.Column="0"
                                                         WidthRequest="36" HeightRequest="36"
                                                         StrokeThickness="0" VerticalOptions="Center"
@@ -314,44 +322,60 @@
                                                         BackgroundColor="{StaticResource ExpenseTint}">
                                                     <Border.Triggers>
                                                         <DataTrigger TargetType="Border"
-                                                                     Binding="{Binding DisplayType}" Value="Income">
+                                                                     Binding="{Binding IsIncome}" Value="True">
                                                             <Setter Property="BackgroundColor" Value="{StaticResource IncomeTint}" />
                                                         </DataTrigger>
                                                         <DataTrigger TargetType="Border"
-                                                                     Binding="{Binding DisplayType}" Value="Borrow">
+                                                                     Binding="{Binding IsBorrow}" Value="True">
                                                             <Setter Property="BackgroundColor" Value="{StaticResource BorrowTint}" />
                                                         </DataTrigger>
                                                         <DataTrigger TargetType="Border"
-                                                                     Binding="{Binding DisplayType}" Value="Lend">
+                                                                     Binding="{Binding IsLend}" Value="True">
                                                             <Setter Property="BackgroundColor" Value="{StaticResource LendTint}" />
                                                         </DataTrigger>
                                                     </Border.Triggers>
 
-                                                    <Path WidthRequest="16" HeightRequest="16"
-                                                          Aspect="Uniform"
-                                                          StrokeLineCap="Round" StrokeLineJoin="Round"
-                                                          StrokeThickness="2.2"
-                                                          Stroke="{StaticResource Expense}"
-                                                          HorizontalOptions="Center" VerticalOptions="Center"
-                                                          Data="M12,20 L12,4 M6,10 L12,4 L18,10">
-                                                        <Path.Triggers>
-                                                            <DataTrigger TargetType="Path"
-                                                                         Binding="{Binding DisplayType}" Value="Income">
-                                                                <Setter Property="Data" Value="M12,4 L12,20 M6,14 L12,20 L18,14" />
-                                                                <Setter Property="Stroke" Value="{StaticResource Income}" />
-                                                            </DataTrigger>
-                                                            <DataTrigger TargetType="Path"
-                                                                         Binding="{Binding DisplayType}" Value="Borrow">
-                                                                <Setter Property="Data" Value="M12,4 L12,20 M6,14 L12,20 L18,14" />
-                                                                <Setter Property="Stroke" Value="{StaticResource Borrow}" />
-                                                            </DataTrigger>
-                                                            <DataTrigger TargetType="Path"
-                                                                         Binding="{Binding DisplayType}" Value="Lend">
-                                                                <Setter Property="Data" Value="M12,20 L12,4 M6,10 L12,4 L18,10" />
-                                                                <Setter Property="Stroke" Value="{StaticResource Lend}" />
-                                                            </DataTrigger>
-                                                        </Path.Triggers>
-                                                    </Path>
+                                                    <Grid>
+                                                        <!-- Expense: UP, red -->
+                                                        <Path WidthRequest="16" HeightRequest="16"
+                                                              Aspect="Uniform" Fill="Transparent"
+                                                              StrokeLineCap="Round" StrokeLineJoin="Round"
+                                                              StrokeThickness="2.2"
+                                                              Stroke="{StaticResource Expense}"
+                                                              HorizontalOptions="Center" VerticalOptions="Center"
+                                                              IsVisible="{Binding IsExpense}"
+                                                              Data="M12,20 L12,4 M6,10 L12,4 L18,10" />
+
+                                                        <!-- Income: DOWN, green -->
+                                                        <Path WidthRequest="16" HeightRequest="16"
+                                                              Aspect="Uniform" Fill="Transparent"
+                                                              StrokeLineCap="Round" StrokeLineJoin="Round"
+                                                              StrokeThickness="2.2"
+                                                              Stroke="{StaticResource Income}"
+                                                              HorizontalOptions="Center" VerticalOptions="Center"
+                                                              IsVisible="{Binding IsIncome}"
+                                                              Data="M12,4 L12,20 M6,14 L12,20 L18,14" />
+
+                                                        <!-- Borrow: DOWN, blue -->
+                                                        <Path WidthRequest="16" HeightRequest="16"
+                                                              Aspect="Uniform" Fill="Transparent"
+                                                              StrokeLineCap="Round" StrokeLineJoin="Round"
+                                                              StrokeThickness="2.2"
+                                                              Stroke="{StaticResource Borrow}"
+                                                              HorizontalOptions="Center" VerticalOptions="Center"
+                                                              IsVisible="{Binding IsBorrow}"
+                                                              Data="M12,4 L12,20 M6,14 L12,20 L18,14" />
+
+                                                        <!-- Lend: UP, purple -->
+                                                        <Path WidthRequest="16" HeightRequest="16"
+                                                              Aspect="Uniform" Fill="Transparent"
+                                                              StrokeLineCap="Round" StrokeLineJoin="Round"
+                                                              StrokeThickness="2.2"
+                                                              Stroke="{StaticResource Lend}"
+                                                              HorizontalOptions="Center" VerticalOptions="Center"
+                                                              IsVisible="{Binding IsLend}"
+                                                              Data="M12,20 L12,4 M6,10 L12,4 L18,10" />
+                                                    </Grid>
                                                 </Border>
 
                                                 <!-- Description + category + date -->
@@ -373,7 +397,7 @@
                                                            Text="{Binding TransactionDate, StringFormat='{0:dd MMM yyyy • hh:mm tt}'}" />
                                                 </VerticalStackLayout>
 
-                                                <!-- Amount (4 types, DisplayType se) -->
+                                                <!-- Amount (bool flags) -->
                                                 <Label Grid.Column="2"
                                                        FontSize="14" FontAttributes="Bold"
                                                        VerticalOptions="Center"
@@ -382,15 +406,15 @@
                                                        Text="{Binding Amount, StringFormat='₹{0:N2}'}">
                                                     <Label.Triggers>
                                                         <DataTrigger TargetType="Label"
-                                                                     Binding="{Binding DisplayType}" Value="Income">
+                                                                     Binding="{Binding IsIncome}" Value="True">
                                                             <Setter Property="TextColor" Value="{StaticResource Income}" />
                                                         </DataTrigger>
                                                         <DataTrigger TargetType="Label"
-                                                                     Binding="{Binding DisplayType}" Value="Borrow">
+                                                                     Binding="{Binding IsBorrow}" Value="True">
                                                             <Setter Property="TextColor" Value="{StaticResource Borrow}" />
                                                         </DataTrigger>
                                                         <DataTrigger TargetType="Label"
-                                                                     Binding="{Binding DisplayType}" Value="Lend">
+                                                                     Binding="{Binding IsLend}" Value="True">
                                                             <Setter Property="TextColor" Value="{StaticResource Lend}" />
                                                         </DataTrigger>
                                                     </Label.Triggers>

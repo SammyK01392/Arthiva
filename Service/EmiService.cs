@@ -4,18 +4,36 @@ namespace MoneySpend.Services;
 
 public class EmiService : IEmiService
 {
+    // Category ka naam jo EMI payment transactions ko default milega
+    private const string EmiCategoryName = "EMI";
+
     private readonly IGenericRepository<EmiMaster> _repo;
     private readonly IGenericRepository<EmiPayment> _paymentRepo;
+    private readonly IGenericRepository<Category> _categoryRepo;
     private readonly ITransactionService _transactionService;
 
     public EmiService(
         IGenericRepository<EmiMaster> repo,
         IGenericRepository<EmiPayment> paymentRepo,
+        IGenericRepository<Category> categoryRepo,
         ITransactionService transactionService)
     {
         _repo = repo;
         _paymentRepo = paymentRepo;
+        _categoryRepo = categoryRepo;
         _transactionService = transactionService;
+    }
+
+    /// <summary>
+    /// "EMI" naam wali category ka Id (case-insensitive). Na mile to 0 return
+    /// karta hai, taaki payment save hone mein kabhi error na aaye.
+    /// </summary>
+    private async Task<int> GetEmiCategoryIdAsync()
+    {
+        var categories = await _categoryRepo.FindAsync(c => true);
+        var emi = categories.FirstOrDefault(c =>
+            string.Equals(c.Name?.Trim(), EmiCategoryName, StringComparison.OrdinalIgnoreCase));
+        return emi?.Id ?? 0;
     }
 
     public async Task<List<EmiMaster>> GetAllAsync(bool includeCompleted = false)
@@ -83,6 +101,7 @@ public class EmiService : IEmiService
             var createdTxn = new Transaction
             {
                 AccountId = emi.AccountId.Value,
+                CategoryId = await GetEmiCategoryIdAsync(), // default: EMI category
                 Amount = payment.Amount,
                 TransactionType = "Expense",
                 TransactionDate = payment.PaymentDate,
@@ -187,6 +206,11 @@ public class EmiService : IEmiService
             {
                 txn.Amount = existing.Amount;
                 txn.TransactionDate = existing.PaymentDate;
+
+                // Purani EMI transactions (jinki category blank thi) bhi edit par fix ho jayengi
+                if (txn.CategoryId == 0)
+                    txn.CategoryId = await GetEmiCategoryIdAsync();
+
                 await _transactionService.UpdateTransactionAsync(txn);
             }
         }
