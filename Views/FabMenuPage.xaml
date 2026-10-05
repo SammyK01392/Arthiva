@@ -42,7 +42,7 @@
                     </Border>
                 </Grid>
 
-                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="14" RowSpacing="14">
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="14" RowSpacing="14">
 
                     <Border x:Name="ItemIncome" Grid.Row="0" Grid.Column="0"
                             BackgroundColor="#F0FDF4" Stroke="#BBF7D0" StrokeThickness="1"
@@ -150,6 +150,33 @@
                                 <Label Text="Udhaar diya" FontSize="12" TextColor="#6B7280" />
                             </VerticalStackLayout>
                         </VerticalStackLayout>
+                    </Border>
+
+                    <Border x:Name="ItemSplit" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+        BackgroundColor="#FFF7ED" Stroke="#FED7AA" StrokeThickness="1"
+        StrokeShape="RoundRectangle 22" Padding="16">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnSplitTapped" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14" InputTransparent="True">
+                            <Border WidthRequest="46" HeightRequest="46" StrokeThickness="0"
+                StrokeShape="RoundRectangle 23" VerticalOptions="Center">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#FDBA74" Offset="0" />
+                                        <GradientStop Color="#EA580C" Offset="1" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Path Data="M12 4 L12 10 M12 10 L6 18 M12 10 L18 18 M6 13 L6 18 L11 18 M18 13 L18 18 L13 18"
+                  Stroke="White" StrokeThickness="2.4" StrokeLineCap="Round" StrokeLineJoin="Round"
+                  Aspect="Uniform" WidthRequest="20" HeightRequest="20"
+                  HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label Text="Split Expense" FontSize="16" FontAttributes="Bold" TextColor="#9A3412" />
+                                <Label Text="Dosto ke saath bill baanto" FontSize="12" TextColor="#6B7280" />
+                            </VerticalStackLayout>
+                        </Grid>
                     </Border>
 
                 </Grid>

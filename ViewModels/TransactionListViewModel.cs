@@ -9,6 +9,7 @@ namespace MoneySpend.ViewModels;
 public partial class TransactionListViewModel : BaseViewModel
 {
     private readonly ITransactionService _transactionService;
+    private readonly AutoRefresh _autoRefresh;
 
     private List<Transaction> _allTransactions = new();
 
@@ -39,17 +40,34 @@ public partial class TransactionListViewModel : BaseViewModel
     {
         _transactionService = transactionService;
         Title = "Transactions";
+
+        // DB change (add / edit / delete) aate hi list khud reload hogi
+        _autoRefresh = new AutoRefresh(ReloadAsync);
+    }
+
+    // IsBusy guard ke bina seedha reload (AutoRefresh isi ko call karta hai).
+    // Yahan ExecuteAsync mat lagana, warna silently skip hone wali problem wapas aa jayegi.
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            _allTransactions = await _transactionService.GetAllAsync();
+            RecalculateTotals();
+            ApplyFilter();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
     }
 
     [RelayCommand]
     private async Task LoadAsync()
     {
-        await ExecuteAsync(async () =>
-        {
-            _allTransactions = await _transactionService.GetAllAsync();
-            RecalculateTotals();
-            ApplyFilter();
-        });
+        await ExecuteAsync(ReloadAsync);
+
+        // Pehli load ke baad auto-refresh on
+        _autoRefresh.Enabled = true;
     }
 
     // ─────────────────────────────────────────────────────────
@@ -129,6 +147,8 @@ public partial class TransactionListViewModel : BaseViewModel
     {
         await ExecuteAsync(async () =>
         {
+            // Service delete ke baad Publish karti hai, to AutoRefresh bhi reload karega.
+            // Neeche ka manual remove sirf instant UI feel ke liye hai.
             await _transactionService.DeleteTransactionAsync(transaction.Id);
             _allTransactions.Remove(transaction);
             Transactions.Remove(transaction);

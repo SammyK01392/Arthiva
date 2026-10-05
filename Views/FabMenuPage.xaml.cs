@@ -11,7 +11,18 @@ public partial class FabMenuPage : ContentPage
         InitializeComponent();
     }
 
-    private double SheetOffset => Sheet.Height > 0 ? Sheet.Height + 40 : 700;
+    private double SheetOffset
+    {
+        get
+        {
+            var height = Sheet.Height;
+
+            if (height <= 0 || double.IsNaN(height))
+                height = DeviceDisplay.MainDisplayInfo.Height / DeviceDisplay.MainDisplayInfo.Density;
+
+            return height + 40;
+        }
+    }
 
     protected override async void OnAppearing()
     {
@@ -105,5 +116,10 @@ public partial class FabMenuPage : ContentPage
     {
         var route = nameof(BorrowLendEditViewModel).Replace("ViewModel", "Page");
         _ = CloseAndGoAsync(ItemLend, $"{route}?Type=Lend");
+    }
+    private void OnSplitTapped(object sender, TappedEventArgs e)
+    {
+        var route = nameof(AddSplitViewModel).Replace("ViewModel", "Page");
+        _ = CloseAndGoAsync(ItemSplit, route);
     }
 }

@@ -17,9 +17,9 @@ public partial class TransactionListPage : ContentPage
         BindingContext = _viewModel;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        _viewModel.LoadCommand.Execute(null);
+        await _viewModel.LoadCommand.ExecuteAsync(null);
     }
 }

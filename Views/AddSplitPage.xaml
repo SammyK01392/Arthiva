@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="MoneySpend.Views.AddSplitPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MoneySpend.ViewModels"
+    x:DataType="vm:AddSplitViewModel"
+    Title="Split Expense"
+    BackgroundColor="#FFFFFF">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="Primary">#FF6B00</Color>
+            <Color x:Key="PrimaryTint">#FFF1E3</Color>
+            <Color x:Key="CardBg">#FFF8F2</Color>
+            <Color x:Key="CardStroke">#F4EBE1</Color>
+            <Color x:Key="TrackMuted">#F4EDE6</Color>
+            <Color x:Key="TextPrimary">#1A1410</Color>
+            <Color x:Key="TextSecondary">#7A6B5E</Color>
+            <Color x:Key="TextTertiary">#A89A8C</Color>
+            <Color x:Key="Income">#0FA968</Color>
+            <Color x:Key="Expense">#E63946</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="*,Auto">
+
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="16,16,16,24" Spacing="14">
+
+                <!-- ═══ Basics ═══ -->
+                <Border Padding="14" StrokeThickness="1"
+                        Stroke="{StaticResource CardStroke}"
+                        BackgroundColor="{StaticResource CardBg}"
+                        StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout Spacing="6">
+
+                        <Label Text="What was it for?" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Entry Text="{Binding ExpenseTitle}" Placeholder="Dinner, Cab, Movie..."
+                               TextColor="{StaticResource TextPrimary}" />
+
+                        <Label Text="Total amount (you paid)" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" Margin="0,6,0,0" />
+                        <Entry Text="{Binding TotalText}" Placeholder="0.00" Keyboard="Numeric"
+                               FontSize="20" FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}" />
+
+                        <Label Text="Date" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" Margin="0,6,0,0" />
+                        <DatePicker Date="{Binding SplitDate}" TextColor="{StaticResource TextPrimary}" />
+
+                        <Label Text="Paid from" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" Margin="0,6,0,0" />
+                        <!-- x:DataType null: ItemDisplayBinding runs against the item (Account), not the page VM -->
+                        <Picker x:DataType="{x:Null}"
+                                Title="Select account"
+                                ItemsSource="{Binding Accounts}"
+                                SelectedItem="{Binding SelectedAccount}"
+                                ItemDisplayBinding="{Binding Name}"
+                                TextColor="{StaticResource TextPrimary}" />
+
+                        <Label Text="Category (for your share)" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" Margin="0,6,0,0" />
+                        <Picker x:DataType="{x:Null}"
+                                Title="Select category"
+                                ItemsSource="{Binding Categories}"
+                                SelectedItem="{Binding SelectedCategory}"
+                                ItemDisplayBinding="{Binding Name}"
+                                TextColor="{StaticResource TextPrimary}" />
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ═══ Split method ═══ -->
+                <Label Text="Split between" FontSize="15" FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}" />
+
+                <Border Padding="4" StrokeThickness="0"
+                        BackgroundColor="{StaticResource TrackMuted}"
+                        StrokeShape="RoundRectangle 13">
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="3">
+
+                        <!-- Equal -->
+                        <Border Grid.Column="0" Padding="2,9" StrokeThickness="0"
+                                BackgroundColor="Transparent" StrokeShape="RoundRectangle 10">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding SelectedMethod}" Value="Equal">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SetMethodCommand}"
+                                                      CommandParameter="Equal" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Equal" FontSize="12" FontAttributes="Bold"
+                                   HorizontalOptions="Center" VerticalOptions="Center"
+                                   TextColor="{StaticResource TextSecondary}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding SelectedMethod}" Value="Equal">
+                                        <Setter Property="TextColor" Value="White" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Border>
+
+                        <!-- Exact -->
+                        <Border Grid.Column="1" Padding="2,9" StrokeThickness="0"
+                                BackgroundColor="Transparent" StrokeShape="RoundRectangle 10">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding SelectedMethod}" Value="Exact">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SetMethodCommand}"
+                                                      CommandParameter="Exact" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Exact ₹" FontSize="12" FontAttributes="Bold"
+                                   HorizontalOptions="Center" VerticalOptions="Center"
+                                   TextColor="{StaticResource TextSecondary}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding SelectedMethod}" Value="Exact">
+                                        <Setter Property="TextColor" Value="White" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Border>
+
+                        <!-- Percent -->
+                        <Border Grid.Column="2" Padding="2,9" StrokeThickness="0"
+                                BackgroundColor="Transparent" StrokeShape="RoundRectangle 10">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding SelectedMethod}" Value="Percent">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SetMethodCommand}"
+                                                      CommandParameter="Percent" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Percent %" FontSize="12" FontAttributes="Bold"
+                                   HorizontalOptions="Center" VerticalOptions="Center"
+                                   TextColor="{StaticResource TextSecondary}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding SelectedMethod}" Value="Percent">
+                                        <Setter Property="TextColor" Value="White" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Border>
+
+                    </Grid>
+                </Border>
+
+                <!-- Search friends -->
+                <Entry Text="{Binding ContactSearch}" Placeholder="Search friends"
+                       TextColor="{StaticResource TextPrimary}" />
+
+                <!-- ═══ People ═══ -->
+                <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding VisibleRows}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ParticipantRow">
+                            <Border Padding="8,4" StrokeThickness="1"
+                                    Stroke="{StaticResource CardStroke}"
+                                    BackgroundColor="{StaticResource CardBg}"
+                                    StrokeShape="RoundRectangle 12">
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+
+                                    <CheckBox Grid.Column="0"
+                                              IsChecked="{Binding IsSelected}"
+                                              Color="{StaticResource Primary}"
+                                              VerticalOptions="Center" />
+
+                                    <Label Grid.Column="1" Text="{Binding Name}"
+                                           FontSize="14" FontAttributes="Bold"
+                                           LineBreakMode="TailTruncation" MaxLines="1"
+                                           VerticalOptions="Center"
+                                           TextColor="{StaticResource TextPrimary}" />
+
+                                    <Entry Grid.Column="2"
+                                           Text="{Binding Input}"
+                                           Placeholder="{Binding InputHint}"
+                                           Keyboard="Numeric"
+                                           WidthRequest="76"
+                                           HorizontalTextAlignment="End"
+                                           IsVisible="{Binding ShowInput}"
+                                           VerticalOptions="Center"
+                                           TextColor="{StaticResource TextPrimary}" />
+
+                                    <Label Grid.Column="3"
+                                           Text="{Binding Share, StringFormat='₹{0:N2}'}"
+                                           IsVisible="{Binding IsSelected}"
+                                           FontSize="13" FontAttributes="Bold"
+                                           MinimumWidthRequest="72"
+                                           HorizontalTextAlignment="End"
+                                           VerticalOptions="Center"
+                                           TextColor="{StaticResource Primary}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- Summary -->
+                <Border Padding="12,10" StrokeThickness="0"
+                        BackgroundColor="{StaticResource PrimaryTint}"
+                        StrokeShape="RoundRectangle 12">
+                    <Label Text="{Binding SummaryText}" FontSize="13" FontAttributes="Bold"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{StaticResource Expense}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding IsSplitValid}" Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource Income}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+
+                <!-- Notes -->
+                <Entry Text="{Binding Notes}" Placeholder="Note (optional)"
+                       TextColor="{StaticResource TextPrimary}" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ═══ Save ═══ -->
+        <Border Grid.Row="1" Padding="16,10,16,16" StrokeThickness="0" BackgroundColor="White">
+            <Button Text="Save Split"
+                    Command="{Binding SaveCommand}"
+                    IsEnabled="{Binding IsNotBusy}"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    CornerRadius="14"
+                    HeightRequest="50" />
+        </Border>
+    </Grid>
+</ContentPage>

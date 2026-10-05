@@ -81,6 +81,7 @@ public static class MauiProgram
         services.AddSingleton<IAttachmentService, AttachmentService>();
         services.AddSingleton<IMonthlySummaryService, MonthlySummaryService>();
         services.AddSingleton<IUserProfileService, UserProfileService>();
+        services.AddSingleton<ISplitService, SplitService>();
 
         // App PIN lock — stateless, safe as a singleton.
         services.AddSingleton<IPinService, PinService>();
@@ -132,6 +133,10 @@ public static class MauiProgram
         services.AddTransient<ContactDetailViewModel>();
 
         services.AddTransient<UserProfileViewModel>();
+
+        services.AddTransient<AddSplitViewModel>();
+        services.AddTransient<SplitListViewModel>();
+
     }
 
     private static void RegisterPages(IServiceCollection services)
@@ -188,5 +193,8 @@ public static class MauiProgram
         // Cloud backup UI.
         services.AddTransient<LoginPage>();
         services.AddTransient<BackupRestorePage>();
+
+        services.AddTransient<AddSplitPage>();
+        services.AddTransient<SplitListPage>();
     }
 }

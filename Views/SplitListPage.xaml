@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="MoneySpend.Views.SplitListPage"
+    x:Name="PageRoot"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MoneySpend.ViewModels"
+    xmlns:services="clr-namespace:MoneySpend.Services"
+    x:DataType="vm:SplitListViewModel"
+    Title="Splits"
+    BackgroundColor="#FFFFFF">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="Primary">#FF6B00</Color>
+            <Color x:Key="PrimaryTint">#FFF1E3</Color>
+            <Color x:Key="CardBg">#FFF8F2</Color>
+            <Color x:Key="CardStroke">#F4EBE1</Color>
+            <Color x:Key="TrackMuted">#F4EDE6</Color>
+            <Color x:Key="TextPrimary">#1A1410</Color>
+            <Color x:Key="TextSecondary">#7A6B5E</Color>
+            <Color x:Key="TextTertiary">#A89A8C</Color>
+            <Color x:Key="Income">#0FA968</Color>
+            <Color x:Key="IncomeTint">#E3F7EE</Color>
+            <Color x:Key="Expense">#E63946</Color>
+            <Color x:Key="ExpenseTint">#FDECEE</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid>
+        <Grid RowDefinitions="Auto,Auto,*">
+
+            <!-- ═══ Summary ═══ -->
+            <Grid Grid.Row="0" ColumnDefinitions="*,*" ColumnSpacing="10" Margin="16,14,16,0">
+                <Border Grid.Column="0" Padding="12" StrokeThickness="0"
+                        BackgroundColor="{StaticResource IncomeTint}"
+                        StrokeShape="RoundRectangle 14">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="Friends owe you" FontSize="11" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Label Text="{Binding TotalOwedToMe, StringFormat='₹{0:N2}'}"
+                               FontSize="18" FontAttributes="Bold"
+                               TextColor="{StaticResource Income}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Column="1" Padding="12" StrokeThickness="0"
+                        BackgroundColor="{StaticResource ExpenseTint}"
+                        StrokeShape="RoundRectangle 14">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="You owe" FontSize="11" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Label Text="{Binding TotalIOwe, StringFormat='₹{0:N2}'}"
+                               FontSize="18" FontAttributes="Bold"
+                               TextColor="{StaticResource Expense}" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- ═══ Tabs ═══ -->
+            <Border Grid.Row="1" Margin="16,12,16,10" Padding="4" StrokeThickness="0"
+                    BackgroundColor="{StaticResource TrackMuted}"
+                    StrokeShape="RoundRectangle 13">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="3">
+
+                    <Border Grid.Column="0" Padding="2,9" StrokeThickness="0"
+                            BackgroundColor="Transparent" StrokeShape="RoundRectangle 10">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding SelectedTab}" Value="Friends">
+                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SetTabCommand}"
+                                                  CommandParameter="Friends" />
+                        </Border.GestureRecognizers>
+                        <Label Text="Friends" FontSize="12" FontAttributes="Bold"
+                               HorizontalOptions="Center" VerticalOptions="Center"
+                               TextColor="{StaticResource TextSecondary}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label"
+                                             Binding="{Binding SelectedTab}" Value="Friends">
+                                    <Setter Property="TextColor" Value="White" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Border>
+
+                    <Border Grid.Column="1" Padding="2,9" StrokeThickness="0"
+                            BackgroundColor="Transparent" StrokeShape="RoundRectangle 10">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding SelectedTab}" Value="History">
+                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SetTabCommand}"
+                                                  CommandParameter="History" />
+                        </Border.GestureRecognizers>
+                        <Label Text="History" FontSize="12" FontAttributes="Bold"
+                               HorizontalOptions="Center" VerticalOptions="Center"
+                               TextColor="{StaticResource TextSecondary}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label"
+                                             Binding="{Binding SelectedTab}" Value="History">
+                                    <Setter Property="TextColor" Value="White" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Border>
+
+                </Grid>
+            </Border>
+
+            <!-- ═══ Content ═══ -->
+            <RefreshView Grid.Row="2"
+                         IsRefreshing="{Binding IsBusy, Mode=OneWay}"
+                         Command="{Binding LoadCommand}"
+                         RefreshColor="{StaticResource Primary}">
+                <Grid>
+
+                    <!-- ── Friends ── -->
+                    <CollectionView ItemsSource="{Binding Friends}"
+                                    IsVisible="{Binding IsFriendsTab}"
+                                    SelectionMode="None"
+                                    VerticalScrollBarVisibility="Never">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="services:FriendBalance">
+                                <Border Margin="16,0,16,8" Padding="12"
+                                        StrokeThickness="1"
+                                        Stroke="{StaticResource CardStroke}"
+                                        BackgroundColor="{StaticResource CardBg}"
+                                        StrokeShape="RoundRectangle 14">
+                                    <Grid ColumnDefinitions="40,*,Auto" RowDefinitions="Auto,Auto"
+                                          ColumnSpacing="10" RowSpacing="8">
+
+                                        <Border Grid.Column="0" Grid.Row="0"
+                                                WidthRequest="40" HeightRequest="40"
+                                                StrokeThickness="0"
+                                                StrokeShape="RoundRectangle 20"
+                                                BackgroundColor="{StaticResource PrimaryTint}"
+                                                VerticalOptions="Center">
+                                            <Label Text="{Binding Initial}" FontSize="16" FontAttributes="Bold"
+                                                   HorizontalOptions="Center" VerticalOptions="Center"
+                                                   TextColor="{StaticResource Primary}" />
+                                        </Border>
+
+                                        <VerticalStackLayout Grid.Column="1" Grid.Row="0"
+                                                             Spacing="2" VerticalOptions="Center">
+                                            <Label Text="{Binding Name}" FontSize="14" FontAttributes="Bold"
+                                                   LineBreakMode="TailTruncation" MaxLines="1"
+                                                   TextColor="{StaticResource TextPrimary}" />
+                                            <Label Text="{Binding StatusText}" FontSize="11"
+                                                   TextColor="{StaticResource TextTertiary}" />
+                                        </VerticalStackLayout>
+
+                                        <Label Grid.Column="2" Grid.Row="0"
+                                               Text="{Binding AbsNet, StringFormat='₹{0:N2}'}"
+                                               FontSize="15" FontAttributes="Bold"
+                                               VerticalOptions="Center"
+                                               TextColor="{StaticResource Expense}">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label"
+                                                             Binding="{Binding OwesYou}" Value="True">
+                                                    <Setter Property="TextColor" Value="{StaticResource Income}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+
+                                        <HorizontalStackLayout Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1"
+                                                               Spacing="8" HorizontalOptions="End">
+
+                                            <Border Padding="14,7" StrokeThickness="1"
+                                                    Stroke="{StaticResource Primary}"
+                                                    BackgroundColor="Transparent"
+                                                    StrokeShape="RoundRectangle 10"
+                                                    IsVisible="{Binding OwesYou}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.RemindCommand}"
+                                                        CommandParameter="{Binding .}" />
+                                                </Border.GestureRecognizers>
+                                                <Label Text="Remind" FontSize="12" FontAttributes="Bold"
+                                                       TextColor="{StaticResource Primary}" />
+                                            </Border>
+
+                                            <Border Padding="14,7" StrokeThickness="0"
+                                                    BackgroundColor="{StaticResource Primary}"
+                                                    StrokeShape="RoundRectangle 10"
+                                                    IsVisible="{Binding CanSettle}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SettleCommand}"
+                                                        CommandParameter="{Binding .}" />
+                                                </Border.GestureRecognizers>
+                                                <Label Text="Settle" FontSize="12" FontAttributes="Bold"
+                                                       TextColor="White" />
+                                            </Border>
+
+                                        </HorizontalStackLayout>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+
+                        <CollectionView.Footer>
+                            <BoxView HeightRequest="110" Color="Transparent" />
+                        </CollectionView.Footer>
+                    </CollectionView>
+
+                    <!-- ── History ── -->
+                    <CollectionView ItemsSource="{Binding Splits}"
+                                    IsVisible="{Binding IsHistoryTab}"
+                                    SelectionMode="None"
+                                    VerticalScrollBarVisibility="Never">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="services:SplitListItem">
+                                <SwipeView Margin="16,0,16,8">
+
+                                    <SwipeView.RightItems>
+                                        <SwipeItems Mode="Reveal" SwipeBehaviorOnInvoked="Close">
+                                            <SwipeItemView>
+                                                <Grid WidthRequest="88" BackgroundColor="#E63946">
+                                                    <Grid.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteSplitCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Grid.GestureRecognizers>
+                                                    <Label Text="Delete" FontSize="12" FontAttributes="Bold"
+                                                           TextColor="White"
+                                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                                </Grid>
+                                            </SwipeItemView>
+                                        </SwipeItems>
+                                    </SwipeView.RightItems>
+
+                                    <Border Padding="12,10" StrokeThickness="1"
+                                            Stroke="{StaticResource CardStroke}"
+                                            BackgroundColor="{StaticResource CardBg}"
+                                            StrokeShape="RoundRectangle 14">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+
+                                            <VerticalStackLayout Grid.Column="0" Spacing="2"
+                                                                 VerticalOptions="Center">
+                                                <Label Text="{Binding Title}" FontSize="14" FontAttributes="Bold"
+                                                       LineBreakMode="TailTruncation" MaxLines="1"
+                                                       TextColor="{StaticResource TextPrimary}" />
+                                                <Label Text="{Binding FriendsText, StringFormat='with {0}'}"
+                                                       FontSize="11"
+                                                       LineBreakMode="TailTruncation" MaxLines="1"
+                                                       TextColor="{StaticResource TextSecondary}" />
+                                                <Label Text="{Binding Date, StringFormat='{0:dd MMM yyyy}'}"
+                                                       FontSize="10"
+                                                       TextColor="{StaticResource TextTertiary}" />
+                                            </VerticalStackLayout>
+
+                                            <VerticalStackLayout Grid.Column="1" Spacing="2"
+                                                                 VerticalOptions="Center">
+                                                <Label Text="{Binding Total, StringFormat='₹{0:N2}'}"
+                                                       FontSize="14" FontAttributes="Bold"
+                                                       HorizontalTextAlignment="End"
+                                                       TextColor="{StaticResource TextPrimary}" />
+                                                <Label Text="{Binding MyShare, StringFormat='your share ₹{0:N2}'}"
+                                                       FontSize="10"
+                                                       HorizontalTextAlignment="End"
+                                                       TextColor="{StaticResource TextTertiary}" />
+                                                <Label Text="{Binding StatusText}"
+                                                       FontSize="11" FontAttributes="Bold"
+                                                       HorizontalTextAlignment="End"
+                                                       TextColor="{StaticResource Primary}">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label"
+                                                                     Binding="{Binding IsSettled}" Value="True">
+                                                            <Setter Property="TextColor" Value="{StaticResource Income}" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                            </VerticalStackLayout>
+
+                                        </Grid>
+                                    </Border>
+                                </SwipeView>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+
+                        <CollectionView.Footer>
+                            <BoxView HeightRequest="110" Color="Transparent" />
+                        </CollectionView.Footer>
+                    </CollectionView>
+
+                    <!-- ── Empty: Friends ── -->
+                    <VerticalStackLayout Padding="32" Spacing="12"
+                                         HorizontalOptions="Center" VerticalOptions="Center"
+                                         IsVisible="{Binding ShowFriendsEmpty}">
+                        <Label Text="All settled up" FontSize="16" FontAttributes="Bold"
+                               HorizontalOptions="Center"
+                               TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="Split a bill and what your friends owe shows up here."
+                               FontSize="12.5" HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{StaticResource TextSecondary}" />
+                    </VerticalStackLayout>
+
+                    <!-- ── Empty: History ── -->
+                    <VerticalStackLayout Padding="32" Spacing="12"
+                                         HorizontalOptions="Center" VerticalOptions="Center"
+                                         IsVisible="{Binding ShowHistoryEmpty}">
+                        <Label Text="No splits yet" FontSize="16" FontAttributes="Bold"
+                               HorizontalOptions="Center"
+                               TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="Tap + to split your first bill."
+                               FontSize="12.5" HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{StaticResource TextSecondary}" />
+                    </VerticalStackLayout>
+
+                    <!-- ── Error ── -->
+                    <Border Margin="20" Padding="16,12" StrokeThickness="0"
+                            VerticalOptions="Center" HorizontalOptions="Fill"
+                            BackgroundColor="{StaticResource ExpenseTint}"
+                            StrokeShape="RoundRectangle 14"
+                            IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}">
+                        <Label Text="{Binding ErrorMessage}" FontSize="13"
+                               TextColor="{StaticResource Expense}" />
+                    </Border>
+
+                </Grid>
+            </RefreshView>
+        </Grid>
+
+        <!-- ═══ New split FAB ═══ -->
+        <Border HorizontalOptions="End" VerticalOptions="End"
+                Margin="0,0,20,24" Padding="18,14"
+                StrokeThickness="0"
+                BackgroundColor="{StaticResource Primary}"
+                StrokeShape="RoundRectangle 28">
+            <Border.Shadow>
+                <Shadow Brush="#FF6B00" Offset="0,4" Radius="10" Opacity="0.35" />
+            </Border.Shadow>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding GoToAddCommand}" />
+            </Border.GestureRecognizers>
+            <Label Text="+ New Split" FontSize="14" FontAttributes="Bold" TextColor="White" />
+        </Border>
+    </Grid>
+</ContentPage>
