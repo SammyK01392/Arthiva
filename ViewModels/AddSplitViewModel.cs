@@ -54,6 +54,11 @@ public partial class AddSplitViewModel : BaseViewModel
     [ObservableProperty] private string selectedMethod = "Equal"; // Equal / Exact / Percent
     [ObservableProperty] private string contactSearch = string.Empty;
 
+    // Quick "add friend" form (inline — no page navigation, so nothing typed is lost)
+    [ObservableProperty] private bool isAddFriendOpen;
+    [ObservableProperty] private string newFriendName = string.Empty;
+    [ObservableProperty] private string newFriendMobile = string.Empty;
+
     [ObservableProperty] private string summaryText = "Enter the amount and pick who is in";
     [ObservableProperty] private bool isSplitValid;
 
@@ -113,10 +118,15 @@ public partial class AddSplitViewModel : BaseViewModel
         });
     }
 
-    private ParticipantRow Track(ParticipantRow row)
+    private ParticipantRow Track(ParticipantRow row, int? insertAt = null)
     {
         row.PropertyChanged += OnRowChanged;
-        _allRows.Add(row);
+
+        if (insertAt is int index && index >= 0 && index <= _allRows.Count)
+            _allRows.Insert(index, row);
+        else
+            _allRows.Add(row);
+
         return row;
     }
 
@@ -141,6 +151,56 @@ public partial class AddSplitViewModel : BaseViewModel
 
         VisibleRows.Clear();
         foreach (var r in rows) VisibleRows.Add(r);
+    }
+
+    // ─────────────────────────────────────────────
+    //  Quick add friend (not in contacts yet)
+    // ─────────────────────────────────────────────
+    [RelayCommand]
+    private void OpenAddFriend()
+    {
+        // If the user already typed a name in the search box, start from that.
+        NewFriendName = ContactSearch?.Trim() ?? string.Empty;
+        NewFriendMobile = string.Empty;
+        IsAddFriendOpen = true;
+    }
+
+    [RelayCommand]
+    private void CancelAddFriend()
+    {
+        IsAddFriendOpen = false;
+        NewFriendName = string.Empty;
+        NewFriendMobile = string.Empty;
+    }
+
+    [RelayCommand]
+    private async Task SaveFriendAsync()
+    {
+        if (IsBusy) return;
+
+        AddFriendResult? result = null;
+        await ExecuteAsync(async () => result = await _splitService.AddFriendAsync(NewFriendName, NewFriendMobile));
+
+        if (result is null) return;
+
+        if (!result.Success)
+        {
+            await AlertAsync(result.ErrorMessage ?? "Could not add the friend.");
+            return;
+        }
+
+        // Reuse the row if this contact is already in the list (duplicate name case).
+        var row = _allRows.FirstOrDefault(r => r.ContactId == result.ContactId)
+                  ?? Track(new ParticipantRow { ContactId = result.ContactId, Name = result.Name }, insertAt: 1);
+
+        row.IsSelected = true;
+
+        // Back to the normal list with the new friend ticked, ready to continue.
+        ContactSearch = string.Empty;
+        ApplySearch();
+        Recalculate();
+
+        CancelAddFriend();
     }
 
     // ─────────────────────────────────────────────

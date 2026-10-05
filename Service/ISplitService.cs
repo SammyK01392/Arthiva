@@ -20,6 +20,14 @@ public record SplitRequest(
 
 public record SplitResult(bool Success, string? ErrorMessage = null);
 
+/// <summary>Result of quick-adding a friend from the Split screen.</summary>
+public record AddFriendResult(
+    bool Success,
+    int ContactId,
+    string Name,
+    string? ErrorMessage = null,
+    bool AlreadyExisted = false);
+
 /// <summary>Row for the "History" tab.</summary>
 public class SplitListItem
 {
@@ -108,6 +116,12 @@ public static class SplitCalculator
 public interface ISplitService
 {
     Task<List<Contact>> GetContactsAsync();
+
+    /// <summary>
+    /// Quick-add a friend straight from the Split screen (name required, mobile optional).
+    /// If a contact with the same name already exists it is returned instead of creating a duplicate.
+    /// </summary>
+    Task<AddFriendResult> AddFriendAsync(string name, string? mobile);
 
     /// <summary>
     /// "I paid" split. Creates: your share as an Expense, one BorrowLend (Lend)

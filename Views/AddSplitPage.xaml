@@ -159,9 +159,61 @@
                     </Grid>
                 </Border>
 
-                <!-- Search friends -->
-                <Entry Text="{Binding ContactSearch}" Placeholder="Search friends"
-                       TextColor="{StaticResource TextPrimary}" />
+                <!-- Search friends + quick add -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <Entry Grid.Column="0" Text="{Binding ContactSearch}" Placeholder="Search friends"
+                           TextColor="{StaticResource TextPrimary}" VerticalOptions="Center" />
+
+                    <Border Grid.Column="1" Padding="12,9" StrokeThickness="1"
+                            Stroke="{StaticResource Primary}"
+                            BackgroundColor="Transparent"
+                            StrokeShape="RoundRectangle 10"
+                            VerticalOptions="Center">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenAddFriendCommand}" />
+                        </Border.GestureRecognizers>
+                        <Label Text="+ Add friend" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource Primary}" />
+                    </Border>
+                </Grid>
+
+                <!-- Inline "new friend" form: saves to Contacts and ticks them here -->
+                <Border IsVisible="{Binding IsAddFriendOpen}"
+                        Padding="14" StrokeThickness="1"
+                        Stroke="{StaticResource Primary}"
+                        BackgroundColor="{StaticResource PrimaryTint}"
+                        StrokeShape="RoundRectangle 14">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="New friend" FontSize="13" FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}" />
+
+                        <Entry Text="{Binding NewFriendName}" Placeholder="Name"
+                               TextColor="{StaticResource TextPrimary}" />
+
+                        <Entry Text="{Binding NewFriendMobile}"
+                               Placeholder="Mobile (optional, for WhatsApp reminders)"
+                               Keyboard="Telephone" MaxLength="20"
+                               TextColor="{StaticResource TextPrimary}" />
+
+                        <Label Text="They are saved to your Contacts and added to this split."
+                               FontSize="11" TextColor="{StaticResource TextSecondary}" />
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Grid.Column="0" Text="Cancel"
+                                    Command="{Binding CancelAddFriendCommand}"
+                                    BackgroundColor="White"
+                                    TextColor="{StaticResource TextSecondary}"
+                                    BorderColor="{StaticResource CardStroke}" BorderWidth="1"
+                                    CornerRadius="12" HeightRequest="44" />
+                            <Button Grid.Column="1" Text="Add &amp; select"
+                                    Command="{Binding SaveFriendCommand}"
+                                    IsEnabled="{Binding IsNotBusy}"
+                                    BackgroundColor="{StaticResource Primary}"
+                                    TextColor="White" FontAttributes="Bold"
+                                    CornerRadius="12" HeightRequest="44" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
 
                 <!-- ═══ People ═══ -->
                 <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding VisibleRows}">

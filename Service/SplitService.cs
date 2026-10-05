@@ -37,6 +37,46 @@ public class SplitService : ISplitService
         return contacts.OrderBy(c => c.Name).ToList();
     }
 
+    public async Task<AddFriendResult> AddFriendAsync(string name, string? mobile)
+    {
+        name = name?.Trim() ?? string.Empty;
+
+        if (name.Length == 0)
+            return new AddFriendResult(false, 0, string.Empty, "Enter the friend's name.");
+        if (name.Length > 100)
+            return new AddFriendResult(false, 0, name, "Name is too long.");
+
+        string? digits = null;
+        if (!string.IsNullOrWhiteSpace(mobile))
+        {
+            digits = new string(mobile.Where(char.IsDigit).ToArray());
+
+            if (digits.Length == 0)
+                digits = null;
+            else if (digits.Length < 10 || digits.Length > 15)
+                return new AddFriendResult(false, 0, name, "Enter a valid mobile number, or leave it empty.");
+        }
+
+        // Same name already in contacts? Reuse it instead of creating a duplicate.
+        var existing = (await _contactRepo.FindAsync(c => !c.IsDeleted))
+            .FirstOrDefault(c => string.Equals(c.Name?.Trim(), name, StringComparison.OrdinalIgnoreCase));
+
+        if (existing is not null)
+            return new AddFriendResult(true, existing.Id, existing.Name, null, AlreadyExisted: true);
+
+        var contact = new Contact
+        {
+            Name = name,
+            Mobile = digits,
+            ContactType = "Friend"
+        };
+
+        await _contactRepo.AddAsync(contact);
+        DataChangeNotifier.Publish<Contact>();
+
+        return new AddFriendResult(true, contact.Id, contact.Name);
+    }
+
     // ─────────────────────────────────────────────
     //  Create
     // ─────────────────────────────────────────────

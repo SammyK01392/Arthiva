@@ -108,4 +108,6 @@ public partial class MorePage : ContentPage
 
     private async void OnAboutDeveloperTapped(object? sender, TappedEventArgs e)
         => await Shell.Current.GoToAsync(nameof(AboutDeveloperPage));
+    private async void OnSplitsTapped(object? sender, TappedEventArgs e)
+    => await Shell.Current.GoToAsync(nameof(SplitListPage));
 }
