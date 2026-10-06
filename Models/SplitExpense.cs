@@ -38,6 +38,21 @@ public class SplitExpense
     [MaxLength(500)]
     public string? Notes { get; set; }
 
+    // ── Phase 2 ──────────────────────────────────────────────
+
+    /// <summary>Optional group this bill belongs to.</summary>
+    [Indexed]
+    public int? GroupId { get; set; }
+
+    /// <summary>Who paid the bill. null = you.</summary>
+    public int? PaidByContactId { get; set; }
+
+    /// <summary>
+    /// When a FRIEND paid: the Borrow record for YOUR share (no account entry is made
+    /// when the split is created — cash-basis; the expense is booked when you pay them back).
+    /// </summary>
+    public int? MyBorrowLendId { get; set; }
+
     public bool IsDeleted { get; set; } = false;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

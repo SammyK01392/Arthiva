@@ -29,19 +29,29 @@ public partial class ParticipantRow : ObservableObject
     [ObservableProperty] private string inputHint = "₹";
 }
 
+/// <summary>Optional query: AddSplitPage?GroupId=5 pre-selects that group.</summary>
+[QueryProperty(nameof(GroupIdText), "GroupId")]
 public partial class AddSplitViewModel : BaseViewModel
 {
     private readonly ISplitService _splitService;
+    private readonly ISplitGroupService _groupService;
     private readonly IAccountService _accountService;
     private readonly ICategoryService _categoryService;
 
     private readonly List<ParticipantRow> _allRows = new();
+    private readonly List<(int Id, string Name)> _allContacts = new();
     private bool _loaded;
     private bool _suspend;
 
     public ObservableCollection<Account> Accounts { get; } = new();
     public ObservableCollection<Category> Categories { get; } = new();
+    public ObservableCollection<SplitGroup> Groups { get; } = new();
     public ObservableCollection<ParticipantRow> VisibleRows { get; } = new();
+
+    /// <summary>Same people (and order) as _allRows — feeds the "Paid by" picker.</summary>
+    public ObservableCollection<ParticipantRow> PayerOptions { get; } = new();
+
+    [ObservableProperty] private string groupIdText = string.Empty;
 
     [ObservableProperty] private string expenseTitle = string.Empty;
     [ObservableProperty] private string totalText = string.Empty;
@@ -50,6 +60,8 @@ public partial class AddSplitViewModel : BaseViewModel
 
     [ObservableProperty] private Account? selectedAccount;
     [ObservableProperty] private Category? selectedCategory;
+    [ObservableProperty] private SplitGroup? selectedGroup;
+    [ObservableProperty] private ParticipantRow? selectedPayer;
 
     [ObservableProperty] private string selectedMethod = "Equal"; // Equal / Exact / Percent
     [ObservableProperty] private string contactSearch = string.Empty;
@@ -62,6 +74,11 @@ public partial class AddSplitViewModel : BaseViewModel
     [ObservableProperty] private string summaryText = "Enter the amount and pick who is in";
     [ObservableProperty] private bool isSplitValid;
 
+    /// <summary>The "Paid from" account only matters when YOU paid (cash-basis: a friend's payment doesn't touch your account yet).</summary>
+    public bool IsPaidByMe => SelectedPayer is null || SelectedPayer.IsMe;
+
+    partial void OnSelectedPayerChanged(ParticipantRow? value) => OnPropertyChanged(nameof(IsPaidByMe));
+
     partial void OnTotalTextChanged(string value) => Recalculate();
 
     partial void OnSelectedMethodChanged(string value)
@@ -72,12 +89,20 @@ public partial class AddSplitViewModel : BaseViewModel
 
     partial void OnContactSearchChanged(string value) => ApplySearch();
 
+    partial void OnSelectedGroupChanged(SplitGroup? value)
+    {
+        if (!_loaded) return;
+        _ = SafeRebuildAsync();
+    }
+
     public AddSplitViewModel(
         ISplitService splitService,
+        ISplitGroupService groupService,
         IAccountService accountService,
         ICategoryService categoryService)
     {
         _splitService = splitService;
+        _groupService = groupService;
         _accountService = accountService;
         _categoryService = categoryService;
         Title = "Split Expense";
@@ -94,10 +119,10 @@ public partial class AddSplitViewModel : BaseViewModel
         await ExecuteAsync(async () =>
         {
             // NOTE: assumes IAccountService / ICategoryService expose GetAllAsync().
-            // If your method names differ, change just these two lines.
             var accounts = await _accountService.GetAllAsync();
             var categories = await _categoryService.GetAllAsync();
             var contacts = await _splitService.GetContactsAsync();
+            var groups = await _groupService.GetGroupEntitiesAsync();
 
             Accounts.Clear();
             foreach (var a in accounts) Accounts.Add(a);
@@ -107,15 +132,69 @@ public partial class AddSplitViewModel : BaseViewModel
             foreach (var c in categories) Categories.Add(c);
             SelectedCategory ??= Categories.FirstOrDefault();
 
-            _allRows.Clear();
-            Track(new ParticipantRow { Name = "You", IsSelected = true });
-            foreach (var contact in contacts)
-                Track(new ParticipantRow { ContactId = contact.Id, Name = contact.Name });
+            _allContacts.Clear();
+            foreach (var c in contacts) _allContacts.Add((c.Id, c.Name));
 
-            ApplySearch();
-            Recalculate();
+            Groups.Clear();
+            Groups.Add(new SplitGroup { Id = 0, Name = "No group" });
+            foreach (var g in groups) Groups.Add(g);
+
+            int.TryParse(GroupIdText, out var groupId);
+            SelectedGroup = Groups.FirstOrDefault(g => g.Id == groupId) ?? Groups[0];
+
+            await RebuildRowsAsync();
             _loaded = true;
         });
+    }
+
+    private async Task SafeRebuildAsync()
+    {
+        try { await RebuildRowsAsync(); }
+        catch (Exception ex) { ErrorMessage = ex.Message; }
+    }
+
+    private int? CurrentGroupId => SelectedGroup is { Id: > 0 } g ? g.Id : null;
+
+    /// <summary>
+    /// No group → everyone in Contacts, only you ticked.
+    /// Group → just its members, all ticked (typical "split with everyone").
+    /// </summary>
+    private async Task RebuildRowsAsync()
+    {
+        var groupId = CurrentGroupId;
+        var people = new List<(int Id, string Name)>();
+
+        if (groupId is int gid)
+        {
+            foreach (var c in await _groupService.GetMembersAsync(gid))
+                people.Add((c.Id, c.Name));
+        }
+        else
+        {
+            people.AddRange(_allContacts);
+        }
+
+        _suspend = true;
+        try
+        {
+            _allRows.Clear();
+            PayerOptions.Clear();
+
+            Track(new ParticipantRow { Name = "You", IsSelected = true });
+            foreach (var (id, name) in people)
+                Track(new ParticipantRow { ContactId = id, Name = name, IsSelected = groupId is not null });
+
+            SelectedPayer = PayerOptions.FirstOrDefault();
+        }
+        finally
+        {
+            _suspend = false;
+        }
+
+        ContactSearch = string.Empty;
+        ApplySearch();
+        PrefillInputs();
+        Recalculate();
     }
 
     private ParticipantRow Track(ParticipantRow row, int? insertAt = null)
@@ -123,9 +202,15 @@ public partial class AddSplitViewModel : BaseViewModel
         row.PropertyChanged += OnRowChanged;
 
         if (insertAt is int index && index >= 0 && index <= _allRows.Count)
+        {
             _allRows.Insert(index, row);
+            PayerOptions.Insert(index, row);
+        }
         else
+        {
             _allRows.Add(row);
+            PayerOptions.Add(row);
+        }
 
         return row;
     }
@@ -178,22 +263,45 @@ public partial class AddSplitViewModel : BaseViewModel
     {
         if (IsBusy) return;
 
+        var groupId = CurrentGroupId;
         AddFriendResult? result = null;
-        await ExecuteAsync(async () => result = await _splitService.AddFriendAsync(NewFriendName, NewFriendMobile));
+        SplitResult? memberResult = null;
+
+        await ExecuteAsync(async () =>
+        {
+            result = await _splitService.AddFriendAsync(NewFriendName, NewFriendMobile);
+
+            // Inside a group, the new friend also becomes a member of that group.
+            if (result.Success && groupId is int gid)
+                memberResult = await _groupService.AddMemberAsync(gid, result.ContactId);
+        });
 
         if (result is null) return;
 
         if (!result.Success)
         {
-            await AlertAsync(result.ErrorMessage ?? "Could not add the friend.");
+            await SplitPrompts.AlertAsync(result.ErrorMessage ?? "Could not add the friend.");
             return;
         }
 
-        // Reuse the row if this contact is already in the list (duplicate name case).
+        if (memberResult is { Success: false })
+        {
+            await SplitPrompts.AlertAsync(memberResult.ErrorMessage ?? "Could not add the friend to the group.");
+            return;
+        }
+
+        if (!_allContacts.Any(c => c.Id == result.ContactId))
+            _allContacts.Add((result.ContactId, result.Name));
+
+        // Inserting into the picker's source can reset its selection — remember and restore.
+        var payer = SelectedPayer;
+
         var row = _allRows.FirstOrDefault(r => r.ContactId == result.ContactId)
                   ?? Track(new ParticipantRow { ContactId = result.ContactId, Name = result.Name }, insertAt: 1);
 
         row.IsSelected = true;
+
+        SelectedPayer = payer ?? PayerOptions.FirstOrDefault();
 
         // Back to the normal list with the new friend ticked, ready to continue.
         ContactSearch = string.Empty;
@@ -315,30 +423,44 @@ public partial class AddSplitViewModel : BaseViewModel
 
         var total = SplitCalculator.ParseAmount(TotalText);
 
-        if (string.IsNullOrWhiteSpace(ExpenseTitle)) { await AlertAsync("Enter what this expense was for."); return; }
-        if (total <= 0) { await AlertAsync("Enter a valid total amount."); return; }
-        if (SelectedAccount is null) { await AlertAsync("Select the account you paid from."); return; }
+        if (string.IsNullOrWhiteSpace(ExpenseTitle)) { await SplitPrompts.AlertAsync("Enter what this expense was for."); return; }
+        if (total <= 0) { await SplitPrompts.AlertAsync("Enter a valid total amount."); return; }
 
         var me = _allRows.First(r => r.IsMe);
+        var payerRow = SelectedPayer ?? me;
+        var paidByMe = payerRow.IsMe;
+        var groupId = CurrentGroupId;
+
+        if (paidByMe && SelectedAccount is null) { await SplitPrompts.AlertAsync("Select the account you paid from."); return; }
+
         var myShare = me.IsSelected ? me.Share : 0m;
+        if (myShare > 0 && SelectedCategory is null) { await SplitPrompts.AlertAsync("Select a category for your share."); return; }
 
-        if (myShare > 0 && SelectedCategory is null) { await AlertAsync("Select a category for your share."); return; }
+        // Everyone selected except you (the payer is included if they took a share).
+        var others = _allRows.Where(r => r.IsSelected && !r.IsMe && r.Share > 0).ToList();
 
-        var friends = _allRows.Where(r => r.IsSelected && !r.IsMe && r.Share > 0).ToList();
-        if (friends.Count == 0) { await AlertAsync("Pick at least one friend with a share above zero."); return; }
+        if (paidByMe && others.Count == 0) { await SplitPrompts.AlertAsync("Pick at least one friend with a share above zero."); return; }
 
-        if (!IsSplitValid) { await AlertAsync(SummaryText); return; }
+        if (!paidByMe && myShare <= 0 && groupId is null)
+        {
+            await SplitPrompts.AlertAsync("You need a share in this bill. To track a bill between other people, pick a group.");
+            return;
+        }
+
+        if (!IsSplitValid) { await SplitPrompts.AlertAsync(SummaryText); return; }
 
         var request = new SplitRequest(
             ExpenseTitle.Trim(),
             total,
             SelectedMethod,
             SplitDate.Date + DateTime.Now.TimeOfDay,
-            SelectedAccount.Id,
+            paidByMe ? SelectedAccount!.Id : 0,
             SelectedCategory?.Id ?? 0,
             myShare,
-            friends.Select(f => new SplitShareInput(f.ContactId!.Value, f.Share)).ToList(),
-            string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim());
+            others.Select(f => new SplitShareInput(f.ContactId!.Value, f.Share)).ToList(),
+            string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
+            PaidByContactId: payerRow.ContactId,
+            GroupId: groupId);
 
         SplitResult? result = null;
         await ExecuteAsync(async () => result = await _splitService.CreateAsync(request));
@@ -348,9 +470,6 @@ public partial class AddSplitViewModel : BaseViewModel
         if (result.Success)
             await Shell.Current.GoToAsync("..");
         else
-            await AlertAsync(result.ErrorMessage ?? "Could not save the split.");
+            await SplitPrompts.AlertAsync(result.ErrorMessage ?? "Could not save the split.");
     }
-
-    private static Task AlertAsync(string message)
-        => Shell.Current.DisplayAlert("Split", message, "OK");
 }

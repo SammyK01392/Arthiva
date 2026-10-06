@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="MoneySpend.Views.GroupDetailPage"
+    x:Name="PageRoot"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MoneySpend.ViewModels"
+    xmlns:services="clr-namespace:MoneySpend.Services"
+    x:DataType="vm:GroupDetailViewModel"
+    Title="{Binding Title}"
+    BackgroundColor="#FFFFFF">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="Primary">#FF6B00</Color>
+            <Color x:Key="PrimaryTint">#FFF1E3</Color>
+            <Color x:Key="CardBg">#FFF8F2</Color>
+            <Color x:Key="CardStroke">#F4EBE1</Color>
+            <Color x:Key="TextPrimary">#1A1410</Color>
+            <Color x:Key="TextSecondary">#7A6B5E</Color>
+            <Color x:Key="TextTertiary">#A89A8C</Color>
+            <Color x:Key="Income">#0FA968</Color>
+            <Color x:Key="IncomeTint">#E3F7EE</Color>
+            <Color x:Key="Expense">#E63946</Color>
+            <Color x:Key="ExpenseTint">#FDECEE</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="*,Auto">
+
+        <RefreshView Grid.Row="0"
+                     IsRefreshing="{Binding IsBusy, Mode=OneWay}"
+                     Command="{Binding LoadCommand}"
+                     RefreshColor="{StaticResource Primary}">
+            <ScrollView>
+                <VerticalStackLayout Padding="16,14,16,24" Spacing="12">
+
+                    <!-- My position -->
+                    <Border Padding="14" StrokeThickness="0"
+                            BackgroundColor="{StaticResource PrimaryTint}"
+                            StrokeShape="RoundRectangle 16">
+                        <Label Text="{Binding MyNetText}" FontSize="18" FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{StaticResource TextPrimary}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding MyNetKind}" Value="Owed">
+                                    <Setter Property="TextColor" Value="{StaticResource Income}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding MyNetKind}" Value="Owing">
+                                    <Setter Property="TextColor" Value="{StaticResource Expense}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Border>
+
+                    <!-- ═══ Settle up (fewest payments) ═══ -->
+                    <Label Text="Settle up (fewest payments)" FontSize="15" FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}" Margin="0,6,0,0" />
+
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Transfers}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="services:GroupTransfer">
+                                <Border Padding="12" StrokeThickness="1"
+                                        Stroke="{StaticResource CardStroke}"
+                                        BackgroundColor="{StaticResource CardBg}"
+                                        StrokeShape="RoundRectangle 14">
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto"
+                                          ColumnSpacing="10" RowSpacing="6">
+
+                                        <Label Grid.Column="0" Grid.Row="0"
+                                               Text="{Binding Title}"
+                                               FontSize="14" FontAttributes="Bold"
+                                               LineBreakMode="TailTruncation" MaxLines="1"
+                                               VerticalOptions="Center"
+                                               TextColor="{StaticResource TextPrimary}" />
+
+                                        <Label Grid.Column="1" Grid.Row="0"
+                                               Text="{Binding Amount, StringFormat='₹{0:N2}'}"
+                                               FontSize="15" FontAttributes="Bold"
+                                               VerticalOptions="Center"
+                                               TextColor="{StaticResource Primary}" />
+
+                                        <Label Grid.Column="0" Grid.Row="1"
+                                               Text="{Binding HintText}"
+                                               IsVisible="{Binding ShowHint}"
+                                               FontSize="11"
+                                               VerticalOptions="Center"
+                                               TextColor="{StaticResource TextTertiary}" />
+
+                                        <Border Grid.Column="1" Grid.Row="1"
+                                                Padding="14,7" StrokeThickness="0"
+                                                BackgroundColor="{StaticResource Primary}"
+                                                StrokeShape="RoundRectangle 10"
+                                                HorizontalOptions="End"
+                                                IsVisible="{Binding CanAct}">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.TransferActionCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+                                            <Label Text="{Binding ActionLabel}" FontSize="12"
+                                                   FontAttributes="Bold" TextColor="White" />
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <Label Text="Everyone is settled up 🎉" FontSize="12.5"
+                           IsVisible="{Binding ShowNoTransfers}"
+                           TextColor="{StaticResource TextSecondary}" />
+
+                    <!-- ═══ Balances ═══ -->
+                    <Label Text="Balances" FontSize="15" FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}" Margin="0,10,0,0" />
+
+                    <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding Balances}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="services:MemberBalance">
+                                <Border Padding="12,10" StrokeThickness="1"
+                                        Stroke="{StaticResource CardStroke}"
+                                        BackgroundColor="{StaticResource CardBg}"
+                                        StrokeShape="RoundRectangle 12">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="1" VerticalOptions="Center">
+                                            <Label Text="{Binding Name}" FontSize="14" FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextPrimary}" />
+                                            <Label Text="{Binding StatusText}" FontSize="11"
+                                                   TextColor="{StaticResource TextTertiary}" />
+                                        </VerticalStackLayout>
+
+                                        <Label Grid.Column="1"
+                                               Text="{Binding AbsNet, StringFormat='₹{0:N2}'}"
+                                               FontSize="14" FontAttributes="Bold"
+                                               VerticalOptions="Center"
+                                               TextColor="{StaticResource TextSecondary}">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsPositive}" Value="True">
+                                                    <Setter Property="TextColor" Value="{StaticResource Income}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsNegative}" Value="True">
+                                                    <Setter Property="TextColor" Value="{StaticResource Expense}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <!-- ═══ Expenses ═══ -->
+                    <Label Text="Expenses" FontSize="15" FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}" Margin="0,10,0,0" />
+
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Expenses}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="services:SplitListItem">
+                                <SwipeView>
+                                    <SwipeView.RightItems>
+                                        <SwipeItems Mode="Reveal" SwipeBehaviorOnInvoked="Close">
+                                            <SwipeItemView>
+                                                <Grid WidthRequest="88" BackgroundColor="#E63946">
+                                                    <Grid.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteSplitCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Grid.GestureRecognizers>
+                                                    <Label Text="Delete" FontSize="12" FontAttributes="Bold"
+                                                           TextColor="White"
+                                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                                </Grid>
+                                            </SwipeItemView>
+                                        </SwipeItems>
+                                    </SwipeView.RightItems>
+
+                                    <Border Padding="12,10" StrokeThickness="1"
+                                            Stroke="{StaticResource CardStroke}"
+                                            BackgroundColor="{StaticResource CardBg}"
+                                            StrokeShape="RoundRectangle 14">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+
+                                            <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                                <Label Text="{Binding Title}" FontSize="14" FontAttributes="Bold"
+                                                       LineBreakMode="TailTruncation" MaxLines="1"
+                                                       TextColor="{StaticResource TextPrimary}" />
+                                                <Label Text="{Binding SubtitleText}" FontSize="11"
+                                                       LineBreakMode="TailTruncation" MaxLines="1"
+                                                       TextColor="{StaticResource TextSecondary}" />
+                                                <Label Text="{Binding Date, StringFormat='{0:dd MMM yyyy}'}" FontSize="10"
+                                                       TextColor="{StaticResource TextTertiary}" />
+                                            </VerticalStackLayout>
+
+                                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                                <Label Text="{Binding Total, StringFormat='₹{0:N2}'}"
+                                                       FontSize="14" FontAttributes="Bold"
+                                                       HorizontalTextAlignment="End"
+                                                       TextColor="{StaticResource TextPrimary}" />
+                                                <Label Text="{Binding StatusText}"
+                                                       FontSize="11" FontAttributes="Bold"
+                                                       HorizontalTextAlignment="End"
+                                                       TextColor="{StaticResource Primary}">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding IsSettled}" Value="True">
+                                                            <Setter Property="TextColor" Value="{StaticResource Income}" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </Border>
+                                </SwipeView>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <Label Text="No expenses yet. Tap “Add expense” below." FontSize="12.5"
+                           IsVisible="{Binding ShowNoExpenses}"
+                           TextColor="{StaticResource TextSecondary}" />
+
+                    <!-- ═══ Manage ═══ -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,14,0,0">
+                        <Button Grid.Column="0" Text="Add members"
+                                Command="{Binding AddMembersCommand}"
+                                BackgroundColor="White"
+                                TextColor="{StaticResource Primary}"
+                                BorderColor="{StaticResource Primary}" BorderWidth="1"
+                                CornerRadius="12" HeightRequest="44" />
+                        <Button Grid.Column="1" Text="Delete group"
+                                Command="{Binding DeleteGroupCommand}"
+                                BackgroundColor="White"
+                                TextColor="{StaticResource Expense}"
+                                BorderColor="{StaticResource Expense}" BorderWidth="1"
+                                CornerRadius="12" HeightRequest="44" />
+                    </Grid>
+
+                    <!-- Error -->
+                    <Border Padding="16,12" StrokeThickness="0"
+                            BackgroundColor="{StaticResource ExpenseTint}"
+                            StrokeShape="RoundRectangle 14"
+                            IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}">
+                        <Label Text="{Binding ErrorMessage}" FontSize="13"
+                               TextColor="{StaticResource Expense}" />
+                    </Border>
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+
+        <Border Grid.Row="1" Padding="16,10,16,16" StrokeThickness="0" BackgroundColor="White">
+            <Button Text="Add expense"
+                    Command="{Binding AddExpenseCommand}"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    CornerRadius="14"
+                    HeightRequest="50" />
+        </Border>
+    </Grid>
+</ContentPage>

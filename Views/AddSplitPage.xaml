@@ -50,11 +50,31 @@
                                TextColor="{StaticResource TextSecondary}" Margin="0,6,0,0" />
                         <DatePicker Date="{Binding SplitDate}" TextColor="{StaticResource TextPrimary}" />
 
-                        <Label Text="Paid from" FontSize="12" FontAttributes="Bold"
+                        <Label Text="Group (optional)" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" Margin="0,6,0,0" />
+                        <Picker x:DataType="{x:Null}"
+                                Title="No group"
+                                ItemsSource="{Binding Groups}"
+                                SelectedItem="{Binding SelectedGroup}"
+                                ItemDisplayBinding="{Binding Name}"
+                                TextColor="{StaticResource TextPrimary}" />
+
+                        <Label Text="Paid by" FontSize="12" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" Margin="0,6,0,0" />
+                        <Picker x:DataType="{x:Null}"
+                                Title="Who paid?"
+                                ItemsSource="{Binding PayerOptions}"
+                                SelectedItem="{Binding SelectedPayer}"
+                                ItemDisplayBinding="{Binding Name}"
+                                TextColor="{StaticResource TextPrimary}" />
+
+                        <Label IsVisible="{Binding IsPaidByMe}"
+                               Text="Paid from" FontSize="12" FontAttributes="Bold"
                                TextColor="{StaticResource TextSecondary}" Margin="0,6,0,0" />
                         <!-- x:DataType null: ItemDisplayBinding runs against the item (Account), not the page VM -->
                         <Picker x:DataType="{x:Null}"
                                 Title="Select account"
+                                IsVisible="{Binding IsPaidByMe}"
                                 ItemsSource="{Binding Accounts}"
                                 SelectedItem="{Binding SelectedAccount}"
                                 ItemDisplayBinding="{Binding Name}"

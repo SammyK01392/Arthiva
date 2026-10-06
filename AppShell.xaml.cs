@@ -245,5 +245,8 @@ public partial class AppShell : Shell
 
         Routing.RegisterRoute(nameof(AddSplitPage), typeof(AddSplitPage));
         Routing.RegisterRoute(nameof(SplitListPage), typeof(SplitListPage));
+
+        Routing.RegisterRoute(nameof(GroupEditPage), typeof(GroupEditPage));
+        Routing.RegisterRoute(nameof(GroupDetailPage), typeof(GroupDetailPage));
     }
 }

@@ -82,7 +82,7 @@ public static class MauiProgram
         services.AddSingleton<IMonthlySummaryService, MonthlySummaryService>();
         services.AddSingleton<IUserProfileService, UserProfileService>();
         services.AddSingleton<ISplitService, SplitService>();
-
+        services.AddSingleton<ISplitGroupService, SplitGroupService>();
         // App PIN lock — stateless, safe as a singleton.
         services.AddSingleton<IPinService, PinService>();
         services.AddTransient<ChangePinPage>();
@@ -136,6 +136,9 @@ public static class MauiProgram
 
         services.AddTransient<AddSplitViewModel>();
         services.AddTransient<SplitListViewModel>();
+        services.AddTransient<GroupEditViewModel>();
+        services.AddTransient<GroupDetailViewModel>();
+
 
     }
 
@@ -196,5 +199,7 @@ public static class MauiProgram
 
         services.AddTransient<AddSplitPage>();
         services.AddTransient<SplitListPage>();
+        services.AddTransient<GroupEditPage>();
+        services.AddTransient<GroupDetailPage>();
     }
 }

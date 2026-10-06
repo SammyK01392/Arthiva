@@ -48,6 +48,9 @@ public class MoneySpendDatabase
         await _database.CreateTableAsync<MonthlySummary>();
         await _database.CreateTableAsync<SplitExpense>();
         await _database.CreateTableAsync<SplitShare>();
+        await _database.CreateTableAsync<SplitGroup>();
+        await _database.CreateTableAsync<SplitGroupMember>();
+        await _database.CreateTableAsync<GroupSettlement>();
 
         await SeedData.SeedAsync(_database);
 

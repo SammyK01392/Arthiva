@@ -7,6 +7,7 @@ public class SplitService : ISplitService
 {
     private readonly IGenericRepository<SplitExpense> _splitRepo;
     private readonly IGenericRepository<SplitShare> _shareRepo;
+    private readonly IGenericRepository<SplitGroup> _groupRepo;
     private readonly IGenericRepository<Transaction> _txRepo;
     private readonly IGenericRepository<Contact> _contactRepo;
     private readonly IBorrowLendService _borrowLend;
@@ -15,6 +16,7 @@ public class SplitService : ISplitService
     public SplitService(
         IGenericRepository<SplitExpense> splitRepo,
         IGenericRepository<SplitShare> shareRepo,
+        IGenericRepository<SplitGroup> groupRepo,
         IGenericRepository<Transaction> txRepo,
         IGenericRepository<Contact> contactRepo,
         IBorrowLendService borrowLend,
@@ -22,6 +24,7 @@ public class SplitService : ISplitService
     {
         _splitRepo = splitRepo;
         _shareRepo = shareRepo;
+        _groupRepo = groupRepo;
         _txRepo = txRepo;
         _contactRepo = contactRepo;
         _borrowLend = borrowLend;
@@ -83,20 +86,29 @@ public class SplitService : ISplitService
     public async Task<SplitResult> CreateAsync(SplitRequest r)
     {
         var title = r.Title?.Trim() ?? string.Empty;
+        var paidByMe = r.PaidByContactId is null;
 
         if (title.Length == 0) return Fail("Enter what this expense was for.");
         if (r.TotalAmount <= 0) return Fail("Enter a valid total amount.");
-        if (r.AccountId <= 0) return Fail("Select the account you paid from.");
+        if (paidByMe && r.AccountId <= 0) return Fail("Select the account you paid from.");
         if (r.MyShare < 0) return Fail("Your share can't be negative.");
         if (r.MyShare > 0 && r.CategoryId <= 0) return Fail("Select a category for your share.");
-        if (r.Shares.Count == 0 || r.Shares.Any(s => s.Amount <= 0))
-            return Fail("Pick at least one friend with a share above zero.");
-        if (r.Shares.GroupBy(s => s.ContactId).Any(g => g.Count() > 1))
-            return Fail("A friend is selected twice.");
+        if (r.Shares.Any(s => s.Amount <= 0)) return Fail("Every selected friend needs a share above zero.");
+        if (r.Shares.GroupBy(s => s.ContactId).Any(g => g.Count() > 1)) return Fail("A friend is selected twice.");
+        if (paidByMe && r.Shares.Count == 0) return Fail("Pick at least one friend with a share above zero.");
+        if (!paidByMe && r.MyShare <= 0 && r.GroupId is null)
+            return Fail("You need a share in this bill. To track a bill between other people, create it inside a group.");
 
         var sum = r.MyShare + r.Shares.Sum(s => s.Amount);
         if (sum != r.TotalAmount)
             return Fail($"Shares add up to ₹{sum:N2} but the total is ₹{r.TotalAmount:N2}.");
+
+        Contact? payer = null;
+        if (!paidByMe)
+        {
+            payer = await _contactRepo.GetByIdAsync(r.PaidByContactId!.Value);
+            if (payer is null) return Fail("The person who paid was not found.");
+        }
 
         var now = DateTime.UtcNow;
         var split = new SplitExpense
@@ -106,81 +118,125 @@ public class SplitService : ISplitService
             MyShareAmount = r.MyShare,
             SplitMethod = r.Method,
             SplitDate = r.Date,
-            AccountId = r.AccountId,
+            AccountId = paidByMe ? r.AccountId : 0,
             CategoryId = r.CategoryId,
             Notes = r.Notes,
+            GroupId = r.GroupId,
+            PaidByContactId = r.PaidByContactId,
             CreatedAt = now,
             UpdatedAt = now
         };
         await _splitRepo.AddAsync(split);
 
         var createdBorrowLendIds = new List<int>();
-        int? myTxnId = null;
 
         try
         {
-            // 1) Your own share → normal Expense (counts in budgets/reports).
-            if (r.MyShare > 0)
+            if (paidByMe)
             {
-                var myTxn = new Transaction
+                // Your own share → normal Expense (counts in budgets/reports).
+                if (r.MyShare > 0)
                 {
-                    AccountId = r.AccountId,
-                    CategoryId = r.CategoryId,
-                    Amount = r.MyShare,
-                    TransactionType = "Expense",
-                    TransactionDate = r.Date,
-                    Description = $"{title} - my share (split ₹{SplitCalculator.Money(r.TotalAmount)})",
-                    SourceType = "Split",
-                    SourceReferenceId = split.Id
-                };
-                await _transactionService.AddTransactionAsync(myTxn);
-                myTxnId = myTxn.Id;
-            }
-
-            // 2) Each friend → Lend record (also debits the account via BorrowLendService).
-            foreach (var share in r.Shares)
-            {
-                var contact = await _contactRepo.GetByIdAsync(share.ContactId);
-
-                var bl = new BorrowLend
-                {
-                    ContactId = share.ContactId,
-                    Type = "Lend",
-                    TotalAmount = share.Amount,
-                    GivenDate = r.Date,
-                    Notes = $"Split: {title}",
-                    ReminderEnabled = false // no due date for splits; avoid stray notifications
-                };
-
-                try
-                {
-                    await _borrowLend.CreateAsync(bl, r.AccountId);
-                }
-                finally
-                {
-                    // Even if CreateAsync failed midway, remember it so rollback can clean up.
-                    if (bl.Id > 0) createdBorrowLendIds.Add(bl.Id);
+                    var myTxn = new Transaction
+                    {
+                        AccountId = r.AccountId,
+                        CategoryId = r.CategoryId,
+                        Amount = r.MyShare,
+                        TransactionType = "Expense",
+                        TransactionDate = r.Date,
+                        Description = $"{title} - my share (split ₹{SplitCalculator.Money(r.TotalAmount)})",
+                        SourceType = "Split",
+                        SourceReferenceId = split.Id
+                    };
+                    await _transactionService.AddTransactionAsync(myTxn);
+                    split.MyTransactionId = myTxn.Id;
                 }
 
-                await RelabelLendTransactionsAsync(bl.Id, $"Split: {title} - {contact?.Name}");
-
-                await _shareRepo.AddAsync(new SplitShare
+                // Each friend → Lend record (also debits the account via BorrowLendService).
+                foreach (var share in r.Shares)
                 {
-                    SplitExpenseId = split.Id,
-                    ContactId = share.ContactId,
-                    ShareAmount = share.Amount,
-                    BorrowLendId = bl.Id
-                });
+                    var contact = await _contactRepo.GetByIdAsync(share.ContactId);
+
+                    var bl = new BorrowLend
+                    {
+                        ContactId = share.ContactId,
+                        Type = "Lend",
+                        TotalAmount = share.Amount,
+                        GivenDate = r.Date,
+                        Notes = $"Split: {title}",
+                        ReminderEnabled = false // no due date for splits; avoid stray notifications
+                    };
+
+                    try
+                    {
+                        await _borrowLend.CreateAsync(bl, r.AccountId);
+                    }
+                    finally
+                    {
+                        // Even if CreateAsync failed midway, remember it so rollback can clean up.
+                        if (bl.Id > 0) createdBorrowLendIds.Add(bl.Id);
+                    }
+
+                    await RelabelLendTransactionsAsync(bl.Id, $"Split: {title} - {contact?.Name}");
+
+                    await _shareRepo.AddAsync(new SplitShare
+                    {
+                        SplitExpenseId = split.Id,
+                        ContactId = share.ContactId,
+                        ShareAmount = share.Amount,
+                        BorrowLendId = bl.Id
+                    });
+                }
+            }
+            else
+            {
+                // A friend paid. Cash-basis: NOTHING leaves your account now.
+                // Record what you owe them as a Borrow (no account entry); the Expense is booked
+                // when you pay them back (see PayAsync).
+                if (r.MyShare > 0)
+                {
+                    var bl = new BorrowLend
+                    {
+                        ContactId = payer!.Id,
+                        Type = "Borrow",
+                        TotalAmount = r.MyShare,
+                        GivenDate = r.Date,
+                        Notes = $"Split: {title}",
+                        ReminderEnabled = false
+                    };
+
+                    try
+                    {
+                        await _borrowLend.CreateAsync(bl, null); // null account = no Transaction created
+                    }
+                    finally
+                    {
+                        if (bl.Id > 0) createdBorrowLendIds.Add(bl.Id);
+                    }
+
+                    split.MyBorrowLendId = bl.Id;
+                }
+
+                // Other people's shares are only for the group's books (no money moves for you).
+                foreach (var share in r.Shares)
+                {
+                    await _shareRepo.AddAsync(new SplitShare
+                    {
+                        SplitExpenseId = split.Id,
+                        ContactId = share.ContactId,
+                        ShareAmount = share.Amount,
+                        BorrowLendId = 0
+                    });
+                }
             }
 
-            split.MyTransactionId = myTxnId;
             split.UpdatedAt = DateTime.UtcNow;
             await _splitRepo.UpdateAsync(split);
         }
         catch (Exception ex)
         {
             CrashLogger.Log(ex, "SplitService.CreateAsync");
-            await RollbackAsync(split, myTxnId, createdBorrowLendIds);
+            await RollbackAsync(split, createdBorrowLendIds);
             return Fail("Could not save the split, so nothing was changed. Please try again.");
         }
 
@@ -201,10 +257,14 @@ public class SplitService : ISplitService
 
         try
         {
-            foreach (var share in shares)
+            foreach (var share in shares.Where(s => s.BorrowLendId > 0))
                 await ReverseBorrowLendAsync(share.BorrowLendId);
 
-            await DeleteTransactionOnceAsync(split.MyTransactionId);
+            if (split.MyBorrowLendId is int myBl && myBl > 0)
+                await ReverseBorrowLendAsync(myBl);
+
+            // Your share Expense (you paid) and any "paid back to a friend" expenses (friend paid).
+            await DeleteSplitTransactionsAsync(split.Id);
 
             split.IsDeleted = true;
             split.UpdatedAt = DateTime.UtcNow;
@@ -224,34 +284,72 @@ public class SplitService : ISplitService
     // ─────────────────────────────────────────────
     //  Queries
     // ─────────────────────────────────────────────
-    public async Task<List<SplitListItem>> GetSplitsAsync()
+    public async Task<List<SplitListItem>> GetSplitsAsync(int? groupId = null)
     {
         var splits = (await _splitRepo.FindAsync(s => !s.IsDeleted))
+            .Where(s => groupId is null || s.GroupId == groupId)
             .OrderByDescending(s => s.SplitDate)
             .ToList();
 
         if (splits.Count == 0) return new List<SplitListItem>();
 
         var shares = (await _shareRepo.FindAsync(s => s.SplitExpenseId > 0)).ToList();
-        var openAndClosed = await _borrowLend.GetAllAsync(null, includeClosed: true);
-        var borrowLends = openAndClosed.ToDictionary(b => b.Id);
+        var borrowLends = (await _borrowLend.GetAllAsync(null, includeClosed: true)).ToDictionary(b => b.Id);
         var contacts = (await _contactRepo.FindAsync(c => c.Id > 0)).ToDictionary(c => c.Id, c => c.Name);
+        var groups = (await _groupRepo.FindAsync(g => g.Id > 0)).ToDictionary(g => g.Id, g => g.Name);
+
+        string NameOf(int id) => contacts.TryGetValue(id, out var n) ? n : "Unknown";
 
         var items = new List<SplitListItem>();
         foreach (var split in splits)
         {
             var mine = shares.Where(s => s.SplitExpenseId == split.Id).ToList();
+            var payerId = split.PaidByContactId;
 
-            var pending = mine.Sum(s =>
-                borrowLends.TryGetValue(s.BorrowLendId, out var bl) ? bl.PendingAmount : 0m);
+            // ── status (what it means for YOU) ──
+            string status;
+            bool settled;
+
+            var lendShares = mine.Where(s => s.BorrowLendId > 0).ToList();
+            if (payerId is null && lendShares.Count > 0)
+            {
+                var pending = lendShares.Sum(s =>
+                    borrowLends.TryGetValue(s.BorrowLendId, out var bl) ? bl.PendingAmount : 0m);
+                settled = pending <= 0;
+                status = settled ? "Settled" : $"₹{pending:N2} pending";
+            }
+            else if (split.MyBorrowLendId is int myBl && myBl > 0)
+            {
+                var pending = borrowLends.TryGetValue(myBl, out var bl) ? bl.PendingAmount : 0m;
+                settled = pending <= 0;
+                status = settled ? "Settled" : $"You owe ₹{pending:N2}";
+            }
+            else
+            {
+                settled = true;
+                status = "No dues for you";
+            }
+
+            // ── subtitle ──
+            var parts = new List<string>
+            {
+                payerId is int pid ? $"{NameOf(pid)} paid" : "You paid"
+            };
+
+            if (split.GroupId is int gid && groups.TryGetValue(gid, out var groupName))
+                parts.Add(groupName);
 
             var names = mine
-                .Select(s => contacts.TryGetValue(s.ContactId, out var n) ? n : "Unknown")
+                .Where(s => s.ContactId != payerId)
+                .Select(s => NameOf(s.ContactId))
                 .ToList();
 
-            var friendsText = names.Count <= 2
-                ? string.Join(", ", names)
-                : $"{names[0]}, {names[1]} +{names.Count - 2}";
+            if (names.Count > 0)
+            {
+                parts.Add(names.Count <= 2
+                    ? $"with {string.Join(", ", names)}"
+                    : $"with {names[0]}, {names[1]} +{names.Count - 2}");
+            }
 
             items.Add(new SplitListItem
             {
@@ -260,8 +358,9 @@ public class SplitService : ISplitService
                 Date = split.SplitDate,
                 Total = split.TotalAmount,
                 MyShare = split.MyShareAmount,
-                FriendsText = friendsText,
-                Pending = pending
+                SubtitleText = string.Join(" • ", parts),
+                StatusText = status,
+                IsSettled = settled
             });
         }
 
@@ -297,9 +396,9 @@ public class SplitService : ISplitService
     }
 
     // ─────────────────────────────────────────────
-    //  Settle
+    //  Settle (money received from a friend)
     // ─────────────────────────────────────────────
-    public async Task<SplitResult> SettleAsync(int contactId, decimal amount, int accountId)
+    public async Task<SplitResult> SettleAsync(int contactId, decimal amount, int accountId, int? groupId = null)
     {
         amount = Math.Round(amount, 2, MidpointRounding.AwayFromZero);
 
@@ -310,6 +409,12 @@ public class SplitService : ISplitService
             .Where(b => b.Type == "Lend" && !b.IsClosed && b.PendingAmount > 0)
             .OrderBy(b => b.GivenDate)
             .ToList();
+
+        if (groupId is int gid)
+        {
+            var allowed = await GroupBorrowLendIdsAsync(gid);
+            open = open.Where(b => allowed.Contains(b.Id)).ToList();
+        }
 
         var pendingTotal = open.Sum(b => b.PendingAmount);
         if (pendingTotal <= 0) return Fail("Nothing is pending with this friend.");
@@ -340,6 +445,66 @@ public class SplitService : ISplitService
         }
 
         DataChangeNotifier.Publish<BorrowLend>();
+        return new SplitResult(true);
+    }
+
+    // ─────────────────────────────────────────────
+    //  Pay (money paid to a friend) — cash-basis moment
+    // ─────────────────────────────────────────────
+    public async Task<SplitResult> PayAsync(int contactId, decimal amount, int accountId, int? groupId = null)
+    {
+        amount = Math.Round(amount, 2, MidpointRounding.AwayFromZero);
+
+        if (amount <= 0) return Fail("Enter a valid amount.");
+        if (accountId <= 0) return Fail("Select an account.");
+
+        var open = (await _borrowLend.GetByContactAsync(contactId))
+            .Where(b => b.Type == "Borrow" && !b.IsClosed && b.PendingAmount > 0)
+            .OrderBy(b => b.GivenDate)
+            .ToList();
+
+        if (groupId is int gid)
+        {
+            var allowed = await GroupBorrowLendIdsAsync(gid);
+            open = open.Where(b => allowed.Contains(b.Id)).ToList();
+        }
+
+        var pendingTotal = open.Sum(b => b.PendingAmount);
+        if (pendingTotal <= 0) return Fail("You don't owe this friend anything.");
+        if (amount > pendingTotal)
+            return Fail($"Amount can't exceed what you owe: ₹{pendingTotal:N2}.");
+
+        var contact = await _contactRepo.GetByIdAsync(contactId);
+
+        var remaining = amount;
+        foreach (var bl in open)
+        {
+            if (remaining <= 0) break;
+
+            var pay = Math.Min(remaining, bl.PendingAmount);
+            var type = pay >= bl.PendingAmount ? "Return" : "PartialReturn";
+
+            var move = new BorrowLendTransaction
+            {
+                BorrowLendId = bl.Id,
+                Amount = pay,
+                Type = type,
+                TransactionDate = DateTime.Now,
+                Notes = "Paid via Split"
+            };
+
+            var result = await _borrowLend.RecordTransactionAsync(move, accountId);
+            if (!result.Success)
+                return Fail(result.ErrorMessage ?? "Could not record the payment.");
+
+            // Split-created Borrow? Then this payment is YOUR expense → book it properly.
+            await CountAsExpenseAsync(bl.Id, move.TransactionId, contact?.Name);
+
+            remaining -= pay;
+        }
+
+        DataChangeNotifier.Publish<BorrowLend>();
+        DataChangeNotifier.Publish<Transaction>();
         return new SplitResult(true);
     }
 
@@ -377,6 +542,26 @@ public class SplitService : ISplitService
     // ─────────────────────────────────────────────
     private static SplitResult Fail(string message) => new(false, message);
 
+    /// <summary>BorrowLend ids that belong to a group's (non-deleted) bills.</summary>
+    private async Task<HashSet<int>> GroupBorrowLendIdsAsync(int groupId)
+    {
+        var splits = (await _splitRepo.FindAsync(s => !s.IsDeleted))
+            .Where(s => s.GroupId == groupId)
+            .ToList();
+
+        var splitIds = splits.Select(s => s.Id).ToHashSet();
+        var ids = new HashSet<int>();
+
+        foreach (var s in splits)
+            if (s.MyBorrowLendId is int myBl && myBl > 0) ids.Add(myBl);
+
+        var shares = await _shareRepo.FindAsync(s => s.SplitExpenseId > 0);
+        foreach (var sh in shares.Where(s => splitIds.Contains(s.SplitExpenseId) && s.BorrowLendId > 0))
+            ids.Add(sh.BorrowLendId);
+
+        return ids;
+    }
+
     /// <summary>BorrowLendService names its auto-created transaction "Lend - initial"; give it a useful label.</summary>
     private async Task RelabelLendTransactionsAsync(int borrowLendId, string description)
     {
@@ -394,9 +579,35 @@ public class SplitService : ISplitService
     }
 
     /// <summary>
+    /// If this Borrow record came from a split where a friend paid, turn the payment's
+    /// transaction into a regular Expense (split's category, SourceType "Split") so budgets
+    /// and reports count it. Amount/account/type are untouched, so balances don't change.
+    /// </summary>
+    private async Task CountAsExpenseAsync(int borrowLendId, int? transactionId, string? friendName)
+    {
+        if (transactionId is not int txnId) return;
+
+        int? refId = borrowLendId;
+        var split = (await _splitRepo.FindAsync(s => !s.IsDeleted && s.MyBorrowLendId == refId))
+            .FirstOrDefault();
+        if (split is null) return;
+
+        var txn = await _txRepo.GetByIdAsync(txnId);
+        if (txn is null) return;
+
+        txn.SourceType = "Split";
+        txn.SourceReferenceId = split.Id;
+        txn.CategoryId = split.CategoryId;
+        txn.Description = $"{split.Title} - paid to {friendName}";
+        txn.UpdatedAt = DateTime.UtcNow;
+        txn.SyncStatus = SyncStatus.Pending;
+        await _txRepo.UpdateAsync(txn);
+    }
+
+    /// <summary>
     /// BorrowLendService.SoftDeleteAsync does NOT reverse linked transactions / account
     /// balance, so do that here: delete every linked Transaction (initial lend + any
-    /// settlements received), then soft-delete the record itself.
+    /// settlements), then soft-delete the record itself.
     /// </summary>
     private async Task ReverseBorrowLendAsync(int borrowLendId)
     {
@@ -411,19 +622,21 @@ public class SplitService : ISplitService
     }
 
     /// <summary>
-    /// TransactionService.DeleteTransactionAsync reverses the balance every time it runs,
-    /// even for an already-deleted row — so never call it twice for the same transaction.
+    /// Deletes every live transaction tagged to this split (your share + payments re-tagged as
+    /// expenses). Only live rows are touched: TransactionService.DeleteTransactionAsync would
+    /// reverse the balance again for an already-deleted row.
     /// </summary>
-    private async Task DeleteTransactionOnceAsync(int? transactionId)
+    private async Task DeleteSplitTransactionsAsync(int splitId)
     {
-        if (!transactionId.HasValue) return;
+        int? refId = splitId;
+        var txns = await _txRepo.FindAsync(t =>
+            !t.IsDeleted && t.SourceType == "Split" && t.SourceReferenceId == refId);
 
-        var txn = await _transactionService.GetByIdAsync(transactionId.Value);
-        if (txn is { IsDeleted: false })
-            await _transactionService.DeleteTransactionAsync(txn.Id);
+        foreach (var t in txns)
+            await _transactionService.DeleteTransactionAsync(t.Id);
     }
 
-    private async Task RollbackAsync(SplitExpense split, int? myTxnId, List<int> borrowLendIds)
+    private async Task RollbackAsync(SplitExpense split, List<int> borrowLendIds)
     {
         foreach (var id in borrowLendIds)
         {
@@ -431,8 +644,8 @@ public class SplitService : ISplitService
             catch (Exception ex) { CrashLogger.Log(ex, "SplitService.Rollback.BorrowLend"); }
         }
 
-        try { await DeleteTransactionOnceAsync(myTxnId); }
-        catch (Exception ex) { CrashLogger.Log(ex, "SplitService.Rollback.MyTxn"); }
+        try { await DeleteSplitTransactionsAsync(split.Id); }
+        catch (Exception ex) { CrashLogger.Log(ex, "SplitService.Rollback.Transactions"); }
 
         try
         {

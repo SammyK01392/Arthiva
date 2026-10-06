@@ -7,6 +7,10 @@ namespace MoneySpend.Services;
 
 public record SplitShareInput(int ContactId, decimal Amount);
 
+/// <summary>
+/// PaidByContactId null = you paid. GroupId null = no group.
+/// Shares = every selected friend except you (the payer included if they took a share).
+/// </summary>
 public record SplitRequest(
     string Title,
     decimal TotalAmount,
@@ -16,7 +20,9 @@ public record SplitRequest(
     int CategoryId,
     decimal MyShare,
     IReadOnlyList<SplitShareInput> Shares,
-    string? Notes);
+    string? Notes,
+    int? PaidByContactId = null,
+    int? GroupId = null);
 
 public record SplitResult(bool Success, string? ErrorMessage = null);
 
@@ -28,7 +34,7 @@ public record AddFriendResult(
     string? ErrorMessage = null,
     bool AlreadyExisted = false);
 
-/// <summary>Row for the "History" tab.</summary>
+/// <summary>Row for expense lists (History tab / group detail).</summary>
 public class SplitListItem
 {
     public int Id { get; init; }
@@ -36,11 +42,13 @@ public class SplitListItem
     public DateTime Date { get; init; }
     public decimal Total { get; init; }
     public decimal MyShare { get; init; }
-    public string FriendsText { get; init; } = string.Empty;
-    public decimal Pending { get; init; }
 
-    public bool IsSettled => Pending <= 0;
-    public string StatusText => IsSettled ? "Settled" : $"₹{Pending:N2} pending";
+    /// <summary>"You paid • Goa Trip • with Rahul, Amit"</summary>
+    public string SubtitleText { get; init; } = string.Empty;
+
+    /// <summary>"Settled", "₹500.00 pending", "You owe ₹500.00" or "No dues for you".</summary>
+    public string StatusText { get; init; } = string.Empty;
+    public bool IsSettled { get; init; }
 }
 
 /// <summary>Row for the "Friends" tab — net of all open Borrow/Lend records for one contact.</summary>
@@ -56,6 +64,7 @@ public class FriendBalance
     public decimal AbsNet => Math.Abs(Net);
     public bool OwesYou => Net > 0;
     public bool CanSettle => LendPending > 0;
+    public bool CanPay => BorrowPending > 0;
     public string StatusText => Net > 0 ? "owes you" : Net < 0 ? "you owe" : "settled up";
 
     public string Initial =>
@@ -118,30 +127,39 @@ public interface ISplitService
     Task<List<Contact>> GetContactsAsync();
 
     /// <summary>
-    /// Quick-add a friend straight from the Split screen (name required, mobile optional).
+    /// Quick-add a friend straight from a Split screen (name required, mobile optional).
     /// If a contact with the same name already exists it is returned instead of creating a duplicate.
     /// </summary>
     Task<AddFriendResult> AddFriendAsync(string name, string? mobile);
 
     /// <summary>
-    /// "I paid" split. Creates: your share as an Expense, one BorrowLend (Lend)
-    /// per friend (which also debits the account), and the Split records.
+    /// Creates a split. YOU paid: your share = Expense, each friend = Lend (account debited).
+    /// A FRIEND paid (cash-basis): nothing touches your account now; a Borrow record is made for
+    /// your share and the expense is booked when you pay them back (PayAsync).
     /// All-or-nothing: if anything fails midway, what was created is reversed.
     /// </summary>
     Task<SplitResult> CreateAsync(SplitRequest request);
 
-    /// <summary>Reverses everything the split created (including any settlements already received).</summary>
+    /// <summary>Reverses everything the split created (including settlements already made).</summary>
     Task<SplitResult> DeleteAsync(int splitId);
 
-    Task<List<SplitListItem>> GetSplitsAsync();
+    /// <summary>groupId null = all splits.</summary>
+    Task<List<SplitListItem>> GetSplitsAsync(int? groupId = null);
 
     Task<List<FriendBalance>> GetFriendBalancesAsync();
 
     /// <summary>
-    /// Records money received from a friend, applied to their oldest open Lend
-    /// records first (partial amounts allowed). Credits the given account.
+    /// Money RECEIVED from a friend, applied to their oldest open Lend records first
+    /// (partial allowed). groupId limits it to that group's bills. Credits the account.
     /// </summary>
-    Task<SplitResult> SettleAsync(int contactId, decimal amount, int accountId);
+    Task<SplitResult> SettleAsync(int contactId, decimal amount, int accountId, int? groupId = null);
+
+    /// <summary>
+    /// Money YOU PAY a friend, applied to your oldest open Borrow records with them first.
+    /// For split-created Borrow records the payment is booked as a normal Expense in the
+    /// split's category (this is the cash-basis moment). Debits the account.
+    /// </summary>
+    Task<SplitResult> PayAsync(int contactId, decimal amount, int accountId, int? groupId = null);
 
     /// <summary>Ready-to-send reminder text (WhatsApp / share sheet).</summary>
     Task<string> BuildReminderTextAsync(int contactId);

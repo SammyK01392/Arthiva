@@ -61,7 +61,7 @@
             <Border Grid.Row="1" Margin="16,12,16,10" Padding="4" StrokeThickness="0"
                     BackgroundColor="{StaticResource TrackMuted}"
                     StrokeShape="RoundRectangle 13">
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="3">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="3">
 
                     <Border Grid.Column="0" Padding="2,9" StrokeThickness="0"
                             BackgroundColor="Transparent" StrokeShape="RoundRectangle 10">
@@ -88,6 +88,30 @@
                     </Border>
 
                     <Border Grid.Column="1" Padding="2,9" StrokeThickness="0"
+                            BackgroundColor="Transparent" StrokeShape="RoundRectangle 10">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding SelectedTab}" Value="Groups">
+                                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SetTabCommand}"
+                                                  CommandParameter="Groups" />
+                        </Border.GestureRecognizers>
+                        <Label Text="Groups" FontSize="12" FontAttributes="Bold"
+                               HorizontalOptions="Center" VerticalOptions="Center"
+                               TextColor="{StaticResource TextSecondary}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label"
+                                             Binding="{Binding SelectedTab}" Value="Groups">
+                                    <Setter Property="TextColor" Value="White" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Border>
+
+                    <Border Grid.Column="2" Padding="2,9" StrokeThickness="0"
                             BackgroundColor="Transparent" StrokeShape="RoundRectangle 10">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border"
@@ -199,6 +223,20 @@
                                                        TextColor="White" />
                                             </Border>
 
+                                        <Border Padding="14,7" StrokeThickness="1"
+                                                    Stroke="{StaticResource Expense}"
+                                                    BackgroundColor="Transparent"
+                                                    StrokeShape="RoundRectangle 10"
+                                                    IsVisible="{Binding CanPay}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.PayCommand}"
+                                                        CommandParameter="{Binding .}" />
+                                                </Border.GestureRecognizers>
+                                                <Label Text="Pay" FontSize="12" FontAttributes="Bold"
+                                                       TextColor="{StaticResource Expense}" />
+                                            </Border>
+
                                         </HorizontalStackLayout>
                                     </Grid>
                                 </Border>
@@ -247,7 +285,7 @@
                                                 <Label Text="{Binding Title}" FontSize="14" FontAttributes="Bold"
                                                        LineBreakMode="TailTruncation" MaxLines="1"
                                                        TextColor="{StaticResource TextPrimary}" />
-                                                <Label Text="{Binding FriendsText, StringFormat='with {0}'}"
+                                                <Label Text="{Binding SubtitleText}"
                                                        FontSize="11"
                                                        LineBreakMode="TailTruncation" MaxLines="1"
                                                        TextColor="{StaticResource TextSecondary}" />
@@ -289,6 +327,82 @@
                             <BoxView HeightRequest="110" Color="Transparent" />
                         </CollectionView.Footer>
                     </CollectionView>
+
+                    <!-- ── Groups ── -->
+                    <CollectionView ItemsSource="{Binding Groups}"
+                                    IsVisible="{Binding IsGroupsTab}"
+                                    SelectionMode="None"
+                                    VerticalScrollBarVisibility="Never">
+                        <CollectionView.Header>
+                            <Border Margin="16,0,16,10" Padding="12,10" StrokeThickness="1"
+                                    Stroke="{StaticResource Primary}"
+                                    BackgroundColor="Transparent"
+                                    StrokeShape="RoundRectangle 12">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding NewGroupCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="+ Create group" FontSize="13" FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       TextColor="{StaticResource Primary}" />
+                            </Border>
+                        </CollectionView.Header>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="services:GroupListItem">
+                                <Border Margin="16,0,16,8" Padding="12"
+                                        StrokeThickness="1"
+                                        Stroke="{StaticResource CardStroke}"
+                                        BackgroundColor="{StaticResource CardBg}"
+                                        StrokeShape="RoundRectangle 14">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.OpenGroupCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                            <Label Text="{Binding Name}" FontSize="14" FontAttributes="Bold"
+                                                   LineBreakMode="TailTruncation" MaxLines="1"
+                                                   TextColor="{StaticResource TextPrimary}" />
+                                            <Label Text="{Binding InfoText}" FontSize="11"
+                                                   TextColor="{StaticResource TextTertiary}" />
+                                        </VerticalStackLayout>
+
+                                        <Label Grid.Column="1" Text="{Binding SummaryText}"
+                                               FontSize="12" FontAttributes="Bold"
+                                               VerticalOptions="Center"
+                                               TextColor="{StaticResource TextSecondary}">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsOwed}" Value="True">
+                                                    <Setter Property="TextColor" Value="{StaticResource Income}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsOwing}" Value="True">
+                                                    <Setter Property="TextColor" Value="{StaticResource Expense}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+
+                        <CollectionView.Footer>
+                            <BoxView HeightRequest="110" Color="Transparent" />
+                        </CollectionView.Footer>
+                    </CollectionView>
+
+                    <!-- ── Empty: Groups ── -->
+                    <VerticalStackLayout Padding="32" Margin="0,70,0,0" Spacing="12"
+                                         HorizontalOptions="Center" VerticalOptions="Center"
+                                         IsVisible="{Binding ShowGroupsEmpty}">
+                        <Label Text="No groups yet" FontSize="16" FontAttributes="Bold"
+                               HorizontalOptions="Center"
+                               TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="Create a group for a trip or flatmates and track everything in one place."
+                               FontSize="12.5" HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{StaticResource TextSecondary}" />
+                    </VerticalStackLayout>
 
                     <!-- ── Empty: Friends ── -->
                     <VerticalStackLayout Padding="32" Spacing="12"
