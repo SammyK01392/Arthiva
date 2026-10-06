@@ -11,6 +11,7 @@ public partial class SplitListViewModel : BaseViewModel
     private readonly ISplitService _splitService;
     private readonly ISplitGroupService _groupService;
     private readonly IAccountService _accountService;
+    private readonly IUserProfileService _userProfileService;
     private readonly AutoRefresh _autoRefresh;
 
     public ObservableCollection<FriendBalance> Friends { get; } = new();
@@ -34,11 +35,13 @@ public partial class SplitListViewModel : BaseViewModel
     public SplitListViewModel(
         ISplitService splitService,
         ISplitGroupService groupService,
-        IAccountService accountService)
+        IAccountService accountService,
+        IUserProfileService userProfileService)
     {
         _splitService = splitService;
         _groupService = groupService;
         _accountService = accountService;
+        _userProfileService = userProfileService;
         Title = "Splits";
         RefreshMyUpiText();
 
@@ -178,8 +181,16 @@ public partial class SplitListViewModel : BaseViewModel
             RefreshMyUpiText();
         }
 
+        // Payee name for the UPI link = your profile name (optional; falls back to the UPI id).
+        string? payeeName = null;
+        try { payeeName = (await _userProfileService.GetProfileAsync())?.FullName; }
+        catch { /* profile not ready → link still works without a name */ }
+
         var text = await _splitService.BuildReminderTextAsync(
-            friend.ContactId, string.IsNullOrEmpty(myUpi) ? null : myUpi);
+            friend.ContactId,
+            string.IsNullOrEmpty(myUpi) ? null : myUpi,
+            payeeName,
+            SplitPrompts.PayPageUrl);
         var phone = NormalizePhone(friend.Mobile);
 
         try

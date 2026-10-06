@@ -125,6 +125,64 @@ public static class SplitCalculator
         return result;
     }
 
+    // ─────────────────────────────────────────────
+    //  UPI links
+    // ─────────────────────────────────────────────
+
+    /// <summary>
+    /// RFC 3986 encoding, but '@' stays literal: it is legal in a query string and some UPI
+    /// apps don't decode %40 inside pa=.
+    /// </summary>
+    private static string UpiEncode(string value)
+        => Uri.EscapeDataString(value).Replace("%40", "@");
+
+    private static string Truncate(string value, int max)
+        => value.Length <= max ? value : value[..max];
+
+    /// <summary>
+    /// Generic NPCI deep link: upi://pay?pa=&amp;pn=&amp;am=&amp;cu=INR&amp;tn=
+    /// Returns null if the UPI id is empty/invalid or the amount is not positive.
+    /// </summary>
+    public static string? BuildUpiUri(string? upiId, string? payeeName, decimal amount, string? note)
+    {
+        var query = BuildUpiQuery(upiId, payeeName, amount, note);
+        return query is null ? null : "upi://pay?" + query;
+    }
+
+    /// <summary>
+    /// A tappable https link for chat apps (WhatsApp only auto-links web URLs, not upi://).
+    /// It points at your hosted pay page and carries the same parameters in the #fragment,
+    /// so the values never reach the web server. Returns null when the page URL is not
+    /// configured or the data is invalid — callers then leave the link out.
+    /// </summary>
+    public static string? BuildPayLink(
+        string? payPageUrl, string? upiId, string? payeeName, decimal amount, string? note)
+    {
+        if (string.IsNullOrWhiteSpace(payPageUrl)) return null;
+
+        var query = BuildUpiQuery(upiId, payeeName, amount, note);
+        return query is null ? null : payPageUrl.Trim() + "#" + query;
+    }
+
+    private static string? BuildUpiQuery(string? upiId, string? payeeName, decimal amount, string? note)
+    {
+        if (!IsValidUpi(upiId) || amount <= 0m) return null;
+
+        var pa = upiId!.Trim();
+        var pn = string.IsNullOrWhiteSpace(payeeName) ? pa.Split('@')[0] : payeeName.Trim();
+        var tn = note?.Trim() ?? string.Empty;
+
+        var query = new System.Text.StringBuilder();
+        query.Append("pa=").Append(UpiEncode(pa));
+        query.Append("&pn=").Append(UpiEncode(Truncate(pn, 50)));
+        query.Append("&am=").Append(amount.ToString("0.00", CultureInfo.InvariantCulture));
+        query.Append("&cu=INR");
+        if (tn.Length > 0)
+            query.Append("&tn=").Append(UpiEncode(Truncate(tn, 50)));
+
+        return query.ToString();
+    }
+
     /// <summary>1,200 or 1,200.50 — no needless ".00".</summary>
     public static string Money(decimal amount)
         => amount % 1m == 0m ? amount.ToString("N0") : amount.ToString("N2");
@@ -169,8 +227,12 @@ public interface ISplitService
     /// </summary>
     Task<SplitResult> PayAsync(int contactId, decimal amount, int accountId, int? groupId = null);
 
-    /// <summary>Ready-to-send reminder text (WhatsApp / share sheet). myUpiId is appended when given.</summary>
-    Task<string> BuildReminderTextAsync(int contactId, string? myUpiId = null);
+    /// <summary>
+    /// Ready-to-send reminder text (WhatsApp / share sheet). myUpiId is appended when given;
+    /// if payPageUrl is also given, a tappable "Pay via UPI" link is added (payeeName = your name).
+    /// </summary>
+    Task<string> BuildReminderTextAsync(
+        int contactId, string? myUpiId = null, string? payeeName = null, string? payPageUrl = null);
 
     /// <summary>Shareable text receipt for one split (who paid, each person's share).</summary>
     Task<string> BuildReceiptAsync(int splitId);

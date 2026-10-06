@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Pay via UPI</title>
+<style>
+  :root { --primary:#FF6B00; --ink:#1A1410; --muted:#7A6B5E; --card:#FFF8F2; --line:#F4EBE1; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+         padding:20px; background:#fff; color:var(--ink);
+         font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  .card { width:100%; max-width:420px; background:var(--card); border:1px solid var(--line);
+          border-radius:20px; padding:24px 20px; }
+  h1 { margin:0 0 4px; font-size:16px; color:var(--muted); font-weight:600; }
+  .amount { font-size:38px; font-weight:800; margin:6px 0 18px; }
+  .row { display:flex; justify-content:space-between; gap:12px; padding:10px 0;
+         border-top:1px solid var(--line); font-size:14px; }
+  .row span { color:var(--muted); }
+  .row b { text-align:right; word-break:break-all; }
+  .btn { display:block; width:100%; margin-top:16px; padding:15px; border:0; border-radius:14px;
+         background:var(--primary); color:#fff; font-size:16px; font-weight:700;
+         text-align:center; text-decoration:none; cursor:pointer; }
+  .btn.ghost { background:transparent; color:var(--primary); border:1.5px solid var(--primary); margin-top:10px; }
+  .hint { margin:14px 0 0; font-size:12.5px; line-height:1.45; color:var(--muted); }
+  .error { color:#E63946; font-weight:600; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main class="card">
+  <h1>Pay via UPI</h1>
+  <div class="amount" id="amount">–</div>
+
+  <div id="details">
+    <div class="row"><span>To</span><b id="payee"></b></div>
+    <div class="row"><span>UPI ID</span><b id="upi"></b></div>
+    <div class="row" id="noteRow" hidden><span>Note</span><b id="note"></b></div>
+  </div>
+
+  <a class="btn" id="payBtn" href="#" hidden>Pay with UPI app</a>
+  <button class="btn ghost" id="copyBtn" type="button" hidden>Copy UPI ID</button>
+
+  <p class="hint" id="hint" hidden></p>
+  <p class="hint error" id="error" hidden></p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  // Values travel in the #fragment (never sent to the web server).
+  var params = new URLSearchParams(location.hash.replace(/^#/, ''));
+  var pa = (params.get('pa') || '').trim();
+  var pn = (params.get('pn') || '').trim();
+  var am = (params.get('am') || '').trim();
+  var tn = (params.get('tn') || '').trim();
+
+  var $ = function (id) { return document.getElementById(id); };
+  function show(id, text) { var el = $(id); if (text !== undefined) el.textContent = text; el.hidden = false; }
+
+  // Same rules as the app: name@bank, positive amount with at most 2 decimals.
+  var validUpi = /^[a-zA-Z0-9.\-_]{2,}@[a-zA-Z][a-zA-Z0-9]{1,}$/.test(pa) && pa.length <= 100;
+  var validAmt = /^\d{1,7}(\.\d{1,2})?$/.test(am) && Number(am) > 0;
+
+  if (!validUpi || !validAmt) {
+    $('details').hidden = true;
+    show('error', 'This payment link is incomplete or invalid. Please ask for a new one.');
+    return;
+  }
+
+  var amount = Number(am).toFixed(2);
+  var payee = (pn || pa.split('@')[0]).slice(0, 50);
+  var note = tn.slice(0, 50);
+
+  // textContent only (never innerHTML) so link values can't inject markup.
+  $('amount').textContent = '\u20B9' + amount;
+  $('payee').textContent = payee;
+  $('upi').textContent = pa;
+  if (note) { $('note').textContent = note; $('noteRow').hidden = false; }
+
+  // '@' stays literal in pa, like the app does.
+  function enc(v) { return encodeURIComponent(v).replace(/%40/g, '@'); }
+  var uri = 'upi://pay?pa=' + enc(pa) + '&pn=' + enc(payee) + '&am=' + amount + '&cu=INR' +
+            (note ? '&tn=' + enc(note) : '');
+
+  $('payBtn').href = uri;                       // generic UPI intent → Android shows the app chooser
+  show('payBtn');
+  show('copyBtn');
+
+  $('copyBtn').addEventListener('click', function () {
+    function done() { $('copyBtn').textContent = 'UPI ID copied'; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(pa).then(done, fallbackCopy);
+    } else { fallbackCopy(); }
+    function fallbackCopy() {
+      var t = document.createElement('textarea');
+      t.value = pa; document.body.appendChild(t); t.select();
+      try { document.execCommand('copy'); done(); } catch (e) {}
+      document.body.removeChild(t);
+    }
+  });
+
+  var isAndroid = /android/i.test(navigator.userAgent);
+  if (!isAndroid) {
+    show('hint', 'Open this link on your Android phone to pay with a UPI app, or copy the UPI ID and pay manually.');
+    return;
+  }
+
+  // Best effort auto-launch (browsers may require a tap — the button always works).
+  var left = false;
+  document.addEventListener('visibilitychange', function () { if (document.hidden) left = true; });
+  setTimeout(function () { try { location.href = uri; } catch (e) {} }, 400);
+
+  // Still here after a moment → probably no UPI app handled it.
+  setTimeout(function () {
+    if (!left) {
+      show('hint', 'Nothing opened? Tap \u201CPay with UPI app\u201D. If you have no UPI app installed ' +
+                   '(Google Pay, PhonePe, Paytm, BHIM\u2026), copy the UPI ID and pay manually.');
+    }
+  }, 2500);
+})();
+</script>
+</body>
+</html>

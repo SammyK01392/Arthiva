@@ -12,6 +12,13 @@ public static class SplitPrompts
     // ─────────────────────────────────────────────
     //  My own UPI id (stays on this phone only — Preferences)
     // ─────────────────────────────────────────────
+    /// <summary>
+    /// Full https URL of your hosted pay.html (see web/pay.html), e.g.
+    /// "https://yourname.github.io/moneyspend-pay/pay.html".
+    /// Leave empty to keep reminders exactly as before (no payment link).
+    /// </summary>
+    public const string PayPageUrl = "";
+
     public const string MyUpiKey = "my_upi_id";
     public const string MyUpiAskedKey = "my_upi_asked";
 
@@ -52,10 +59,7 @@ public static class SplitPrompts
     //  Paying a friend: UPI app or "already paid"
     // ─────────────────────────────────────────────
     public static string BuildUpiLink(string upiId, string name, decimal amount, string note)
-        => $"upi://pay?pa={Uri.EscapeDataString(upiId)}" +
-           $"&pn={Uri.EscapeDataString(name)}" +
-           $"&am={amount.ToString("0.00", CultureInfo.InvariantCulture)}" +
-           $"&cu=INR&tn={Uri.EscapeDataString(note)}";
+        => SplitCalculator.BuildUpiUri(upiId, name, amount, note) ?? string.Empty;
 
     /// <summary>
     /// Asks how the payment is made. True = go ahead and record it, false = cancelled.

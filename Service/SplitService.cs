@@ -512,7 +512,8 @@ public class SplitService : ISplitService
     // ─────────────────────────────────────────────
     //  Reminder text
     // ─────────────────────────────────────────────
-    public async Task<string> BuildReminderTextAsync(int contactId, string? myUpiId = null)
+    public async Task<string> BuildReminderTextAsync(
+        int contactId, string? myUpiId = null, string? payeeName = null, string? payPageUrl = null)
     {
         var contact = await _contactRepo.GetByIdAsync(contactId);
 
@@ -538,7 +539,17 @@ public class SplitService : ISplitService
         var text = $"{greeting}, ₹{SplitCalculator.Money(amount)} pending hai{what}. Jab ho sake bhej dena 🙏";
 
         if (!string.IsNullOrWhiteSpace(myUpiId))
-            text += $"\nUPI: {myUpiId.Trim()}";
+        {
+            var upi = myUpiId.Trim();
+            text += $"\nUPI: {upi}";
+
+            // Tappable payment link. Left out (message stays exactly as before) when the pay page
+            // isn't configured, the UPI id is invalid or there is nothing pending.
+            var note = titles.Count == 0 ? "MoneySpend split" : string.Join(", ", titles.Take(3));
+            var link = SplitCalculator.BuildPayLink(payPageUrl, upi, payeeName, amount, note);
+            if (link is not null)
+                text += $"\nPay ₹{SplitCalculator.Money(amount)} via UPI:\n{link}";
+        }
 
         return text;
     }
