@@ -89,6 +89,11 @@ public static class MauiProgram
         // Cloud backup — Firebase Auth (Email/Password) + Realtime Database sync.
         services.AddSingleton<IFirebaseAuthService, FirebaseAuthService>();
         services.AddSingleton<IFirebaseSyncService, FirebaseSyncService>();
+
+        services.AddSingleton<IBackupDataService, BackupDataService>();
+        services.AddSingleton<IGoogleAuthService, GoogleAuthService>();
+        services.AddSingleton<IGoogleDriveService, GoogleDriveService>();
+        services.AddSingleton<IDriveBackupService, DriveBackupService>();
     }
 
     private static void RegisterViewModels(IServiceCollection services)
@@ -138,6 +143,8 @@ public static class MauiProgram
         services.AddTransient<SplitListViewModel>();
         services.AddTransient<GroupEditViewModel>();
         services.AddTransient<GroupDetailViewModel>();
+
+        services.AddTransient<DriveBackupViewModel>();
 
 
     }
@@ -201,5 +208,7 @@ public static class MauiProgram
         services.AddTransient<SplitListPage>();
         services.AddTransient<GroupEditPage>();
         services.AddTransient<GroupDetailPage>();
+
+        services.AddTransient<DriveBackupPage>();
     }
 }

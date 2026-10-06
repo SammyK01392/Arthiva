@@ -14,47 +14,24 @@ public class FirebaseSyncService : IFirebaseSyncService
     private readonly IFirebaseAuthService _authService;
     private readonly HttpClient _http = new();
 
-    public FirebaseSyncService(MoneySpendDatabase db, IFirebaseAuthService authService)
+    private readonly IBackupDataService _backupData;
+
+    public FirebaseSyncService(MoneySpendDatabase db, IFirebaseAuthService authService, IBackupDataService backupData)
     {
         _db = db;
         _authService = authService;
+        _backupData = backupData;
     }
 
-    // ── BACKUP ─────────────────────────────────────────────
     public async Task BackupAsync(IProgress<string>? progress = null)
     {
         var (idToken, uid) = await GetSessionOrThrowAsync();
 
         progress?.Report("Reading local data...");
-
-        var backupPayload = new Dictionary<string, object>
-        {
-            ["backedUpAt"] = DateTime.UtcNow.ToString("O"),
-            ["userProfile"] = await _db.Database.Table<UserProfile>().ToListAsync(),
-            ["accounts"] = await _db.Database.Table<Account>().ToListAsync(),
-            ["categories"] = await _db.Database.Table<Category>().ToListAsync(),
-            ["transactions"] = await _db.Database.Table<Transaction>().ToListAsync(),
-            ["contacts"] = await _db.Database.Table<Contact>().ToListAsync(),
-            ["borrowLends"] = await _db.Database.Table<BorrowLend>().ToListAsync(),
-            ["borrowLendTransactions"] = await _db.Database.Table<BorrowLendTransaction>().ToListAsync(),
-            ["emiMasters"] = await _db.Database.Table<EmiMaster>().ToListAsync(),
-            ["emiPayments"] = await _db.Database.Table<EmiPayment>().ToListAsync(),
-            ["bills"] = await _db.Database.Table<Bill>().ToListAsync(),
-            ["billPayments"] = await _db.Database.Table<BillPayment>().ToListAsync(),
-            ["budgets"] = await _db.Database.Table<Budget>().ToListAsync(),
-            ["savingGoals"] = await _db.Database.Table<SavingGoal>().ToListAsync(),
-            ["goalTransactions"] = await _db.Database.Table<GoalTransaction>().ToListAsync(),
-            ["recurringTransactions"] = await _db.Database.Table<RecurringTransaction>().ToListAsync(),
-            ["notifications"] = await _db.Database.Table<Notification>().ToListAsync(),
-            ["attachments"] = await _db.Database.Table<Attachment>().ToListAsync(),
-            ["monthlySummaries"] = await _db.Database.Table<MonthlySummary>().ToListAsync(),
-        };
+        var snapshot = await _backupData.CreateSnapshotAsync();
 
         progress?.Report("Uploading to cloud...");
-
-        var json = JsonSerializer.Serialize(backupPayload);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
+        var content = new StringContent(snapshot.Json, Encoding.UTF8, "application/json");
         var url = $"{FirebaseConstants.DatabaseUrl}/users/{uid}/backup.json?auth={idToken}";
         var response = await _http.PutAsync(url, content);
 
@@ -63,20 +40,16 @@ public class FirebaseSyncService : IFirebaseSyncService
             var err = await response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Backup failed: {err}");
         }
-
         progress?.Report("Backup complete.");
     }
 
-    // ── RESTORE ────────────────────────────────────────────
     public async Task RestoreAsync(IProgress<string>? progress = null)
     {
         var (idToken, uid) = await GetSessionOrThrowAsync();
 
         progress?.Report("Fetching cloud data...");
-
         var url = $"{FirebaseConstants.DatabaseUrl}/users/{uid}/backup.json?auth={idToken}";
         var response = await _http.GetAsync(url);
-
         if (!response.IsSuccessStatusCode)
             throw new InvalidOperationException("Restore failed: could not reach server.");
 
@@ -84,52 +57,9 @@ public class FirebaseSyncService : IFirebaseSyncService
         if (string.IsNullOrWhiteSpace(json) || json == "null")
             throw new InvalidOperationException("No backup found in the cloud.");
 
-        using var doc = JsonDocument.Parse(json);
-        var root = doc.RootElement;
-
-        progress?.Report("Clearing local data...");
-
-        // Destructive restore: local data replaced entirely by cloud copy.
-        // Order matters where foreign keys exist — delete children before parents.
-        await _db.Database.DeleteAllAsync<Notification>();
-        await _db.Database.DeleteAllAsync<Attachment>();
-        await _db.Database.DeleteAllAsync<MonthlySummary>();
-        await _db.Database.DeleteAllAsync<GoalTransaction>();
-        await _db.Database.DeleteAllAsync<SavingGoal>();
-        await _db.Database.DeleteAllAsync<RecurringTransaction>();
-        await _db.Database.DeleteAllAsync<BillPayment>();
-        await _db.Database.DeleteAllAsync<Bill>();
-        await _db.Database.DeleteAllAsync<EmiPayment>();
-        await _db.Database.DeleteAllAsync<EmiMaster>();
-        await _db.Database.DeleteAllAsync<BorrowLendTransaction>();
-        await _db.Database.DeleteAllAsync<BorrowLend>();
-        await _db.Database.DeleteAllAsync<Contact>();
-        await _db.Database.DeleteAllAsync<Transaction>();
-        await _db.Database.DeleteAllAsync<Budget>();
-        await _db.Database.DeleteAllAsync<Category>();
-        await _db.Database.DeleteAllAsync<Account>();
-        await _db.Database.DeleteAllAsync<UserProfile>();
-
         progress?.Report("Restoring from cloud...");
-
-        await RestoreTableAsync<UserProfile>(root, "userProfile");
-        await RestoreTableAsync<Account>(root, "accounts");
-        await RestoreTableAsync<Category>(root, "categories");
-        await RestoreTableAsync<Transaction>(root, "transactions");
-        await RestoreTableAsync<Contact>(root, "contacts");
-        await RestoreTableAsync<BorrowLend>(root, "borrowLends");
-        await RestoreTableAsync<BorrowLendTransaction>(root, "borrowLendTransactions");
-        await RestoreTableAsync<EmiMaster>(root, "emiMasters");
-        await RestoreTableAsync<EmiPayment>(root, "emiPayments");
-        await RestoreTableAsync<Bill>(root, "bills");
-        await RestoreTableAsync<BillPayment>(root, "billPayments");
-        await RestoreTableAsync<Budget>(root, "budgets");
-        await RestoreTableAsync<SavingGoal>(root, "savingGoals");
-        await RestoreTableAsync<GoalTransaction>(root, "goalTransactions");
-        await RestoreTableAsync<RecurringTransaction>(root, "recurringTransactions");
-        await RestoreTableAsync<Notification>(root, "notifications");
-        await RestoreTableAsync<Attachment>(root, "attachments");
-        await RestoreTableAsync<MonthlySummary>(root, "monthlySummaries");
+        try { await _backupData.RestoreSnapshotAsync(json); }
+        catch (InvalidDataException ex) { throw new InvalidOperationException($"Restore failed: {ex.Message}"); }
 
         progress?.Report("Restore complete.");
     }

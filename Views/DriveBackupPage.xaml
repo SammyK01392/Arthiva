@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MoneySpend.Views.DriveBackupPage"
+             Title="Google Drive Backup"
+             BackgroundColor="#FFFFFF">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Border BackgroundColor="#FFF1E3" StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="16">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding AccountText}" FontAttributes="Bold" FontSize="15" TextColor="#1A1410" />
+                    <Label Text="{Binding LastBackupText, StringFormat='Last backup: {0}'}" FontSize="13" TextColor="#7A6B5E" />
+                    <Label Text="{Binding StatusText}" FontSize="12" TextColor="#7A6B5E" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border BackgroundColor="#FF6B00" StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                    HeightRequest="52" IsVisible="{Binding IsDisconnected}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ConnectCommand}" />
+                </Border.GestureRecognizers>
+                <Label Text="Connect Google Drive" TextColor="White" FontSize="15" FontAttributes="Bold"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+
+            <VerticalStackLayout Spacing="14" IsVisible="{Binding IsConnected}">
+                <Label Text="Backup passphrase" FontAttributes="Bold" TextColor="#1A1410" />
+                <Entry Text="{Binding Passphrase}" IsPassword="True" Placeholder="Min 8 characters" />
+                <HorizontalStackLayout Spacing="8">
+                    <Switch IsToggled="{Binding RememberPassphrase}" OnColor="#FF6B00" />
+                    <Label Text="Remember on this device" VerticalOptions="Center" TextColor="#1A1410" />
+                </HorizontalStackLayout>
+                <Label Text="Your backup is encrypted with this passphrase. If you forget it, the backup cannot be recovered."
+                       FontSize="12" TextColor="#7A6B5E" />
+
+                <Border BackgroundColor="#FF6B00" StrokeThickness="0" StrokeShape="RoundRectangle 16" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding BackupCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="Backup Now" TextColor="White" FontSize="15" FontAttributes="Bold"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border BackgroundColor="#FFF1E3" StrokeThickness="0" StrokeShape="RoundRectangle 16" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SyncCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="Sync" TextColor="#FF6B00" FontSize="15" FontAttributes="Bold"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border BackgroundColor="#FFF1E3" StrokeThickness="0" StrokeShape="RoundRectangle 16" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding RestoreCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="Restore from Drive" TextColor="#FF6B00" FontSize="15" FontAttributes="Bold"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border BackgroundColor="Transparent" StrokeThickness="0" HeightRequest="44">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding DisconnectCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="Disconnect" TextColor="#DC2626" FontSize="14" FontAttributes="Bold"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+            </VerticalStackLayout>
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#FF6B00" />
+            <Label Text="{Binding ProgressText}" HorizontalOptions="Center" FontSize="12" TextColor="#7A6B5E" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

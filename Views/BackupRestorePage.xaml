@@ -53,7 +53,13 @@
                                        Color="#FF6B00" HorizontalOptions="Center" VerticalOptions="Center" />
                 </Grid>
             </Border>
-
+            <Border BackgroundColor="#FFF1E3" StrokeThickness="0" StrokeShape="RoundRectangle 16" HeightRequest="52">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnDriveBackupTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="Google Drive Backup (Encrypted)" TextColor="#FF6B00" FontSize="15" FontAttributes="Bold"
+           HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
             <Border x:Name="LogoutButtonBorder"
                     BackgroundColor="Transparent" StrokeThickness="0"
                     HeightRequest="44" IsVisible="False">
@@ -63,6 +69,7 @@
                 <Label Text="Logout" TextColor="#DC2626" FontSize="14" FontAttributes="Bold"
                        HorizontalOptions="Center" VerticalOptions="Center" />
             </Border>
+            
 
         </VerticalStackLayout>
     </ScrollView>

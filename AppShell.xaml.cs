@@ -136,6 +136,7 @@ public partial class AppShell : Shell
                 NotificationListPage => "Notifications",
                 BackupRestorePage => "Backup & Restore",
                 LoginPage => "Cloud Backup",
+                DriveBackupPage => "Google Drive Backup",
                 _ => "MoneySpend"
             };
         }
@@ -248,5 +249,9 @@ public partial class AppShell : Shell
 
         Routing.RegisterRoute(nameof(GroupEditPage), typeof(GroupEditPage));
         Routing.RegisterRoute(nameof(GroupDetailPage), typeof(GroupDetailPage));
+
+        // RegisterRoutes()
+        Routing.RegisterRoute(nameof(DriveBackupPage), typeof(DriveBackupPage));
+
     }
 }

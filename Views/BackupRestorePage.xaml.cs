@@ -118,7 +118,8 @@ public partial class BackupRestorePage : ContentPage
             SetBusy(RestoreButtonBorder, RestoreBusyIndicator, false);
         }
     }
-
+    private async void OnDriveBackupTapped(object? sender, TappedEventArgs e)
+    => await Shell.Current.GoToAsync(nameof(DriveBackupPage));
     private static void SetBusy(Border border, ActivityIndicator indicator, bool busy)
     {
         border.IsEnabled = !busy;
