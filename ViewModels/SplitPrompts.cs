@@ -17,7 +17,7 @@ public static class SplitPrompts
     /// "https://yourname.github.io/moneyspend-pay/pay.html".
     /// Leave empty to keep reminders exactly as before (no payment link).
     /// </summary>
-    public const string PayPageUrl = "";
+    public const string PayPageUrl = "https://sammyk01392.github.io/Arthiva/pay.html";
 
     public const string MyUpiKey = "my_upi_id";
     public const string MyUpiAskedKey = "my_upi_asked";
