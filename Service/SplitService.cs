@@ -512,6 +512,37 @@ public class SplitService : ISplitService
     // ─────────────────────────────────────────────
     //  Reminder text
     // ─────────────────────────────────────────────
+    // ─────────────────────────────────────────────
+    //  Reminder text
+    // ─────────────────────────────────────────────
+    private static readonly HttpClient ShortenerHttp = new() { Timeout = TimeSpan.FromSeconds(5) };
+
+    /// <summary>Calls one shortener API. Returns null on any failure or non-URL reply.</summary>
+    private static async Task<string?> TryShortenAsync(string api)
+    {
+        try
+        {
+            var result = (await ShortenerHttp.GetStringAsync(api)).Trim();
+            return result.StartsWith("https://", StringComparison.OrdinalIgnoreCase) && !result.Contains(' ')
+                ? result
+                : null;
+        }
+        catch (Exception ex)
+        {
+            CrashLogger.Log(ex, "SplitService.TryShortenAsync");
+            return null;
+        }
+    }
+
+    /// <summary>is.gd first, TinyURL as backup (both free, no signup). Null only if both fail.</summary>
+    private static async Task<string?> ShortenAsync(string longUrl)
+    {
+        var enc = Uri.EscapeDataString(longUrl);
+
+        return await TryShortenAsync($"https://is.gd/create.php?format=simple&url={enc}")
+            ?? await TryShortenAsync($"https://tinyurl.com/api-create.php?url={enc}");
+    }
+
     public async Task<string> BuildReminderTextAsync(
         int contactId, string? myUpiId = null, string? payeeName = null, string? payPageUrl = null)
     {
@@ -533,24 +564,33 @@ public class SplitService : ISplitService
                 titles.Add(split.Title);
         }
 
-        var greeting = string.IsNullOrWhiteSpace(contact?.Name) ? "Hi" : $"Hi {contact!.Name}";
-        var what = titles.Count == 0 ? string.Empty : $" ({string.Join(", ", titles.Take(3))})";
+        var name = contact?.Name?.Trim();
+        var greeting = string.IsNullOrWhiteSpace(name) ? "Hi 👋" : $"Hi {name} 👋";
+        var money = SplitCalculator.Money(amount);
 
-        var text = $"{greeting}, ₹{SplitCalculator.Money(amount)} pending hai{what}. Jab ho sake bhej dena 🙏";
+        var text = $"{greeting}\n\n" +
+                   "This is a gentle reminder about a pending payment.\n\n" +
+                   $"*Amount:* ₹{money}";
+
+        if (titles.Count > 0)
+            text += $"\n*For:* {string.Join(", ", titles.Take(3))}";
 
         if (!string.IsNullOrWhiteSpace(myUpiId))
         {
             var upi = myUpiId.Trim();
-            text += $"\nUPI: {upi}";
-
-            // Tappable payment link. Left out (message stays exactly as before) when the pay page
-            // isn't configured, the UPI id is invalid or there is nothing pending.
             var note = titles.Count == 0 ? "MoneySpend split" : string.Join(", ", titles.Take(3));
-            var link = SplitCalculator.BuildPayLink(payPageUrl, upi, payeeName, amount, note);
-            if (link is not null)
-                text += $"\nPay ₹{SplitCalculator.Money(amount)} via UPI:\n{link}";
+            var fullLink = SplitCalculator.BuildPayLink(payPageUrl, upi, payeeName, amount, note);
+
+            if (fullLink is not null)
+            {
+                // The full link never goes into the message: only a short link is added.
+                var link = await ShortenAsync(fullLink);
+                if (link is not null)
+                    text += $"\n\nPay securely via UPI 👇\n{link}";
+            }
         }
 
+        text += "\n\nThank you 🙏";
         return text;
     }
 
