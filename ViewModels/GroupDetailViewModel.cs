@@ -112,6 +112,26 @@ public partial class GroupDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task ShareSummaryAsync()
+    {
+        var text = await _groupService.BuildSummaryAsync(GroupId);
+        if (string.IsNullOrWhiteSpace(text)) return;
+
+        await Share.Default.RequestAsync(new ShareTextRequest { Text = text, Title = Title });
+    }
+
+    [RelayCommand]
+    private async Task ShareReceiptAsync(SplitListItem item)
+    {
+        if (item is null) return;
+
+        var text = await _splitService.BuildReceiptAsync(item.Id);
+        if (string.IsNullOrWhiteSpace(text)) return;
+
+        await Share.Default.RequestAsync(new ShareTextRequest { Text = text, Title = item.Title });
+    }
+
+    [RelayCommand]
     private async Task DeleteGroupAsync()
     {
         var confirm = await Shell.Current.DisplayAlert(
@@ -202,6 +222,10 @@ public partial class GroupDetailViewModel : BaseViewModel
                     $"You owe them ₹{transfer.DirectPending:N2} here. How much are you paying?",
                     transfer.ActionAmount);
                 if (amount is null) return;
+
+                // UPI app or "already paid" — only continues if the payment really happened.
+                if (!await SplitPrompts.ConfirmPaymentAsync(_splitService, transfer.ToId, transfer.ToName, amount.Value))
+                    return;
 
                 var accountId = await SplitPrompts.PickAccountAsync(_accountService, "Paid from which account?");
                 if (accountId is null) return;

@@ -387,6 +387,7 @@ public class SplitService : ISplitService
                     ContactId = g.Key,
                     Name = contact?.Name ?? "Unknown",
                     Mobile = contact?.Mobile,
+                    UpiId = contact?.UpiId,
                     LendPending = g.Where(b => b.Type == "Lend").Sum(b => b.PendingAmount),
                     BorrowPending = g.Where(b => b.Type == "Borrow").Sum(b => b.PendingAmount)
                 };
@@ -511,7 +512,7 @@ public class SplitService : ISplitService
     // ─────────────────────────────────────────────
     //  Reminder text
     // ─────────────────────────────────────────────
-    public async Task<string> BuildReminderTextAsync(int contactId)
+    public async Task<string> BuildReminderTextAsync(int contactId, string? myUpiId = null)
     {
         var contact = await _contactRepo.GetByIdAsync(contactId);
 
@@ -534,7 +535,73 @@ public class SplitService : ISplitService
         var greeting = string.IsNullOrWhiteSpace(contact?.Name) ? "Hi" : $"Hi {contact!.Name}";
         var what = titles.Count == 0 ? string.Empty : $" ({string.Join(", ", titles.Take(3))})";
 
-        return $"{greeting}, ₹{SplitCalculator.Money(amount)} pending hai{what}. Jab ho sake bhej dena 🙏";
+        var text = $"{greeting}, ₹{SplitCalculator.Money(amount)} pending hai{what}. Jab ho sake bhej dena 🙏";
+
+        if (!string.IsNullOrWhiteSpace(myUpiId))
+            text += $"\nUPI: {myUpiId.Trim()}";
+
+        return text;
+    }
+
+    // ─────────────────────────────────────────────
+    //  Receipt + UPI
+    // ─────────────────────────────────────────────
+    public async Task<string> BuildReceiptAsync(int splitId)
+    {
+        var split = await _splitRepo.GetByIdAsync(splitId);
+        if (split is null || split.IsDeleted) return string.Empty;
+
+        var shares = (await _shareRepo.FindAsync(s => s.SplitExpenseId == splitId)).ToList();
+        var contacts = (await _contactRepo.FindAsync(c => c.Id > 0)).ToDictionary(c => c.Id, c => c.Name);
+
+        string NameOf(int id) => contacts.TryGetValue(id, out var n) ? n : "Unknown";
+
+        // Shared with other people, so "You" becomes "Me".
+        var payer = split.PaidByContactId is int pid ? NameOf(pid) : "Me";
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"🧾 {split.Title}");
+        sb.AppendLine($"{split.SplitDate:dd MMM yyyy} • {payer} paid ₹{SplitCalculator.Money(split.TotalAmount)}");
+
+        if (split.GroupId is int gid)
+        {
+            var group = await _groupRepo.GetByIdAsync(gid);
+            if (group is not null) sb.AppendLine($"Group: {group.Name}");
+        }
+
+        sb.AppendLine();
+        if (split.MyShareAmount > 0)
+            sb.AppendLine($"Me: ₹{SplitCalculator.Money(split.MyShareAmount)}");
+        foreach (var s in shares)
+            sb.AppendLine($"{NameOf(s.ContactId)}: ₹{SplitCalculator.Money(s.ShareAmount)}");
+
+        sb.AppendLine();
+        sb.Append("Split with MoneySpend");
+        return sb.ToString();
+    }
+
+    public async Task<string?> GetFriendUpiAsync(int contactId)
+    {
+        var contact = await _contactRepo.GetByIdAsync(contactId);
+        return string.IsNullOrWhiteSpace(contact?.UpiId) ? null : contact!.UpiId;
+    }
+
+    public async Task<SplitResult> SetFriendUpiAsync(int contactId, string upiId)
+    {
+        upiId = upiId?.Trim() ?? string.Empty;
+
+        if (!SplitCalculator.IsValidUpi(upiId))
+            return Fail("Enter a valid UPI ID like name@upi.");
+
+        var contact = await _contactRepo.GetByIdAsync(contactId);
+        if (contact is null) return Fail("Friend not found.");
+
+        contact.UpiId = upiId;
+        contact.UpdatedAt = DateTime.UtcNow;
+        await _contactRepo.UpdateAsync(contact);
+
+        DataChangeNotifier.Publish<Contact>();
+        return new SplitResult(true);
     }
 
     // ─────────────────────────────────────────────

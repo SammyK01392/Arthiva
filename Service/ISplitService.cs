@@ -59,6 +59,7 @@ public class FriendBalance
     public string? Mobile { get; init; }
     public decimal LendPending { get; init; }    // they owe you
     public decimal BorrowPending { get; init; }  // you owe them
+    public string? UpiId { get; init; }
 
     public decimal Net => LendPending - BorrowPending;
     public decimal AbsNet => Math.Abs(Net);
@@ -73,6 +74,13 @@ public class FriendBalance
 
 public static class SplitCalculator
 {
+    /// <summary>name@bank style UPI id.</summary>
+    public static bool IsValidUpi(string? upiId)
+        => !string.IsNullOrWhiteSpace(upiId)
+           && upiId.Trim().Length <= 100
+           && System.Text.RegularExpressions.Regex.IsMatch(
+               upiId.Trim(), @"^[a-zA-Z0-9.\-_]{2,}@[a-zA-Z][a-zA-Z0-9]{1,}$");
+
     /// <summary>Parses user input with the device culture first, then invariant. Returns 0 on failure.</summary>
     public static decimal ParseAmount(string? text)
     {
@@ -161,6 +169,14 @@ public interface ISplitService
     /// </summary>
     Task<SplitResult> PayAsync(int contactId, decimal amount, int accountId, int? groupId = null);
 
-    /// <summary>Ready-to-send reminder text (WhatsApp / share sheet).</summary>
-    Task<string> BuildReminderTextAsync(int contactId);
+    /// <summary>Ready-to-send reminder text (WhatsApp / share sheet). myUpiId is appended when given.</summary>
+    Task<string> BuildReminderTextAsync(int contactId, string? myUpiId = null);
+
+    /// <summary>Shareable text receipt for one split (who paid, each person's share).</summary>
+    Task<string> BuildReceiptAsync(int splitId);
+
+    Task<string?> GetFriendUpiAsync(int contactId);
+
+    /// <summary>Saves a friend's UPI id on their contact (validated).</summary>
+    Task<SplitResult> SetFriendUpiAsync(int contactId, string upiId);
 }

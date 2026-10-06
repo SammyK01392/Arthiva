@@ -158,6 +158,23 @@
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="services:SplitListItem">
                                 <SwipeView>
+                                    <SwipeView.LeftItems>
+                                        <SwipeItems Mode="Reveal" SwipeBehaviorOnInvoked="Close">
+                                            <SwipeItemView>
+                                                <Grid WidthRequest="88" BackgroundColor="#FF6B00">
+                                                    <Grid.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.ShareReceiptCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Grid.GestureRecognizers>
+                                                    <Label Text="Share" FontSize="12" FontAttributes="Bold"
+                                                           TextColor="White"
+                                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                                </Grid>
+                                            </SwipeItemView>
+                                        </SwipeItems>
+                                    </SwipeView.LeftItems>
+
                                     <SwipeView.RightItems>
                                         <SwipeItems Mode="Reveal" SwipeBehaviorOnInvoked="Close">
                                             <SwipeItemView>
@@ -218,6 +235,13 @@
                     <Label Text="No expenses yet. Tap “Add expense” below." FontSize="12.5"
                            IsVisible="{Binding ShowNoExpenses}"
                            TextColor="{StaticResource TextSecondary}" />
+
+                    <Button Text="Share group summary"
+                            Command="{Binding ShareSummaryCommand}"
+                            BackgroundColor="{StaticResource PrimaryTint}"
+                            TextColor="{StaticResource Primary}"
+                            FontAttributes="Bold"
+                            CornerRadius="12" HeightRequest="44" Margin="0,14,0,0" />
 
                     <!-- ═══ Manage ═══ -->
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,14,0,0">

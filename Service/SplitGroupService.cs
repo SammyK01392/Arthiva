@@ -162,7 +162,7 @@ public class SplitGroupService : ISplitGroupService
         var groups = (await _groupRepo.FindAsync(g => !g.IsDeleted)).OrderBy(g => g.Name).ToList();
         if (groups.Count == 0) return new List<GroupListItem>();
 
-        var members = (await _memberRepo.FindAsync(m => m.GroupId > 0)).ToList();
+        var members = (await _memberRepo.FindAsync(m => m.GroupId > 0)).Where(m => !m.IsRemoved).ToList();
         var ledger = await LoadLedgerAsync();
 
         return groups.Select(g =>
@@ -188,6 +188,7 @@ public class SplitGroupService : ISplitGroupService
     public async Task<List<Contact>> GetMembersAsync(int groupId)
     {
         var ids = (await _memberRepo.FindAsync(m => m.GroupId == groupId))
+            .Where(m => !m.IsRemoved)
             .Select(m => m.ContactId)
             .ToHashSet();
 
@@ -201,6 +202,7 @@ public class SplitGroupService : ISplitGroupService
         if (group is null || group.IsDeleted) return null;
 
         var memberIds = (await _memberRepo.FindAsync(m => m.GroupId == groupId))
+            .Where(m => !m.IsRemoved)
             .Select(m => m.ContactId)
             .Distinct()
             .ToList();
@@ -293,12 +295,8 @@ public class SplitGroupService : ISplitGroupService
             await _groupRepo.AddAsync(group);
         }
 
-        var current = (await _memberRepo.FindAsync(m => m.GroupId == group.Id))
-            .Select(m => m.ContactId)
-            .ToHashSet();
-
-        foreach (var id in ids.Where(id => !current.Contains(id)))
-            await _memberRepo.AddAsync(new SplitGroupMember { GroupId = group.Id, ContactId = id });
+        foreach (var id in ids)
+            await EnsureMemberAsync(group.Id, id);
 
         DataChangeNotifier.Publish<SplitGroup>();
         return new GroupSaveResult(true, group.Id);
@@ -306,16 +304,104 @@ public class SplitGroupService : ISplitGroupService
 
     public async Task<SplitResult> AddMemberAsync(int groupId, int contactId)
     {
-        var exists = (await _memberRepo.FindAsync(m => m.GroupId == groupId))
-            .Any(m => m.ContactId == contactId);
-
-        if (!exists)
-        {
-            await _memberRepo.AddAsync(new SplitGroupMember { GroupId = groupId, ContactId = contactId });
+        if (await EnsureMemberAsync(groupId, contactId))
             DataChangeNotifier.Publish<SplitGroup>();
-        }
 
         return new SplitResult(true);
+    }
+
+    /// <summary>Adds the member, or re-activates a previously removed one. True if anything changed.</summary>
+    private async Task<bool> EnsureMemberAsync(int groupId, int contactId)
+    {
+        var row = (await _memberRepo.FindAsync(m => m.GroupId == groupId))
+            .FirstOrDefault(m => m.ContactId == contactId);
+
+        if (row is null)
+        {
+            await _memberRepo.AddAsync(new SplitGroupMember { GroupId = groupId, ContactId = contactId });
+            return true;
+        }
+
+        if (row.IsRemoved)
+        {
+            row.IsRemoved = false;
+            await _memberRepo.UpdateAsync(row);
+            return true;
+        }
+
+        return false;
+    }
+
+    public async Task<SplitResult> RemoveMemberAsync(int groupId, int contactId)
+    {
+        var member = (await _memberRepo.FindAsync(m => m.GroupId == groupId))
+            .FirstOrDefault(m => m.ContactId == contactId && !m.IsRemoved);
+        if (member is null) return new SplitResult(false, "Member not found.");
+
+        var splits = (await _splitRepo.FindAsync(s => !s.IsDeleted))
+            .Where(s => s.GroupId == groupId)
+            .ToList();
+        var splitIds = splits.Select(s => s.Id).ToHashSet();
+
+        var paidSomething = splits.Any(s => s.PaidByContactId == contactId);
+        var hasShare = (await _shareRepo.FindAsync(s => s.SplitExpenseId > 0))
+            .Any(s => splitIds.Contains(s.SplitExpenseId) && s.ContactId == contactId);
+        var hasSettlement = (await _settleRepo.FindAsync(s => !s.IsDeleted))
+            .Any(s => s.GroupId == groupId && (s.FromContactId == contactId || s.ToContactId == contactId));
+
+        if (paidSomething || hasShare || hasSettlement)
+            return new SplitResult(false, "This person has expenses or payments in the group, so they can't be removed.");
+
+        member.IsRemoved = true;
+        await _memberRepo.UpdateAsync(member);
+
+        DataChangeNotifier.Publish<SplitGroup>();
+        return new SplitResult(true);
+    }
+
+    public async Task<string> BuildSummaryAsync(int groupId)
+    {
+        var detail = await GetDetailAsync(groupId);
+        if (detail is null) return string.Empty;
+
+        // Shared with other people, so "You" becomes "Me".
+        static string Shared(string name) => name == "You" ? "Me" : name;
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"📒 {detail.Name}");
+        sb.AppendLine();
+
+        sb.AppendLine("Balances");
+        var open = detail.Balances.Where(b => b.Net != 0).ToList();
+        if (open.Count == 0)
+            sb.AppendLine("• Everyone is settled up");
+        foreach (var b in open)
+            sb.AppendLine($"• {Shared(b.Name)} {b.StatusText} ₹{SplitCalculator.Money(b.AbsNet)}");
+
+        if (detail.Transfers.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("Settle up");
+            foreach (var t in detail.Transfers)
+                sb.AppendLine($"• {Shared(t.FromName)} → {Shared(t.ToName)}: ₹{SplitCalculator.Money(t.Amount)}");
+        }
+
+        if (detail.Expenses.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine($"Expenses ({detail.Expenses.Count})");
+            foreach (var e in detail.Expenses.Take(10))
+            {
+                var paidBy = e.SubtitleText.Split(" • ")[0].Replace("You paid", "Me paid");
+                sb.AppendLine($"• {e.Title} — ₹{SplitCalculator.Money(e.Total)} ({paidBy})");
+            }
+            if (detail.Expenses.Count > 10)
+                sb.AppendLine($"…and {detail.Expenses.Count - 10} more");
+        }
+
+        sb.AppendLine();
+        sb.Append("Tracked with MoneySpend");
+        return sb.ToString();
     }
 
     public async Task<SplitResult> DeleteGroupAsync(int groupId)

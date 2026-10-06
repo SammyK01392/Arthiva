@@ -20,6 +20,7 @@ public partial class SplitListViewModel : BaseViewModel
     [ObservableProperty] private string selectedTab = "Friends"; // Friends / Groups / History
     [ObservableProperty] private decimal totalOwedToMe;
     [ObservableProperty] private decimal totalIOwe;
+    [ObservableProperty] private string myUpiText = string.Empty;
 
     public bool IsFriendsTab => SelectedTab == "Friends";
     public bool IsGroupsTab => SelectedTab == "Groups";
@@ -39,6 +40,7 @@ public partial class SplitListViewModel : BaseViewModel
         _groupService = groupService;
         _accountService = accountService;
         Title = "Splits";
+        RefreshMyUpiText();
 
         // Any DB change (split added/deleted, settle, group change) reloads the lists.
         _autoRefresh = new AutoRefresh(ReloadAsync);
@@ -93,6 +95,32 @@ public partial class SplitListViewModel : BaseViewModel
     [RelayCommand]
     private void SetTab(string tab) => SelectedTab = tab;
 
+    private void RefreshMyUpiText()
+    {
+        var upi = SplitPrompts.GetMyUpi();
+        MyUpiText = string.IsNullOrEmpty(upi)
+            ? "Add your UPI ID for payment reminders"
+            : $"My UPI: {upi} (tap to change)";
+    }
+
+    [RelayCommand]
+    private async Task EditMyUpiAsync()
+    {
+        await SplitPrompts.AskMyUpiAsync();
+        RefreshMyUpiText();
+    }
+
+    [RelayCommand]
+    private async Task ShareReceiptAsync(SplitListItem item)
+    {
+        if (item is null) return;
+
+        var text = await _splitService.BuildReceiptAsync(item.Id);
+        if (string.IsNullOrWhiteSpace(text)) return;
+
+        await Share.Default.RequestAsync(new ShareTextRequest { Text = text, Title = item.Title });
+    }
+
     [RelayCommand]
     private static async Task GoToAddAsync()
         => await Shell.Current.GoToAsync(
@@ -142,7 +170,16 @@ public partial class SplitListViewModel : BaseViewModel
     {
         if (friend is null) return;
 
-        var text = await _splitService.BuildReminderTextAsync(friend.ContactId);
+        // Ask for my own UPI id once; it is appended to reminders so friends can pay directly.
+        var myUpi = SplitPrompts.GetMyUpi();
+        if (string.IsNullOrEmpty(myUpi) && !Preferences.Default.Get(SplitPrompts.MyUpiAskedKey, false))
+        {
+            myUpi = await SplitPrompts.AskMyUpiAsync() ?? string.Empty;
+            RefreshMyUpiText();
+        }
+
+        var text = await _splitService.BuildReminderTextAsync(
+            friend.ContactId, string.IsNullOrEmpty(myUpi) ? null : myUpi);
         var phone = NormalizePhone(friend.Mobile);
 
         try
@@ -216,6 +253,10 @@ public partial class SplitListViewModel : BaseViewModel
             $"You owe: ₹{friend.BorrowPending:N2}. How much are you paying?",
             friend.BorrowPending);
         if (amount is null) return;
+
+        // UPI app or "already paid" — only continues if the payment really happened.
+        if (!await SplitPrompts.ConfirmPaymentAsync(_splitService, friend.ContactId, friend.Name, amount.Value))
+            return;
 
         var accountId = await SplitPrompts.PickAccountAsync(_accountService, "Paid from which account?");
         if (accountId is null) return;

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage
     x:Class="MoneySpend.Views.GroupEditPage"
+    x:Name="PageRoot"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:MoneySpend.ViewModels"
@@ -116,10 +117,20 @@
                                            VerticalOptions="Center"
                                            TextColor="{StaticResource TextPrimary}" />
 
-                                    <Label Grid.Column="2" Text="member" FontSize="11"
-                                           IsVisible="{Binding IsLocked}"
-                                           VerticalOptions="Center"
-                                           TextColor="{StaticResource TextTertiary}" />
+                                    <Border Grid.Column="2" Padding="10,5" StrokeThickness="1"
+                                            Stroke="{StaticResource TextTertiary}"
+                                            BackgroundColor="Transparent"
+                                            StrokeShape="RoundRectangle 8"
+                                            IsVisible="{Binding IsLocked}"
+                                            VerticalOptions="Center">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.RemoveMemberCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="Remove" FontSize="11" FontAttributes="Bold"
+                                               TextColor="{StaticResource TextSecondary}" />
+                                    </Border>
                                 </Grid>
                             </Border>
                         </DataTemplate>

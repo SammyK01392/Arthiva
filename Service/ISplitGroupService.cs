@@ -87,6 +87,12 @@ public interface ISplitGroupService
 
     Task<SplitResult> AddMemberAsync(int groupId, int contactId);
 
+    /// <summary>Only allowed when the person has no bills, shares or payments in this group.</summary>
+    Task<SplitResult> RemoveMemberAsync(int groupId, int contactId);
+
+    /// <summary>Shareable text: balances, fewest-payments plan, recent expenses.</summary>
+    Task<string> BuildSummaryAsync(int groupId);
+
     /// <summary>Blocked while the group still has expenses (delete those first so account balances are restored properly).</summary>
     Task<SplitResult> DeleteGroupAsync(int groupId);
 

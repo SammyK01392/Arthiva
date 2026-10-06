@@ -153,6 +153,31 @@ public partial class GroupEditViewModel : BaseViewModel
     //  Save
     // ─────────────────────────────────────────────
     [RelayCommand]
+    private async Task RemoveMemberAsync(MemberRow row)
+    {
+        if (row is null || !IsEditMode) return;
+
+        var confirm = await Shell.Current.DisplayAlert(
+            "Remove member?", $"Remove {row.Name} from this group?", "Remove", "Cancel");
+        if (!confirm) return;
+
+        SplitResult? result = null;
+        await ExecuteAsync(async () => result = await _groupService.RemoveMemberAsync(GroupId, row.ContactId));
+
+        if (result is null) return;
+
+        if (result.Success)
+        {
+            _allRows.Remove(row);
+            ApplySearch();
+        }
+        else
+        {
+            await SplitPrompts.AlertAsync(result.ErrorMessage ?? "Could not remove the member.");
+        }
+    }
+
+    [RelayCommand]
     private async Task SaveAsync()
     {
         if (IsBusy) return;

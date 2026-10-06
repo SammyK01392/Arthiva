@@ -150,6 +150,19 @@
                                     IsVisible="{Binding IsFriendsTab}"
                                     SelectionMode="None"
                                     VerticalScrollBarVisibility="Never">
+                        <CollectionView.Header>
+                            <Border Margin="16,0,16,10" Padding="12,8" StrokeThickness="0"
+                                    BackgroundColor="{StaticResource PrimaryTint}"
+                                    StrokeShape="RoundRectangle 12">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding EditMyUpiCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding MyUpiText}" FontSize="12" FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       TextColor="{StaticResource Primary}" />
+                            </Border>
+                        </CollectionView.Header>
+
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="services:FriendBalance">
                                 <Border Margin="16,0,16,8" Padding="12"
@@ -256,6 +269,23 @@
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="services:SplitListItem">
                                 <SwipeView Margin="16,0,16,8">
+
+                                    <SwipeView.LeftItems>
+                                        <SwipeItems Mode="Reveal" SwipeBehaviorOnInvoked="Close">
+                                            <SwipeItemView>
+                                                <Grid WidthRequest="88" BackgroundColor="#FF6B00">
+                                                    <Grid.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.ShareReceiptCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Grid.GestureRecognizers>
+                                                    <Label Text="Share" FontSize="12" FontAttributes="Bold"
+                                                           TextColor="White"
+                                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                                </Grid>
+                                            </SwipeItemView>
+                                        </SwipeItems>
+                                    </SwipeView.LeftItems>
 
                                     <SwipeView.RightItems>
                                         <SwipeItems Mode="Reveal" SwipeBehaviorOnInvoked="Close">

@@ -12,4 +12,7 @@ public class SplitGroupMember
 
     [Indexed]
     public int ContactId { get; set; }
+
+    /// <summary>Soft-removed from the group (only allowed when they have no history in it).</summary>
+    public bool IsRemoved { get; set; } = false;
 }
