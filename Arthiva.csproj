@@ -42,7 +42,7 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 	</PropertyGroup>
@@ -264,10 +264,16 @@
 	  <None Update="Views\EmiListPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </None>
+	  <None Update="Views\FriendsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </None>
 	  <None Update="Views\MorePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </None>
 	  <None Update="Views\SavingGoalListPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </None>
+	  <None Update="Views\SharedRequestListPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </None>
 	  <None Update="Views\TransactionListPage.xaml">
@@ -276,6 +282,11 @@
 	  <None Update="Views\UserProfilePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </None>
+	</ItemGroup>
+
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<PackageReference Include="Xamarin.Firebase.Messaging" Version="125.1.3" />
+		<PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" Version="1.9.0" />
 	</ItemGroup>
 
 </Project>
