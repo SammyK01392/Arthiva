@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MoneySpend.ViewModels"
+             x:Class="MoneySpend.Views.FriendsPage"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <Label Text="{Binding ErrorMessage}" TextColor="Red" />
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+            <Label Text="Log in with your MoneySpend cloud account first (Backup &amp; Restore) to connect with friends."
+                   IsVisible="{Binding NotLoggedIn}" />
+
+            <VerticalStackLayout Spacing="16" IsVisible="{Binding IsLoggedIn}">
+
+                <!-- My code -->
+                <Border Padding="14" StrokeThickness="1"
+                        Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Your friend code" FontAttributes="Bold" />
+                        <Label Text="{Binding MyCode}" FontSize="28" FontAttributes="Bold" />
+                        <Label Text="Share it with people you want to lend, borrow or split with." FontSize="12" />
+                        <HorizontalStackLayout Spacing="8">
+                            <Button Text="Copy" Command="{Binding CopyCodeCommand}" />
+                            <Button Text="Share" Command="{Binding ShareCodeCommand}" />
+                            <Button Text="New code" Command="{Binding NewCodeCommand}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Add a friend -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Connect with a friend" FontAttributes="Bold" />
+                    <Entry Placeholder="Their friend code (ABCD-EFGH)"
+                           Text="{Binding InviteCode}"
+                           Keyboard="Plain" />
+                    <Button Text="Connect" Command="{Binding ConnectCommand}" />
+                </VerticalStackLayout>
+
+                <Button Text="Open shared requests" Command="{Binding OpenRequestsCommand}" />
+
+                <!-- Connections -->
+                <Label Text="Connections" FontAttributes="Bold" />
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Connections}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="12" StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding DisplayName}" FontAttributes="Bold" />
+                                    <Label Text="{Binding StatusText}" FontSize="12" />
+                                    <Label Text="{Binding LinkText}" FontSize="12" IsVisible="{Binding IsActive}" />
+
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Button Text="Accept" IsVisible="{Binding IsIncoming}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FriendsViewModel}}, Path=AcceptCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <Button Text="Decline" IsVisible="{Binding IsIncoming}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FriendsViewModel}}, Path=RemoveCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <Button Text="Cancel request" IsVisible="{Binding IsOutgoing}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FriendsViewModel}}, Path=RemoveCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <Button Text="Link contact" IsVisible="{Binding NeedsLink}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FriendsViewModel}}, Path=LinkContactCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <Button Text="Disconnect" IsVisible="{Binding IsActive}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:FriendsViewModel}}, Path=RemoveCommand}"
+                                                CommandParameter="{Binding .}" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

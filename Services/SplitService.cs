@@ -242,7 +242,7 @@ public class SplitService : ISplitService
 
         DataChangeNotifier.Publish<SplitExpense>();
         DataChangeNotifier.Publish<BorrowLend>();
-        return new SplitResult(true);
+        return new SplitResult(true, null, split.Id);
     }
 
     // ─────────────────────────────────────────────

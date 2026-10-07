@@ -37,7 +37,7 @@ public partial class AddSplitViewModel : BaseViewModel
     private readonly ISplitGroupService _groupService;
     private readonly IAccountService _accountService;
     private readonly ICategoryService _categoryService;
-
+    private readonly ISharedRequestService _sharedRequests;
     private readonly List<ParticipantRow> _allRows = new();
     private readonly List<(int Id, string Name)> _allContacts = new();
     private bool _loaded;
@@ -468,7 +468,11 @@ public partial class AddSplitViewModel : BaseViewModel
         if (result is null) return;
 
         if (result.Success)
+        {
+            try { await _sharedRequests.SendSplitRequestsAsync(result.SplitId); }
+            catch (Exception ex) { CrashLogger.Log(ex, "AddSplit.SendShared"); }
             await Shell.Current.GoToAsync("..");
+        }
         else
             await SplitPrompts.AlertAsync(result.ErrorMessage ?? "Could not save the split.");
     }

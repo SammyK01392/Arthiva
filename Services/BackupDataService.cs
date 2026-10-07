@@ -20,7 +20,7 @@ public interface IBackupDataService
 
 public class BackupDataService : IBackupDataService
 {
-    public const int SchemaVersion = 2;
+    public const int SchemaVersion = 3;
     private readonly MoneySpendDatabase _db;
 
     // Derived/volatile data excluded from the change-detection hash so that
@@ -73,6 +73,7 @@ public class BackupDataService : IBackupDataService
         Spec<SplitExpense>("splitExpenses"),
         Spec<SplitShare>("splitShares"),
         Spec<GroupSettlement>("groupSettlements"),
+        Spec<SharedRequestLink>("sharedRequestLinks"),
     };
 
     public BackupDataService(MoneySpendDatabase db) => _db = db;

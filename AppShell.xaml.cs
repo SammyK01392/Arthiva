@@ -253,5 +253,8 @@ public partial class AppShell : Shell
         // RegisterRoutes()
         Routing.RegisterRoute(nameof(DriveBackupPage), typeof(DriveBackupPage));
 
+        Routing.RegisterRoute(nameof(FriendsPage), typeof(FriendsPage));
+        Routing.RegisterRoute(nameof(SharedRequestListPage), typeof(SharedRequestListPage));
+
     }
 }

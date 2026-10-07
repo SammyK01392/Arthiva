@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1084733777900",
+    "firebase_url": "https://arthiva-d7fb9-default-rtdb.firebaseio.com",
+    "project_id": "arthiva-d7fb9",
+    "storage_bucket": "arthiva-d7fb9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1084733777900:android:3d25567cb0c63d345fc2c9",
+        "android_client_info": {
+          "package_name": "in.arthiva.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGLzFZuW1i8vuGbnDCmnSMvNuG54tnc-c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

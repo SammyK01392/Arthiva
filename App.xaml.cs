@@ -39,24 +39,35 @@ public partial class App : Application
     {
         try
         {
+            // 1. Database must be fully ready first
             await _database.InitializeAsync();
 
-            var userProfileService = _serviceProvider.GetRequiredService<IUserProfileService>();
+            // 2. NOW start shared/Firebase sync coordinator
+            _ = Task.Run(() =>
+                _serviceProvider
+                    .GetService<ISharedSyncCoordinator>()
+                    ?.StartAsync());
+
+            // 3. Continue normal startup/routing
+            var userProfileService =
+                _serviceProvider.GetRequiredService<IUserProfileService>();
+
             var hasProfile = await userProfileService.ProfileExistsAsync();
 
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
                 if (!hasProfile)
                 {
-                    // First install / no profile yet: onboarding gate.
-                    var firstTimeSetupPage = _serviceProvider.GetRequiredService<FirstTimeSetupPage>();
+                    var firstTimeSetupPage =
+                        _serviceProvider.GetRequiredService<FirstTimeSetupPage>();
+
                     MainPage = new NavigationPage(firstTimeSetupPage);
                 }
                 else
                 {
-                    // Existing user: PIN lock gate. AppShell/Dashboard are
-                    // only reachable after AppLockPage verifies the PIN.
-                    var appLockPage = _serviceProvider.GetRequiredService<AppLockPage>();
+                    var appLockPage =
+                        _serviceProvider.GetRequiredService<AppLockPage>();
+
                     MainPage = new NavigationPage(appLockPage);
                 }
             });
@@ -65,8 +76,6 @@ public partial class App : Application
         {
             CrashLogger.Log(ex, "App.InitializeAndRouteAsync");
 
-            // If startup routing itself fails, fail safe to the lock/setup
-            // decision again rather than ever falling through to Dashboard.
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
                 MainPage = new ContentPage

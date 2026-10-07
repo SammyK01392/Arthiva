@@ -44,6 +44,11 @@ public class Contact
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+    /// <summary>Firebase uid of the connected app user this contact maps to. A hint only –
+    /// "connected" is decided by the live /userConnections record, never by this field alone.</summary>
+    [Indexed, MaxLength(128)]
+    public string? LinkedUid { get; set; }
+
     // ⬇️ NAYA: computed property (not persisted)
     /// <summary>First letter of name for avatar fallback.</summary>
     [Ignore]

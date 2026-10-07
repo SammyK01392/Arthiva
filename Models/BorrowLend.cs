@@ -44,6 +44,10 @@ public class BorrowLend
     [MaxLength(50)]
     public string? PaymentMethod { get; set; }
 
+    /// <summary>Same id on both users' records for one shared request. Idempotency key for apply.</summary>
+    [Indexed, MaxLength(40)]
+    public string? SharedRequestId { get; set; }
+
     /// <summary>
     /// Reminder notification enabled
     /// </summary>

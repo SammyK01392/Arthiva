@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MoneySpend.ViewModels"
+             x:Class="MoneySpend.Views.SharedRequestListPage"
+             Title="{Binding Title}">
+
+    <RefreshView Command="{Binding RefreshCommand}"
+                 IsRefreshing="{Binding IsRefreshing}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="14">
+
+                <Label Text="{Binding ErrorMessage}" TextColor="Red" />
+
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+                <Label Text="Nothing here yet. Requests you send to or receive from connected friends appear here."
+                       IsVisible="{Binding IsEmpty}" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+                <!-- Needs your response -->
+                <Label Text="Needs your response" FontAttributes="Bold" FontSize="16"
+                       IsVisible="{Binding HasIncoming}" />
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Incoming}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="12" StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding Headline}" FontAttributes="Bold" />
+                                    <Label Text="{Binding Title}" />
+                                    <Label Text="{Binding DateText}" FontSize="12" />
+                                    <HorizontalStackLayout Spacing="10">
+                                        <Button Text="Accept"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SharedRequestListViewModel}}, Path=AcceptCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <Button Text="Reject"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SharedRequestListViewModel}}, Path=RejectCommand}"
+                                                CommandParameter="{Binding .}" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- Waiting for them -->
+                <Label Text="Waiting for the other person" FontAttributes="Bold" FontSize="16"
+                       IsVisible="{Binding HasOutgoing}" />
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Outgoing}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="12" StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding Headline}" FontAttributes="Bold" />
+                                    <Label Text="{Binding StatusText}" FontSize="12" />
+                                    <Button Text="Withdraw request" HorizontalOptions="Start"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SharedRequestListViewModel}}, Path=CancelRequestCommand}"
+                                            CommandParameter="{Binding .}" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- History -->
+                <Label Text="History" FontAttributes="Bold" FontSize="16"
+                       IsVisible="{Binding HasHistory}" />
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding History}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="12" StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#EEEEEE, Dark=#333333}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="{Binding Headline}" />
+                                    <Label Text="{Binding StatusText}" FontSize="12" FontAttributes="Bold" />
+                                    <Label Text="{Binding DateText}" FontSize="12" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

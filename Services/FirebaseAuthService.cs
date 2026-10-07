@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using MoneySpend.Data;
@@ -16,22 +15,29 @@ public class FirebaseAuthService : IFirebaseAuthService
     private const string RefreshUrl =
         $"https://securetoken.googleapis.com/v1/token?key={FirebaseConstants.WebApiKey}";
     private const string ResetPasswordUrl =
-    $"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FirebaseConstants.WebApiKey}";
+        $"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FirebaseConstants.WebApiKey}";
 
-    // SecureStorage keys
+    // SecureStorage keys (unchanged)
     private const string KeyIdToken = "firebase_id_token";
     private const string KeyRefreshToken = "firebase_refresh_token";
     private const string KeyUid = "firebase_uid";
     private const string KeyTokenExpiresAt = "firebase_token_expires_at";
 
-    private readonly HttpClient _http = new();
+    private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(30) };
+
+    // CHANGED: the realtime listener, the (later) outbox worker and normal UI
+    // calls will all ask for a token at the same time. Without this lock they
+    // would refresh concurrently and race on SecureStorage.
+    private readonly SemaphoreSlim _tokenLock = new(1, 1);
+
+    public event EventHandler? SignedIn;
+    public event EventHandler? SignedOut;
 
     public async Task<FirebaseAuthResult> SignUpAsync(string email, string password)
         => await PostAuthAsync(SignUpUrl, email, password);
 
     public async Task<FirebaseAuthResult> SignInAsync(string email, string password)
         => await PostAuthAsync(SignInUrl, email, password);
-
 
     public async Task SendPasswordResetAsync(string email)
     {
@@ -47,6 +53,7 @@ public class FirebaseAuthService : IFirebaseAuthService
             throw new InvalidOperationException(MapFirebaseError(errorCode));
         }
     }
+
     private async Task<FirebaseAuthResult> PostAuthAsync(string url, string email, string password)
     {
         var payload = new { email, password, returnSecureToken = true };
@@ -64,7 +71,11 @@ public class FirebaseAuthService : IFirebaseAuthService
         var result = JsonSerializer.Deserialize<FirebaseAuthResult>(body)
             ?? throw new InvalidOperationException("Unexpected response from server.");
 
-        await SaveSessionAsync(result);
+        await _tokenLock.WaitAsync();
+        try { await SaveSessionAsync(result); }
+        finally { _tokenLock.Release(); }
+
+        SignedIn?.Invoke(this, EventArgs.Empty);
         return result;
     }
 
@@ -105,46 +116,66 @@ public class FirebaseAuthService : IFirebaseAuthService
         await SecureStorage.SetAsync(KeyTokenExpiresAt, expiresAt.ToUnixTimeSeconds().ToString());
     }
 
-    public async Task<string?> GetValidIdTokenAsync()
+    public async Task<string?> GetValidIdTokenAsync(bool forceRefresh = false)
     {
-        var idToken = await SecureStorage.GetAsync(KeyIdToken);
-        var refreshToken = await SecureStorage.GetAsync(KeyRefreshToken);
-        var expiresAtStr = await SecureStorage.GetAsync(KeyTokenExpiresAt);
-
-        if (string.IsNullOrEmpty(idToken) || string.IsNullOrEmpty(refreshToken))
-            return null;
-
-        var expiresAt = long.TryParse(expiresAtStr, out var e)
-            ? DateTimeOffset.FromUnixTimeSeconds(e)
-            : DateTimeOffset.MinValue;
-
-        if (DateTimeOffset.UtcNow < expiresAt)
-            return idToken; // still valid
-
-        // Expired — refresh it
-        var payload = new { grant_type = "refresh_token", refresh_token = refreshToken };
-        var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-        var response = await _http.PostAsync(RefreshUrl, content);
-
-        if (!response.IsSuccessStatusCode)
+        await _tokenLock.WaitAsync();
+        try
         {
-            await SignOutAsync();
-            return null;
+            // Read inside the lock: a caller that waited may find the token
+            // already refreshed by whoever held the lock before it.
+            var idToken = await SecureStorage.GetAsync(KeyIdToken);
+            var refreshToken = await SecureStorage.GetAsync(KeyRefreshToken);
+            var expiresAtStr = await SecureStorage.GetAsync(KeyTokenExpiresAt);
+
+            if (string.IsNullOrEmpty(idToken) || string.IsNullOrEmpty(refreshToken))
+                return null;
+
+            var expiresAt = long.TryParse(expiresAtStr, out var e)
+                ? DateTimeOffset.FromUnixTimeSeconds(e)
+                : DateTimeOffset.MinValue;
+
+            if (!forceRefresh && DateTimeOffset.UtcNow < expiresAt)
+                return idToken; // still valid
+
+            // securetoken expects form-urlencoded (documented format).
+            var content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["grant_type"] = "refresh_token",
+                ["refresh_token"] = refreshToken
+            });
+            var response = await _http.PostAsync(RefreshUrl, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // CHANGED: only a definitive "this refresh token is dead"
+                // (4xx other than 429) signs the user out. A 5xx / rate limit
+                // is transient and must not log anyone out.
+                var code = response.StatusCode;
+                if (code is HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
+                {
+                    await SignOutAsync();
+                    return null;
+                }
+                throw new HttpRequestException($"Token refresh failed ({(int)code}).");
+            }
+
+            var body = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(body);
+            var newIdToken = doc.RootElement.GetProperty("id_token").GetString() ?? string.Empty;
+            var newRefreshToken = doc.RootElement.GetProperty("refresh_token").GetString() ?? string.Empty;
+            var expiresIn = doc.RootElement.GetProperty("expires_in").GetString() ?? "3600";
+
+            var newExpiresAt = DateTimeOffset.UtcNow.AddSeconds(int.Parse(expiresIn) - 60);
+            await SecureStorage.SetAsync(KeyIdToken, newIdToken);
+            await SecureStorage.SetAsync(KeyRefreshToken, newRefreshToken);
+            await SecureStorage.SetAsync(KeyTokenExpiresAt, newExpiresAt.ToUnixTimeSeconds().ToString());
+
+            return newIdToken;
         }
-
-        var body = await response.Content.ReadAsStringAsync();
-        using var doc = JsonDocument.Parse(body);
-        var newIdToken = doc.RootElement.GetProperty("id_token").GetString() ?? string.Empty;
-        var newRefreshToken = doc.RootElement.GetProperty("refresh_token").GetString() ?? string.Empty;
-        var expiresIn = doc.RootElement.GetProperty("expires_in").GetString() ?? "3600";
-
-        var newExpiresAt = DateTimeOffset.UtcNow.AddSeconds(int.Parse(expiresIn) - 60);
-        await SecureStorage.SetAsync(KeyIdToken, newIdToken);
-        await SecureStorage.SetAsync(KeyRefreshToken, newRefreshToken);
-        await SecureStorage.SetAsync(KeyTokenExpiresAt, newExpiresAt.ToUnixTimeSeconds().ToString());
-
-        return newIdToken;
+        finally { _tokenLock.Release(); }
     }
+
+    public Task<string?> GetUidAsync() => SecureStorage.GetAsync(KeyUid);
 
     public Task<bool> IsLoggedInAsync()
         => SecureStorage.GetAsync(KeyUid).ContinueWith(t => !string.IsNullOrEmpty(t.Result));
@@ -155,6 +186,7 @@ public class FirebaseAuthService : IFirebaseAuthService
         SecureStorage.Remove(KeyRefreshToken);
         SecureStorage.Remove(KeyUid);
         SecureStorage.Remove(KeyTokenExpiresAt);
+        SignedOut?.Invoke(this, EventArgs.Empty);
         return Task.CompletedTask;
     }
 }

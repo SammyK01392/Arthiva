@@ -24,7 +24,7 @@ public record SplitRequest(
     int? PaidByContactId = null,
     int? GroupId = null);
 
-public record SplitResult(bool Success, string? ErrorMessage = null);
+public record SplitResult(bool Success, string? ErrorMessage = null, int SplitId = 0);
 
 /// <summary>Result of quick-adding a friend from the Split screen.</summary>
 public record AddFriendResult(
@@ -241,4 +241,6 @@ public interface ISplitService
 
     /// <summary>Saves a friend's UPI id on their contact (validated).</summary>
     Task<SplitResult> SetFriendUpiAsync(int contactId, string upiId);
+
+
 }

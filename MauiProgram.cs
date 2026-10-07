@@ -3,6 +3,7 @@ using MoneySpend.Services;
 using MoneySpend.ViewModels;
 using MoneySpend.Views;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.LifecycleEvents;
 using Plugin.LocalNotification;
 
 using INotificationService = MoneySpend.Services.INotificationService;
@@ -29,6 +30,17 @@ public static class MauiProgram
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            })
+            // NEW: app foreground hook for the shared-Firebase device heartbeat.
+            .ConfigureLifecycleEvents(events =>
+            {
+#if ANDROID
+                events.AddAndroid(android => android.OnResume(activity =>
+                {
+                    _ = IPlatformApplication.Current?.Services
+                        .GetService<ISharedSyncCoordinator>()?.OnResumeAsync();
+                }));
+#endif
             });
 
 #if DEBUG
@@ -45,7 +57,13 @@ public static class MauiProgram
         // notification-badge state shown in the global title bar.
         builder.Services.AddSingleton<AppShell>();
         SwipeHint.Register();
-        return builder.Build();
+
+        // CHANGED: build, then construct the coordinator once so its auth/push
+        // event subscriptions are live, and kick off profile/friend-code/device registration.
+        var app = builder.Build();
+        var coordinator = app.Services.GetRequiredService<ISharedSyncCoordinator>();
+      
+        return app;
     }
 
     private static void RegisterDatabase(IServiceCollection services)
@@ -94,6 +112,17 @@ public static class MauiProgram
         services.AddSingleton<IGoogleAuthService, GoogleAuthService>();
         services.AddSingleton<IGoogleDriveService, GoogleDriveService>();
         services.AddSingleton<IDriveBackupService, DriveBackupService>();
+        services.AddSingleton<ISharedRequestService, SharedRequestService>();
+        // Shared (multi-user) Firebase – metadata only, no personal financial data.
+        services.AddSingleton<IFirebaseRtdbClient, FirebaseRtdbClient>();
+#if ANDROID
+        services.AddSingleton<IPushTokenProvider, AndroidPushTokenProvider>();
+#else
+        services.AddSingleton<IPushTokenProvider, NullPushTokenProvider>();
+#endif
+        services.AddSingleton<IDeviceRegistrationService, DeviceRegistrationService>();
+        services.AddSingleton<IFriendConnectionService, FriendConnectionService>();
+        services.AddSingleton<ISharedSyncCoordinator, SharedSyncCoordinator>();
     }
 
     private static void RegisterViewModels(IServiceCollection services)
@@ -143,10 +172,9 @@ public static class MauiProgram
         services.AddTransient<SplitListViewModel>();
         services.AddTransient<GroupEditViewModel>();
         services.AddTransient<GroupDetailViewModel>();
-
+        services.AddTransient<FriendsViewModel>();
+        services.AddTransient<SharedRequestListViewModel>();
         services.AddTransient<DriveBackupViewModel>();
-
-
     }
 
     private static void RegisterPages(IServiceCollection services)
@@ -208,7 +236,8 @@ public static class MauiProgram
         services.AddTransient<SplitListPage>();
         services.AddTransient<GroupEditPage>();
         services.AddTransient<GroupDetailPage>();
-
+        services.AddTransient<FriendsPage>();
+        services.AddTransient<SharedRequestListPage>();
         services.AddTransient<DriveBackupPage>();
     }
 }

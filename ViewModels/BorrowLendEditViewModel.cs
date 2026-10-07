@@ -15,6 +15,7 @@ public partial class BorrowLendEditViewModel : BaseViewModel
     private readonly IBorrowLendService _borrowLendService;
     private readonly IContactService _contactService;
     private readonly IAccountService _accountService;
+    private readonly ISharedRequestService _sharedRequests; // NEW
 
     [ObservableProperty]
     private string type = "Lend"; // Borrow / Lend
@@ -70,11 +71,13 @@ public partial class BorrowLendEditViewModel : BaseViewModel
     public BorrowLendEditViewModel(
         IBorrowLendService borrowLendService,
         IContactService contactService,
-        IAccountService accountService)
+        IAccountService accountService,
+        ISharedRequestService sharedRequests)
     {
         _borrowLendService = borrowLendService;
         _contactService = contactService;
         _accountService = accountService;
+        _sharedRequests = sharedRequests;
         Title = "New Borrow / Lend";
     }
 
@@ -122,6 +125,47 @@ public partial class BorrowLendEditViewModel : BaseViewModel
 
         await ExecuteAsync(async () =>
         {
+            // NEW: a contact who is a connected MoneySpend user can receive this as a shared request.
+            var linkState = await _sharedRequests.GetLinkStateAsync(SelectedContact.Id);
+
+            if (linkState == ContactLinkState.Connected)
+            {
+                var sendRequest = await Shell.Current.DisplayAlert(
+                    $"Send to {SelectedContact.Name}?",
+                    $"{SelectedContact.Name} uses MoneySpend. Send this as a request so it is recorded for both of you once they accept? " +
+                    "Only the amount, date and type are shared, never your notes or account.",
+                    "Send request", "Save only for me");
+
+                if (sendRequest)
+                {
+                    var sent = await _sharedRequests.SendBorrowLendRequestAsync(
+                        SelectedContact.Id, Type, TotalAmount, GivenDate, SelectedAccount?.Id);
+
+                    if (!sent.Success)
+                    {
+                        ErrorMessage = sent.Message;
+                        return;
+                    }
+
+                    if (!string.IsNullOrEmpty(sent.Message))
+                        await Shell.Current.DisplayAlert("Shared request", sent.Message, "OK");
+
+                    await Shell.Current.GoToAsync("..");
+                    return;
+                }
+            }
+            else if (linkState == ContactLinkState.Unknown)
+            {
+                var saveLocally = await Shell.Current.DisplayAlert(
+                    "Can't reach the server",
+                    $"{SelectedContact.Name} is a MoneySpend user, but you're offline so the request can't be sent. " +
+                    "Save it only on this phone (it won't be shared)?",
+                    "Save only for me", "Cancel");
+
+                if (!saveLocally) return;
+            }
+
+            // Existing local-only flow (unchanged).
             var record = new BorrowLend
             {
                 ContactId = SelectedContact.Id,
