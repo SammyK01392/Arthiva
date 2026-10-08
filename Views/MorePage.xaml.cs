@@ -110,4 +110,9 @@ public partial class MorePage : ContentPage
         => await Shell.Current.GoToAsync(nameof(AboutDeveloperPage));
     private async void OnSplitsTapped(object? sender, TappedEventArgs e)
     => await Shell.Current.GoToAsync(nameof(SplitListPage));
+    private async void OnFriendsTapped(object? sender, TappedEventArgs e)
+    => await Shell.Current.GoToAsync(nameof(FriendsPage));
+
+    private async void OnSharedRequestsTapped(object? sender, TappedEventArgs e)
+        => await Shell.Current.GoToAsync(nameof(SharedRequestListPage));
 }

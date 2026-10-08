@@ -378,18 +378,97 @@ public class SharedRequestService : ISharedRequestService
         await _blRepo.UpdateAsync(bl);
     }
 
+    /// <summary>
+    /// Offline outbox, in dependency order:
+    ///  1. requests created offline (create node + index),
+    ///  2. index entries that failed after a status change (the other side's stream is waiting for them),
+    ///  3. responses (Accept / Reject / Cancel) the user gave offline.
+    /// Everything is idempotent, so running it twice (two triggers, a crash, a restore) is harmless.
+    /// </summary>
     private async Task FlushPendingAsync(string uid)
     {
-        var pending = await _links.FindAsync(l =>
+        // 1. Creates that never reached Firebase.
+        var creates = await _links.FindAsync(l =>
             l.Role == SharedRequestRole.Sender
             && l.FanoutPending
             && l.Status == SharedRequestStatus.Pending);
 
-        foreach (var link in pending)
+        foreach (var link in creates)
         {
             try { await TrySendAsync(link, uid); }
-            catch (FirebaseRtdbException) { /* retried at next start/resume */ }
+            catch (FirebaseRtdbException) { /* retried at next trigger */ }
         }
+
+        // 2. Index repair after a transition whose fan-out failed.
+        var repairs = await _links.FindAsync(l =>
+            l.FanoutPending
+            && !(l.Role == SharedRequestRole.Sender && l.Status == SharedRequestStatus.Pending));
+
+        foreach (var link in repairs)
+        {
+            try
+            {
+                await FanoutAsync(uid, link.OtherUid, link.SharedRequestId);
+
+                var fresh = await GetLinkAsync(link.SharedRequestId) ?? link;
+                fresh.FanoutPending = false;
+                fresh.UpdatedAt = DateTime.UtcNow;
+                await _links.UpdateAsync(fresh);
+            }
+            catch (FirebaseRtdbException) { /* retried at next trigger */ }
+        }
+
+        // 3. Queued responses. Re-query: step 1 may have just created the node a Cancel depends on.
+        var actions = await _links.FindAsync(l =>
+            l.PendingAction != null
+            && !(l.Role == SharedRequestRole.Sender && l.FanoutPending && l.Status == SharedRequestStatus.Pending));
+
+        foreach (var link in actions)
+        {
+            try { await ExecutePendingActionAsync(link, uid); }
+            catch (FirebaseRtdbException) { /* retried at next trigger */ }
+        }
+    }
+
+    private async Task<SharedRequestResult> QueueActionAsync(SharedRequestLink link, string action, string message)
+    {
+        var fresh = await GetLinkAsync(link.SharedRequestId) ?? link;
+        fresh.PendingAction = action;
+        fresh.UpdatedAt = DateTime.UtcNow;
+        await _links.UpdateAsync(fresh);
+
+        return new SharedRequestResult(true, message);
+    }
+
+    private const string QueuedOfflineMessage =
+        "You're offline. Your response will be sent automatically when you're back online.";
+
+    private async Task ExecutePendingActionAsync(SharedRequestLink link, string uid)
+    {
+        var action = link.PendingAction;
+        if (action is null) return;
+
+        SharedRequestResult result;
+        try
+        {
+            result = await TransitionAsync(link, uid, action);
+        }
+        catch (FirebaseRtdbException ex) when (IsTransient(ex))
+        {
+            return; // stays queued
+        }
+
+        // Done (or definitively impossible): take it out of the queue.
+        var fresh = await GetLinkAsync(link.SharedRequestId) ?? link;
+        fresh.PendingAction = null;
+        fresh.UpdatedAt = DateTime.UtcNow;
+        await _links.UpdateAsync(fresh);
+
+        var reached = fresh.Status == action;
+        if (reached && action == SharedRequestStatus.Accepted)
+            await ApplyAcceptedAsync(fresh.SharedRequestId);
+        else if (!reached)
+            await NotifyAsync("Couldn't send your response", result.Message ?? "The request changed in the meantime.");
     }
 
     // ─────────────────────────────────────────────
@@ -405,15 +484,26 @@ public class SharedRequestService : ISharedRequestService
                 return Fail("Request not found.");
             if (link.Status != SharedRequestStatus.Pending)
                 return Fail($"This request is already {link.Status.ToLowerInvariant()}.");
+            if (link.PendingAction is not null)
+                return Fail("Your response is already waiting to be sent.");
 
             // Remember the PRIVATE account choice BEFORE touching the server, so that if we
-            // crash right after the remote write, reconcile still applies it correctly.
+            // crash right after the remote write (or go offline), the apply step still uses it.
             link.AccountId = link.Type == SharedRequestType.Split ? null : accountId;
             link.UpdatedAt = DateTime.UtcNow;
             await _links.UpdateAsync(link);
 
-            var moved = await TransitionAsync(link, uid, SharedRequestStatus.Accepted);
-            if (!moved.Success) return moved;
+            try
+            {
+                var moved = await TransitionAsync(link, uid, SharedRequestStatus.Accepted);
+                if (!moved.Success) return moved;
+            }
+            catch (FirebaseRtdbException ex) when (IsTransient(ex))
+            {
+                // Nothing is applied locally until the server confirms: the sender may have
+                // withdrawn the request in the meantime.
+                return await QueueActionAsync(link, SharedRequestStatus.Accepted, QueuedOfflineMessage);
+            }
 
             await ApplyAcceptedAsync(link.SharedRequestId);
             return new SharedRequestResult(true);
@@ -434,8 +524,22 @@ public class SharedRequestService : ISharedRequestService
             if (link is null || link.Role != requiredRole) return Fail("Request not found.");
             if (link.Status != SharedRequestStatus.Pending)
                 return Fail($"This request is already {link.Status.ToLowerInvariant()}.");
+            if (link.PendingAction is not null)
+                return Fail("Your response is already waiting to be sent.");
 
-            return await TransitionAsync(link, uid, newStatus);
+            // The request itself hasn't been created on the server yet (queued while offline):
+            // queue the withdrawal behind it. The flush creates first, then cancels.
+            if (link.Role == SharedRequestRole.Sender && link.FanoutPending)
+                return await QueueActionAsync(link, newStatus, "Will be withdrawn as soon as you're back online.");
+
+            try
+            {
+                return await TransitionAsync(link, uid, newStatus);
+            }
+            catch (FirebaseRtdbException ex) when (IsTransient(ex))
+            {
+                return await QueueActionAsync(link, newStatus, QueuedOfflineMessage);
+            }
         });
 
     /// <summary>
@@ -471,13 +575,23 @@ public class SharedRequestService : ISharedRequestService
             return await ExplainLostRaceAsync(link, uid, current);
         }
 
+        // Make the change visible to both users' streams. If this fails the status change itself
+        // already happened, so just flag the index for repair (FlushPendingAsync step 2).
+        var fanoutFailed = false;
         try { await FanoutAsync(uid, link.OtherUid, link.SharedRequestId); }
-        catch (FirebaseRtdbException ex) when (IsTransient(ex)) { /* other side's reconcile still re-reads Pending/changed requests */ }
+        catch (FirebaseRtdbException ex) when (IsTransient(ex)) { fanoutFailed = true; }
 
-        link.Status = newStatus;
+        // Re-read right before saving: reconcile or another action may have touched this row
+        // (account choice, applied record id…) while we were on the network.
+        var fresh = await GetLinkAsync(link.SharedRequestId) ?? link;
+        fresh.Status = newStatus;
+        fresh.Version = newVersion;
+        if (fanoutFailed) fresh.FanoutPending = true;
+        fresh.UpdatedAt = DateTime.UtcNow;
+        await _links.UpdateAsync(fresh);
+
+        link.Status = newStatus; // keep the caller's instance coherent
         link.Version = newVersion;
-        link.UpdatedAt = DateTime.UtcNow;
-        await _links.UpdateAsync(link);
 
         return new SharedRequestResult(true);
     }
@@ -577,15 +691,38 @@ public class SharedRequestService : ISharedRequestService
     // ─────────────────────────────────────────────
     //  Reconcile (pull)
     // ─────────────────────────────────────────────
+    private int _dirty;
+
     public async Task<SharedRequestResult> ReconcileAsync()
     {
         var uid = await _auth.GetUidAsync();
         if (string.IsNullOrEmpty(uid)) return new SharedRequestResult(true);
 
-        await _reconcileLock.WaitAsync();
+        // Several triggers fire close together (stream event, resume, connectivity back, pull-to-refresh).
+        // If a reconcile is already running, ask it to go around once more instead of queueing behind it.
+        if (!await _reconcileLock.WaitAsync(0))
+        {
+            Volatile.Write(ref _dirty, 1);
+            return new SharedRequestResult(true);
+        }
+
         try
         {
-            return await RunAsync(async () =>
+            SharedRequestResult result;
+            do
+            {
+                Volatile.Write(ref _dirty, 0);
+                result = await ReconcileCoreAsync(uid);
+            }
+            while (Volatile.Read(ref _dirty) == 1);
+
+            return result;
+        }
+        finally { _reconcileLock.Release(); }
+    }
+
+    private Task<SharedRequestResult> ReconcileCoreAsync(string uid)
+        => RunAsync(async () =>
             {
                 await FlushPendingAsync(uid);
 
@@ -625,9 +762,6 @@ public class SharedRequestService : ISharedRequestService
 
                 return new SharedRequestResult(true);
             });
-        }
-        finally { _reconcileLock.Release(); }
-    }
 
     private async Task<SharedRequestLink?> UpsertFromDtoAsync(
         SharedRequestLink? link, string requestId, SharedRequestDto dto, string uid, long stamp,
@@ -668,6 +802,11 @@ public class SharedRequestService : ISharedRequestService
 
             return link;
         }
+
+        // Always modify the row as it is NOW (not a snapshot from the start of a long reconcile),
+        // so a concurrent Accept's private AccountId / PendingAction / BorrowLendId isn't overwritten.
+        var current = await GetLinkAsync(requestId);
+        if (current is not null) link = current;
 
         var changed = link.Status != status;
         link.Status = status;

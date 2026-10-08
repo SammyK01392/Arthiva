@@ -35,13 +35,14 @@ public partial class AppShell : Shell
     private readonly INotificationService _notificationService;
     private readonly IUserProfileService _userProfileService;
     private readonly AutoRefresh _unreadRefresh; // NEW: bell badge auto-refresh
-
-    public AppShell(INotificationService notificationService, IUserProfileService userProfileService)
+    private readonly ISharedSyncCoordinator _sharedSync;
+    public AppShell(INotificationService notificationService, IUserProfileService userProfileService, ISharedSyncCoordinator sharedSync)
     {
         InitializeComponent();
 
         _notificationService = notificationService;
         _userProfileService = userProfileService;
+        _sharedSync = sharedSync;
         _unreadRefresh = new AutoRefresh(RefreshUnreadCountAsync); // NEW
 
         RegisterRoutes();
@@ -53,6 +54,7 @@ public partial class AppShell : Shell
             await RefreshUnreadCountAsync();
             _unreadRefresh.Enabled = true; // NEW
             await LoadUserInitialsAsync();
+            _ = Task.Run(() => _sharedSync.StartAsync());
             UpdateCurrentPageTitle();
         };
 

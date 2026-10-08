@@ -172,6 +172,34 @@
                         <BoxView Style="{StaticResource Divider}" />
                         <Grid Style="{StaticResource RowGrid}">
                             <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnFriendsTapped" />
+                            </Grid.GestureRecognizers>
+                            <Border Style="{StaticResource IconBox}" BackgroundColor="#E0F2FE">
+                                <Label Text="&#128101;" FontSize="19" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2" InputTransparent="True">
+                                <Label Style="{StaticResource RowTitle}" Text="Friends" />
+                                <Label Style="{StaticResource RowSub}" Text="Friend code and connections" />
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2" Style="{StaticResource Chevron}" InputTransparent="True" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid Style="{StaticResource RowGrid}">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnSharedRequestsTapped" />
+                            </Grid.GestureRecognizers>
+                            <Border Style="{StaticResource IconBox}" BackgroundColor="#ECFDF5">
+                                <Label Text="&#128232;" FontSize="19" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2" InputTransparent="True">
+                                <Label Style="{StaticResource RowTitle}" Text="Shared Requests" />
+                                <Label Style="{StaticResource RowSub}" Text="Requests to and from friends" />
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2" Style="{StaticResource Chevron}" InputTransparent="True" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
+                        <Grid Style="{StaticResource RowGrid}">
+                            <Grid.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnSavingGoalsTapped" />
                             </Grid.GestureRecognizers>
                             <Border Style="{StaticResource IconBox}" BackgroundColor="#FFF1E3">

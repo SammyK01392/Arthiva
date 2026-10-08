@@ -82,8 +82,16 @@ public class SharedRequestLink
     /// <summary>Local BorrowLend created/linked for this request. null = not applied on this device yet.</summary>
     public int? BorrowLendId { get; set; }
 
-    /// <summary>Sender only: the Firebase create / index fan-out still has to be (re)tried.</summary>
+    /// <summary>The Firebase create / index fan-out still has to be (re)tried.</summary>
     public bool FanoutPending { get; set; }
+
+    /// <summary>
+    /// Offline outbox: a response (Accepted / Rejected / Cancelled) the user already gave but that
+    /// hasn't reached Firebase yet. null = nothing queued. Replaying is safe: the rules reject it
+    /// if the request changed in the meantime, and we then just sync the real state.
+    /// </summary>
+    [MaxLength(12)]
+    public string? PendingAction { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -92,12 +100,15 @@ public class SharedRequestLink
     // ── UI helpers (not persisted) ─────────────────────────────
 
     [Ignore]
+    public bool IsQueued => PendingAction is not null;
+
+    [Ignore]
     public bool IsIncomingPending =>
-        Role == SharedRequestRole.Receiver && Status == SharedRequestStatus.Pending;
+        Role == SharedRequestRole.Receiver && Status == SharedRequestStatus.Pending && PendingAction is null;
 
     [Ignore]
     public bool IsOutgoingPending =>
-        Role == SharedRequestRole.Sender && Status == SharedRequestStatus.Pending;
+        Role == SharedRequestRole.Sender && Status == SharedRequestStatus.Pending && PendingAction is null;
 
     [Ignore]
     public string DateText => RequestDate.ToString("dd MMM yyyy");
@@ -115,15 +126,17 @@ public class SharedRequestLink
     };
 
     [Ignore]
-    public string StatusText => Status switch
-    {
-        SharedRequestStatus.Pending => Role == SharedRequestRole.Sender
-            ? $"Waiting for {OtherName} to respond"
-            : "Waiting for your response",
-        SharedRequestStatus.Accepted => "Accepted",
-        SharedRequestStatus.Rejected => "Rejected",
-        SharedRequestStatus.Cancelled => "Cancelled",
-        SharedRequestStatus.Settled => "Settled",
-        _ => Status
-    };
+    public string StatusText => PendingAction is not null
+        ? $"{PendingAction} - will be sent when you're online"
+        : Status switch
+        {
+            SharedRequestStatus.Pending => Role == SharedRequestRole.Sender
+                ? $"Waiting for {OtherName} to respond"
+                : "Waiting for your response",
+            SharedRequestStatus.Accepted => "Accepted",
+            SharedRequestStatus.Rejected => "Rejected",
+            SharedRequestStatus.Cancelled => "Cancelled",
+            SharedRequestStatus.Settled => "Settled",
+            _ => Status
+        };
 }

@@ -4,11 +4,14 @@ namespace MoneySpend.Services;
 
 public interface ISharedSyncCoordinator
 {
-    /// <summary>App start: ensure Firebase profile, friend code and this device are registered, then pull shared requests.</summary>
+    /// <summary>App start: register profile/friend code/device, start the live stream, pull shared requests.</summary>
     Task StartAsync();
 
-    /// <summary>App returned to foreground: throttled device heartbeat + pull shared requests.</summary>
+    /// <summary>App returned to foreground: (re)start the stream, heartbeat the device, pull shared requests.</summary>
     Task OnResumeAsync();
+
+    /// <summary>App went to background: stop the stream (saves battery; Android would kill it anyway).</summary>
+    void OnPause();
 
     /// <summary>Call BEFORE IFirebaseAuthService.SignOutAsync() so this device stops receiving this account's pushes.</summary>
     Task PrepareForSignOutAsync();
@@ -16,7 +19,8 @@ public interface ISharedSyncCoordinator
 
 /// <summary>
 /// Single entry point that keeps the shared-Firebase side consistent. Everything is
-/// best-effort and idempotent: offline just means "try again at the next start/resume/sign-in".
+/// best-effort and idempotent: a missed trigger only delays sync until the next one
+/// (stream event, resume, connectivity back, sign-in, pull-to-refresh, push in Phase 4).
 /// </summary>
 public class SharedSyncCoordinator : ISharedSyncCoordinator
 {
@@ -26,6 +30,7 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
     private readonly IFriendConnectionService _friends;
     private readonly IUserProfileService _profile;
     private readonly ISharedRequestService _requests;
+    private readonly IRealtimeListenerService _realtime;
     private readonly SemaphoreSlim _gate = new(1, 1);
 
     private sealed class ProfileDto
@@ -39,7 +44,8 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
         IDeviceRegistrationService devices,
         IFriendConnectionService friends,
         IUserProfileService profile,
-        ISharedRequestService requests)
+        ISharedRequestService requests,
+        IRealtimeListenerService realtime)
     {
         _auth = auth;
         _rtdb = rtdb;
@@ -47,6 +53,7 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
         _friends = friends;
         _profile = profile;
         _requests = requests;
+        _realtime = realtime;
 
         // Constructed once at startup (see MauiProgram) so these subscriptions are always live.
         _auth.SignedIn += (sender, args) =>
@@ -54,8 +61,20 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
             _ = Task.Run(async () =>
             {
                 await EnsureReadyAsync(forceDevice: true);
+                _realtime.Start();
                 await ReconcileSafeAsync();
             });
+        };
+
+        _auth.SignedOut += (sender, args) =>
+        {
+            _realtime.Stop();
+        };
+
+        // The stream says "something changed on the server" → pull.
+        _realtime.Changed += () =>
+        {
+            _ = Task.Run(ReconcileSafeAsync);
         };
 
         PushBridge.TokenRefreshed += token =>
@@ -68,10 +87,18 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
         {
             _ = Task.Run(ReconcileSafeAsync);
         };
+
+        // Back online → flush anything queued while offline and catch up on what we missed.
+        Connectivity.Current.ConnectivityChanged += (sender, args) =>
+        {
+            if (args.NetworkAccess == NetworkAccess.Internet)
+                _ = Task.Run(ReconcileSafeAsync);
+        };
     }
 
     public async Task StartAsync()
     {
+        _realtime.Start(); // no-op / exits by itself if not logged in
         await EnsureReadyAsync(forceDevice: false);
         await ReconcileSafeAsync();
     }
@@ -79,12 +106,18 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
     public async Task OnResumeAsync()
     {
         if (!await _auth.IsLoggedInAsync()) return;
+
+        _realtime.Start();
         await RegisterDeviceSafeAsync();
         await ReconcileSafeAsync();
     }
 
+    public void OnPause() => _realtime.Stop();
+
     public async Task PrepareForSignOutAsync()
     {
+        _realtime.Stop();
+
         try { await _devices.UnregisterAsync(); }
         catch (Exception ex) { CrashLogger.Log(ex, "SharedSync.PrepareForSignOut"); }
     }
@@ -101,7 +134,7 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
         try
         {
             var result = await _requests.ReconcileAsync();
-            // result.Success == false is normal when offline; the next start/resume retries.
+            // result.Success == false is normal when offline; the next trigger retries.
         }
         catch (Exception ex)
         {
@@ -125,7 +158,7 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
         }
         catch (FirebaseRtdbException ex) when (ex.Kind == FirebaseErrorKind.Offline)
         {
-            // Offline: retried on next start/resume/sign-in.
+            // Offline: retried on next start/resume/connectivity/sign-in.
         }
         catch (Exception ex)
         {

@@ -31,17 +31,23 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             })
-            // NEW: app foreground hook for the shared-Firebase device heartbeat.
-            .ConfigureLifecycleEvents(events =>
-            {
-#if ANDROID
-                events.AddAndroid(android => android.OnResume(activity =>
+                // NEW: app foreground hook for the shared-Firebase device heartbeat.
+                .ConfigureLifecycleEvents(events =>
                 {
-                    _ = IPlatformApplication.Current?.Services
-                        .GetService<ISharedSyncCoordinator>()?.OnResumeAsync();
-                }));
-#endif
-            });
+                #if ANDROID
+                    events.AddAndroid(android => android
+                        .OnResume(activity =>
+                        {
+                            _ = IPlatformApplication.Current?.Services
+                                .GetService<ISharedSyncCoordinator>()?.OnResumeAsync();
+                        })
+                        .OnPause(activity =>
+                        {
+                            IPlatformApplication.Current?.Services
+                                .GetService<ISharedSyncCoordinator>()?.OnPause();
+                        }));
+                #endif
+                });
 
 #if DEBUG
         builder.Logging.AddDebug();
@@ -61,8 +67,7 @@ public static class MauiProgram
         // CHANGED: build, then construct the coordinator once so its auth/push
         // event subscriptions are live, and kick off profile/friend-code/device registration.
         var app = builder.Build();
-        var coordinator = app.Services.GetRequiredService<ISharedSyncCoordinator>();
-      
+        _ = app.Services.GetRequiredService<ISharedSyncCoordinator>(); // wires auth / stream / push / connectivity events
         return app;
     }
 
@@ -115,6 +120,7 @@ public static class MauiProgram
         services.AddSingleton<ISharedRequestService, SharedRequestService>();
         // Shared (multi-user) Firebase – metadata only, no personal financial data.
         services.AddSingleton<IFirebaseRtdbClient, FirebaseRtdbClient>();
+        services.AddSingleton<IRealtimeListenerService, RealtimeListenerService>();
 #if ANDROID
         services.AddSingleton<IPushTokenProvider, AndroidPushTokenProvider>();
 #else
