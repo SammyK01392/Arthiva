@@ -44,10 +44,12 @@ public interface IFriendConnectionService
     Task<string> GetOrCreateMyFriendCodeAsync();
     Task<string> RotateFriendCodeAsync();
 
-    /// <summary>null = unknown/invalid code.</summary>
+    /// <summary>null = unknown, invalid or expired code.</summary>
     Task<FriendInvite?> LookupCodeAsync(string code);
 
-    Task SendConnectionRequestAsync(FriendInvite invite);
+    /// <summary>via = the invite/friend code that was used (lets a one-time invite be auto-accepted by its owner).</summary>
+    Task SendConnectionRequestAsync(FriendInvite invite, string? via = null);
+
     Task AcceptConnectionAsync(string otherUid);
 
     /// <summary>Decline an incoming request, cancel an outgoing one, or disconnect.</summary>
@@ -89,6 +91,7 @@ public class FriendConnectionService : IFriendConnectionService
     {
         public string? Uid { get; set; }
         public string? DisplayName { get; set; }
+        public long? Exp { get; set; }
     }
 
     private async Task<string> RequireUidAsync()
@@ -159,6 +162,10 @@ public class FriendConnectionService : IFriendConnectionService
         var dto = await _rtdb.GetAsync<CodeDto>($"friendCodes/{normalized}");
         if (dto?.Uid is not { Length: > 0 } uid) return null;
 
+        // One-time invites expire; permanent friend codes have no Exp.
+        if (dto.Exp is long exp && exp < DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
+            return null;
+
         return new FriendInvite(uid, SharedIdentity.Clamp(dto.DisplayName), normalized);
     }
 
@@ -168,7 +175,7 @@ public class FriendConnectionService : IFriendConnectionService
     // Rules make it unforgeable: "active" on a side can only be set by that side's
     // owner (or by the other party accepting an 'outgoing' request).
 
-    public async Task SendConnectionRequestAsync(FriendInvite invite)
+    public async Task SendConnectionRequestAsync(FriendInvite invite, string? via = null)
     {
         var me = await RequireUidAsync();
         if (invite.Uid == me)
@@ -190,6 +197,11 @@ public class FriendConnectionService : IFriendConnectionService
         }
 
         var myName = await SharedIdentity.DisplayNameAsync(_profile);
+
+        // Only the other side's "incoming" entry carries `via`; the rules verify that this code
+        // really belongs to them and hasn't expired, so it can't be forged.
+        var viaCode = string.IsNullOrEmpty(via) ? null : FriendCode.Normalize(via);
+
         try
         {
             await _rtdb.UpdateAsync(new Dictionary<string, object?>
@@ -204,14 +216,16 @@ public class FriendConnectionService : IFriendConnectionService
                 {
                     status = "incoming",
                     displayName = myName,
-                    createdAt = FirebaseRtdbClient.ServerTimestamp
+                    createdAt = FirebaseRtdbClient.ServerTimestamp,
+                    via = viaCode
                 }
             });
         }
         catch (FirebaseRtdbException ex) when (ex.Kind == FirebaseErrorKind.PermissionDenied)
         {
-            // Other side already has an entry for me (e.g. a stale one) → the atomic write was rejected.
-            throw new InvalidOperationException("Couldn't send the request. Ask them to remove the old connection first.");
+            // Other side already has an entry for me, or the invite is no longer valid.
+            throw new InvalidOperationException(
+                "Couldn't send the request. The invite may have expired, or ask them to remove the old connection first.");
         }
     }
 

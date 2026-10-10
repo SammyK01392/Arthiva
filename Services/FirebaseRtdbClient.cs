@@ -1,8 +1,9 @@
+using MoneySpend.Data;
 using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using MoneySpend.Data;
+
 
 namespace MoneySpend.Services;
 
@@ -104,27 +105,40 @@ public class FirebaseRtdbClient : IFirebaseRtdbClient
         });
     }
 
-    public async Task<bool> PutIfAbsentAsync(string path, object value)
+public async Task<bool> PutIfAbsentAsync(string path, object value)
     {
         var json = JsonSerializer.Serialize(value, Json);
+
         try
         {
             using var _ = await SendAsync(t =>
             {
-                var req = new HttpRequestMessage(HttpMethod.Put, BuildUrl(path, t, true))
+                var req = new HttpRequestMessage(
+                    HttpMethod.Put,
+                    BuildUrl(path, t, false)) // print=silent removed
                 {
-                    Content = new StringContent(json, Encoding.UTF8, "application/json")
+                    Content = new StringContent(
+                        json,
+                        Encoding.UTF8,
+                        "application/json")
                 };
-                req.Headers.TryAddWithoutValidation("if-match", "null_etag");
+
+                req.Headers.TryAddWithoutValidation(
+                    "if-match",
+                    "null_etag");
+
                 return req;
             });
+
             return true;
         }
-        catch (FirebaseRtdbException ex) when (ex.Kind == FirebaseErrorKind.PreconditionFailed)
+        catch (FirebaseRtdbException ex)
+            when (ex.Kind == FirebaseErrorKind.PreconditionFailed)
         {
             return false;
         }
     }
+
 
     // ─────────────────────────────────────────────
 
@@ -182,18 +196,41 @@ public class FirebaseRtdbClient : IFirebaseRtdbClient
                 continue;
             }
 
-            if (!resp.IsSuccessStatusCode)
+if (!resp.IsSuccessStatusCode)
             {
                 var code = resp.StatusCode;
+                var responseBody = await resp.Content.ReadAsStringAsync();
+
+                // Do not log the request URL or Firebase auth token.
+                System.Diagnostics.Debug.WriteLine(
+                    $"[MoneySpendRTDB] HTTP {(int)code} ({code})");
+
+                System.Diagnostics.Debug.WriteLine(
+                    $"[MoneySpendRTDB] Response: {responseBody}");
+
                 resp.Dispose();
+
                 throw (int)code switch
                 {
-                    412 => new FirebaseRtdbException(FirebaseErrorKind.PreconditionFailed, "Conflict.", code),
-                    401 or 403 => new FirebaseRtdbException(FirebaseErrorKind.PermissionDenied, "Permission denied.", code),
-                    429 or >= 500 => new FirebaseRtdbException(FirebaseErrorKind.Server, "Server is temporarily unavailable.", code),
-                    _ => new FirebaseRtdbException(FirebaseErrorKind.Other, $"Request failed ({(int)code}).", code)
+                    412 => new FirebaseRtdbException(
+                        FirebaseErrorKind.PreconditionFailed,
+                        "Conflict.", code),
+
+                    401 or 403 => new FirebaseRtdbException(
+                        FirebaseErrorKind.PermissionDenied,
+                        $"Permission denied. Firebase response: {responseBody}", code),
+
+                    429 or >= 500 => new FirebaseRtdbException(
+                        FirebaseErrorKind.Server,
+                        $"Firebase server error: {responseBody}", code),
+
+                    _ => new FirebaseRtdbException(
+                        FirebaseErrorKind.Other,
+                        $"Request failed ({(int)code}). Firebase response: {responseBody}",
+                        code)
                 };
             }
+
 
             return resp;
         }

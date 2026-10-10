@@ -12,6 +12,7 @@ public partial class RecordBorrowLendTransactionViewModel : BaseViewModel
     private readonly IBorrowLendService _borrowLendService;
     private readonly IContactService _contactService;
     private readonly IAccountService _accountService;
+    private readonly ISharedSettlementService _settlements; // NEW
 
     private int _borrowLendId;
 
@@ -60,11 +61,13 @@ public partial class RecordBorrowLendTransactionViewModel : BaseViewModel
     public RecordBorrowLendTransactionViewModel(
         IBorrowLendService borrowLendService,
         IContactService contactService,
-        IAccountService accountService)
+        IAccountService accountService,
+        ISharedSettlementService settlements)
     {
         _borrowLendService = borrowLendService;
         _contactService = contactService;
         _accountService = accountService;
+        _settlements = settlements;
         Title = "Record Transaction";
     }
 
@@ -79,15 +82,12 @@ public partial class RecordBorrowLendTransactionViewModel : BaseViewModel
             var contact = await _contactService.GetByIdAsync(Record.ContactId);
             ContactName = contact?.Name ?? "Unknown";
 
-           
             MovementTypes.Clear();
             var types = Record.Type == "Lend"
                 ? new[] { "Receive", "PartialReturn", "Lend" }
                 : new[] { "Return", "PartialReturn", "Borrow" };
             foreach (var t in types)
                 MovementTypes.Add(t);
-
-            MovementType = MovementTypes.First();
 
             MovementType = MovementTypes.First();
 
@@ -113,6 +113,30 @@ public partial class RecordBorrowLendTransactionViewModel : BaseViewModel
         if (isReturnMovement && Amount > Record.PendingAmount)
         {
             ErrorMessage = $"Amount can't exceed the outstanding balance of ₹{Record.PendingAmount:N2}.";
+            return;
+        }
+
+        // NEW: this record is shared with another MoneySpend user. A repayment must be agreed by both,
+        // so it goes out as a payment for them to confirm instead of being written only on this phone.
+        if (isReturnMovement && !string.IsNullOrEmpty(Record.SharedRequestId))
+        {
+            await ExecuteAsync(async () =>
+            {
+                var proposed = await _settlements.ProposeForBorrowLendAsync(
+                    Record.Id, Amount, TransactionDate, SelectedAccount?.Id);
+
+                if (!proposed.Success)
+                {
+                    ErrorMessage = proposed.Message;
+                    return;
+                }
+
+                await Shell.Current.DisplayAlert(
+                    "Sent for confirmation",
+                    proposed.Message ?? "It is recorded once the other person confirms.",
+                    "OK");
+                await Shell.Current.GoToAsync("..");
+            });
             return;
         }
 

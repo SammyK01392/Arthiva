@@ -16,6 +16,21 @@
 
             <VerticalStackLayout Spacing="16" IsVisible="{Binding IsLoggedIn}">
 
+                <!-- Invite on WhatsApp -->
+                <Border Padding="14" StrokeThickness="1"
+                        Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Invite a friend" FontAttributes="Bold" />
+                        <Label Text="Pick someone from your contacts. We open WhatsApp with a link: they tap it and you're connected, no codes to type."
+                               FontSize="12" />
+                        <Button Text="Invite a contact on WhatsApp" Command="{Binding InviteContactCommand}" />
+                        <Button Text="Share invite link" Command="{Binding ShareCodeCommand}" />
+                    </VerticalStackLayout>
+                </Border>
+
                 <!-- My code -->
                 <Border Padding="14" StrokeThickness="1"
                         Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}">
@@ -25,18 +40,17 @@
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Your friend code" FontAttributes="Bold" />
                         <Label Text="{Binding MyCode}" FontSize="28" FontAttributes="Bold" />
-                        <Label Text="Share it with people you want to lend, borrow or split with." FontSize="12" />
+                        <Label Text="Or let them type this code. You'll need to approve their request." FontSize="12" />
                         <HorizontalStackLayout Spacing="8">
                             <Button Text="Copy" Command="{Binding CopyCodeCommand}" />
-                            <Button Text="Share" Command="{Binding ShareCodeCommand}" />
                             <Button Text="New code" Command="{Binding NewCodeCommand}" />
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Add a friend -->
+                <!-- Enter a code -->
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="Connect with a friend" FontAttributes="Bold" />
+                    <Label Text="Got a friend's code?" FontAttributes="Bold" />
                     <Entry Placeholder="Their friend code (ABCD-EFGH)"
                            Text="{Binding InviteCode}"
                            Keyboard="Plain" />

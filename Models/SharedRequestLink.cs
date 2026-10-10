@@ -99,6 +99,14 @@ public class SharedRequestLink
 
     // ── UI helpers (not persisted) ─────────────────────────────
 
+    /// <summary>
+    /// True when I am the one who owes money on this request (the borrower) and therefore the one who pays.
+    /// Sender of Lend/Split = lender. Sender of Borrow = borrower. The receiver is always the opposite.
+    /// </summary>
+    [Ignore]
+    public bool IAmPayer =>
+        (Role == SharedRequestRole.Sender) != (Type != SharedRequestType.Borrow);
+
     [Ignore]
     public bool IsQueued => PendingAction is not null;
 

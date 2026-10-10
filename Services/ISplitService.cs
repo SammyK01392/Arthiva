@@ -24,7 +24,7 @@ public record SplitRequest(
     int? PaidByContactId = null,
     int? GroupId = null);
 
-public record SplitResult(bool Success, string? ErrorMessage = null, int SplitId = 0);
+public record SplitResult(bool Success, string? ErrorMessage = null, int SplitId = 0, string? Info = null);
 
 /// <summary>Result of quick-adding a friend from the Split screen.</summary>
 public record AddFriendResult(
@@ -186,6 +186,7 @@ public static class SplitCalculator
     /// <summary>1,200 or 1,200.50 — no needless ".00".</summary>
     public static string Money(decimal amount)
         => amount % 1m == 0m ? amount.ToString("N0") : amount.ToString("N2");
+
 }
 
 public interface ISplitService

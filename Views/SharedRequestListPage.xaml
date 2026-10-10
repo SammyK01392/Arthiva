@@ -17,8 +17,8 @@
                 <Label Text="Nothing here yet. Requests you send to or receive from connected friends appear here."
                        IsVisible="{Binding IsEmpty}" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
 
-                <!-- Needs your response -->
-                <Label Text="Needs your response" FontAttributes="Bold" FontSize="16"
+                <!-- Requests that need my answer -->
+                <Label Text="Requests for you" FontAttributes="Bold" FontSize="16"
                        IsVisible="{Binding HasIncoming}" />
                 <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Incoming}">
                     <BindableLayout.ItemTemplate>
@@ -46,7 +46,58 @@
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
 
-                <!-- Waiting for them -->
+                <!-- Payments the other person says they made / received -->
+                <Label Text="Payments to confirm" FontAttributes="Bold" FontSize="16"
+                       IsVisible="{Binding HasPaymentsToConfirm}" />
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding PaymentsToConfirm}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="12" StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding Headline}" FontAttributes="Bold" />
+                                    <Label Text="{Binding DateText}" FontSize="12" />
+                                    <HorizontalStackLayout Spacing="10">
+                                        <Button Text="Confirm"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SharedRequestListViewModel}}, Path=ConfirmPaymentCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <Button Text="Reject"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SharedRequestListViewModel}}, Path=RejectPaymentCommand}"
+                                                CommandParameter="{Binding .}" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- Accepted, money still outstanding -->
+                <Label Text="Active" FontAttributes="Bold" FontSize="16"
+                       IsVisible="{Binding HasActive}" />
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Active}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="12" StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding Headline}" FontAttributes="Bold" />
+                                    <Label Text="{Binding PendingText}" FontSize="12" />
+                                    <Button Text="Record payment" HorizontalOptions="Start"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SharedRequestListViewModel}}, Path=RecordPaymentCommand}"
+                                            CommandParameter="{Binding .}" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- Waiting for the other person -->
                 <Label Text="Waiting for the other person" FontAttributes="Bold" FontSize="16"
                        IsVisible="{Binding HasOutgoing}" />
                 <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Outgoing}">
@@ -69,8 +120,50 @@
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
 
+                <Label Text="Your payments waiting for confirmation" FontAttributes="Bold" FontSize="16"
+                       IsVisible="{Binding HasPaymentsWaiting}" />
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding PaymentsWaiting}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="12" StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#444444}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding Headline}" FontAttributes="Bold" />
+                                    <Label Text="{Binding StatusText}" FontSize="12" />
+                                    <Button Text="Withdraw payment" HorizontalOptions="Start"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SharedRequestListViewModel}}, Path=CancelPaymentCommand}"
+                                            CommandParameter="{Binding .}" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
                 <!-- History -->
-                <Label Text="History" FontAttributes="Bold" FontSize="16"
+                <Label Text="Payment history" FontAttributes="Bold" FontSize="16"
+                       IsVisible="{Binding HasPaymentHistory}" />
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding PaymentHistory}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="12" StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#EEEEEE, Dark=#333333}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="{Binding Headline}" />
+                                    <Label Text="{Binding StatusText}" FontSize="12" FontAttributes="Bold" />
+                                    <Label Text="{Binding DateText}" FontSize="12" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Label Text="Request history" FontAttributes="Bold" FontSize="16"
                        IsVisible="{Binding HasHistory}" />
                 <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding History}">
                     <BindableLayout.ItemTemplate>

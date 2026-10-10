@@ -210,10 +210,15 @@ public partial class GroupDetailViewModel : BaseViewModel
                 await ExecuteAsync(async () =>
                     result = await _splitService.SettleAsync(transfer.FromId, amount.Value, accountId.Value, GroupId));
 
-                if (result is { Success: false })
-                    await SplitPrompts.AlertAsync(result.ErrorMessage ?? "Could not record the payment.");
-                break;
-            }
+
+                    if (result is { Success: false })
+                        await SplitPrompts.AlertAsync(result.ErrorMessage ?? "Could not record the payment.");
+
+                    if (result is { Success: true, Info: not null })
+                        await SplitPrompts.AlertAsync(result.Info);
+
+                    break;
+                }
 
             case "IPay":
             {
@@ -234,10 +239,15 @@ public partial class GroupDetailViewModel : BaseViewModel
                 await ExecuteAsync(async () =>
                     result = await _splitService.PayAsync(transfer.ToId, amount.Value, accountId.Value, GroupId));
 
-                if (result is { Success: false })
-                    await SplitPrompts.AlertAsync(result.ErrorMessage ?? "Could not record the payment.");
-                break;
-            }
+
+                    if (result is { Success: false })
+                        await SplitPrompts.AlertAsync(result.ErrorMessage ?? "Could not record the payment.");
+
+                    if (result is { Success: true, Info: not null })
+                        await SplitPrompts.AlertAsync(result.Info);
+
+                    break;
+                }
         }
     }
 }

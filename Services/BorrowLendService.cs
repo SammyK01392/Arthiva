@@ -7,17 +7,22 @@ public class BorrowLendService : IBorrowLendService
     private readonly IGenericRepository<BorrowLend> _repo;
     private readonly IGenericRepository<BorrowLendTransaction> _txnRepo;
     private readonly ITransactionService _transactionService;
+    private readonly IGenericRepository<SharedRequestLink> _requestLinks;
+    // constructor: add parameter  IGenericRepository<SharedRequestLink> requestLinks  and  _requestLinks = requestLinks;
 
     private static readonly string[] ReturnMovementTypes = { "Return", "Receive", "PartialReturn" };
 
     public BorrowLendService(
         IGenericRepository<BorrowLend> repo,
         IGenericRepository<BorrowLendTransaction> txnRepo,
-        ITransactionService transactionService)
+        ITransactionService transactionService,
+        IGenericRepository<SharedRequestLink> requestLinks
+    )
     {
         _repo = repo;
         _txnRepo = txnRepo;
         _transactionService = transactionService;
+        _requestLinks = requestLinks;
     }
 
     public async Task<List<BorrowLend>> GetAllAsync(string? type = null, bool includeClosed = false)
@@ -103,6 +108,20 @@ public class BorrowLendService : IBorrowLendService
 
         var isReturnMovement = ReturnMovementTypes.Contains(txn.Type);
 
+        // Shared with another MoneySpend user: both people must agree on every payment (see ISharedSettlementService).
+        if (!string.IsNullOrEmpty(borrowLend.SharedRequestId) && string.IsNullOrEmpty(txn.SharedSettlementId))
+        {
+            var shared = (await _requestLinks.FindAsync(l => l.SharedRequestId == borrowLend.SharedRequestId)).FirstOrDefault();
+
+            if (shared?.Status == SharedRequestStatus.Pending)
+                return new BorrowLendResult(false,
+                    $"Waiting for {shared.OtherName} to accept this request. Record the payment after they accept, or withdraw the request first.");
+
+            if (shared?.Status is SharedRequestStatus.Accepted or SharedRequestStatus.Settled)
+                return new BorrowLendResult(false, isReturnMovement
+                    ? $"This record is shared with {shared.OtherName}. Record the payment as a shared payment (Shared Requests → Record payment) so both of you agree."
+                    : "Extra amounts can't be added to a shared record. Send a new request instead.");
+        }
         // The core fix: never let a Return/Receive/PartialReturn exceed what's
         // actually still outstanding. Previously this was silently clamped to
         // zero, which is how a ₹1,000 "Receive" against a ₹500 Lend produced a

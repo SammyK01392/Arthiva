@@ -12,6 +12,7 @@ public class SplitService : ISplitService
     private readonly IGenericRepository<Contact> _contactRepo;
     private readonly IBorrowLendService _borrowLend;
     private readonly ITransactionService _transactionService;
+    private readonly ISharedSettlementService _settlements;
 
     public SplitService(
         IGenericRepository<SplitExpense> splitRepo,
@@ -20,7 +21,8 @@ public class SplitService : ISplitService
         IGenericRepository<Transaction> txRepo,
         IGenericRepository<Contact> contactRepo,
         IBorrowLendService borrowLend,
-        ITransactionService transactionService)
+        ITransactionService transactionService,
+        ISharedSettlementService settlements)
     {
         _splitRepo = splitRepo;
         _shareRepo = shareRepo;
@@ -29,6 +31,7 @@ public class SplitService : ISplitService
         _contactRepo = contactRepo;
         _borrowLend = borrowLend;
         _transactionService = transactionService;
+        _settlements = settlements;
     }
 
     // ─────────────────────────────────────────────
@@ -422,28 +425,63 @@ public class SplitService : ISplitService
         if (amount > pendingTotal)
             return Fail($"Amount can't exceed the pending ₹{pendingTotal:N2}.");
 
-        var remaining = amount;
+   
+var remaining = amount;
+        var sentForConfirmation = 0;
+
         foreach (var bl in open)
         {
             if (remaining <= 0) break;
 
             var pay = Math.Min(remaining, bl.PendingAmount);
+
+            // Shared record: request confirmation instead of recording immediately.
+            if (!string.IsNullOrEmpty(bl.SharedRequestId))
+            {
+                var proposed = await _settlements.ProposeForBorrowLendAsync(
+                    bl.Id, pay, DateTime.Now, accountId);
+
+                if (!proposed.Success)
+                    return Fail(proposed.Message ??
+                        "Could not send the payment for confirmation.");
+
+                sentForConfirmation++;
+                remaining -= pay;
+                continue;
+            }
+
+            // Existing non-shared settlement logic remains unchanged.
             var type = pay >= bl.PendingAmount ? "Receive" : "PartialReturn";
 
-            var result = await _borrowLend.RecordTransactionAsync(new BorrowLendTransaction
-            {
-                BorrowLendId = bl.Id,
-                Amount = pay,
-                Type = type,
-                TransactionDate = DateTime.Now,
-                Notes = "Settled via Split"
-            }, accountId);
+            var result = await _borrowLend.RecordTransactionAsync(
+                new BorrowLendTransaction
+                {
+                    BorrowLendId = bl.Id,
+                    Amount = pay,
+                    Type = type,
+                    TransactionDate = DateTime.Now,
+                    Notes = "Settled via Split"
+                },
+                accountId);
 
             if (!result.Success)
-                return Fail(result.ErrorMessage ?? "Could not record the payment.");
+                return Fail(result.ErrorMessage ??
+                    "Could not record the payment.");
 
             remaining -= pay;
         }
+
+        DataChangeNotifier.Publish<BorrowLend>();
+
+        return new SplitResult(
+            true,
+            null,
+            0,
+            sentForConfirmation > 0
+                ? $"{sentForConfirmation} payment(s) sent for confirmation. They are recorded once the other person confirms."
+                : null);
+
+
 
         DataChangeNotifier.Publish<BorrowLend>();
         return new SplitResult(true);
@@ -478,11 +516,30 @@ public class SplitService : ISplitService
         var contact = await _contactRepo.GetByIdAsync(contactId);
 
         var remaining = amount;
+        var sentForConfirmation = 0;
+
         foreach (var bl in open)
         {
             if (remaining <= 0) break;
 
             var pay = Math.Min(remaining, bl.PendingAmount);
+
+            // Shared record: request confirmation instead of recording immediately.
+            if (!string.IsNullOrEmpty(bl.SharedRequestId))
+            {
+                var proposed = await _settlements.ProposeForBorrowLendAsync(
+                    bl.Id, pay, DateTime.Now, accountId);
+
+                if (!proposed.Success)
+                    return Fail(proposed.Message ??
+                        "Could not send the payment for confirmation.");
+
+                sentForConfirmation++;
+                remaining -= pay;
+                continue;
+            }
+
+            // Existing non-shared payment logic remains unchanged.
             var type = pay >= bl.PendingAmount ? "Return" : "PartialReturn";
 
             var move = new BorrowLendTransaction
@@ -495,14 +552,27 @@ public class SplitService : ISplitService
             };
 
             var result = await _borrowLend.RecordTransactionAsync(move, accountId);
-            if (!result.Success)
-                return Fail(result.ErrorMessage ?? "Could not record the payment.");
 
-            // Split-created Borrow? Then this payment is YOUR expense → book it properly.
+            if (!result.Success)
+                return Fail(result.ErrorMessage ??
+                    "Could not record the payment.");
+
+            // Only non-shared split Borrow records are booked as expenses here.
             await CountAsExpenseAsync(bl.Id, move.TransactionId, contact?.Name);
 
             remaining -= pay;
         }
+
+        DataChangeNotifier.Publish<BorrowLend>();
+        DataChangeNotifier.Publish<Transaction>();
+
+        return new SplitResult(
+            true,
+            null,
+            0,
+            sentForConfirmation > 0
+                ? $"{sentForConfirmation} payment(s) sent for confirmation. They are recorded once the other person confirms."
+                : null);
 
         DataChangeNotifier.Publish<BorrowLend>();
         DataChangeNotifier.Publish<Transaction>();

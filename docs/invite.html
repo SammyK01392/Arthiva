@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join me on MoneySpend</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0;
+         min-height: 100vh; display: flex; align-items: center; justify-content: center;
+         background: #F6F7FB; color: #111827; }
+  @media (prefers-color-scheme: dark) { body { background: #111318; color: #F3F4F6; } .card { background: #1B1E26 !important; } }
+  .card { background: #fff; max-width: 420px; width: calc(100% - 32px); padding: 28px 22px; border-radius: 22px;
+          box-shadow: 0 6px 24px rgba(0,0,0,.08); text-align: center; }
+  h1 { font-size: 22px; margin: 6px 0 8px; }
+  p  { font-size: 14.5px; line-height: 1.5; margin: 8px 0; opacity: .85; }
+  .emoji { font-size: 44px; }
+  .btn { display: block; width: 100%; box-sizing: border-box; padding: 14px; margin-top: 18px; border: 0;
+         border-radius: 14px; font-size: 16px; font-weight: 700; color: #fff; text-decoration: none;
+         background: linear-gradient(135deg, #FF9A1F, #FF5A00); }
+  .code { margin-top: 18px; font-size: 13px; opacity: .7; }
+  .code b { font-size: 20px; letter-spacing: 2px; opacity: 1; }
+  .note { font-size: 12.5px; opacity: .65; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="emoji">🤝</div>
+  <h1 id="title">You're invited to MoneySpend</h1>
+  <p id="sub">Track udhaar, split bills and share requests with friends, all in one app.</p>
+
+  <a id="open" class="btn" href="#">Open in MoneySpend</a>
+
+  <div class="code" id="codebox" hidden>Invite code: <b id="code"></b></div>
+  <p class="note" id="note">If the app doesn't open, install MoneySpend first, then tap this link again.</p>
+</div>
+
+<script>
+  // ── EDIT THESE TWO LINES ─────────────────────────────────────────────
+  var APP_PACKAGE = "in.MoneySpend.app";   // must equal <ApplicationId> in the .csproj (case-sensitive)
+  var STORE_URL   = "https://play.google.com/store/apps/details?id=" + APP_PACKAGE; // or your APK download page
+  // ─────────────────────────────────────────────────────────────────────
+
+  // The invite lives in the #fragment, which browsers never send to the server.
+  var params = new URLSearchParams(location.hash.replace(/^#/, ""));
+  var code = (params.get("c") || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  var name = (params.get("n") || "").slice(0, 60);
+  var valid = /^[A-HJ-NP-Z2-9]{8}$/.test(code);
+
+  if (name) {
+    document.getElementById("title").textContent = name + " invited you to MoneySpend";
+  }
+
+  var openBtn = document.getElementById("open");
+
+  if (!valid) {
+    openBtn.style.display = "none";
+    document.getElementById("note").textContent = "This invite link looks incomplete. Ask your friend to send it again.";
+  } else {
+    document.getElementById("code").textContent = code.slice(0, 4) + "-" + code.slice(4);
+    document.getElementById("codebox").hidden = false;
+
+    var customUrl = "moneyspend://invite?code=" + encodeURIComponent(code);
+    var store = STORE_URL + "&referrer=" + encodeURIComponent("invite=" + code);
+
+    var isAndroid = /android/i.test(navigator.userAgent);
+    if (isAndroid) {
+      // Chrome: open the app if installed, otherwise fall back to the store page.
+      var intentUrl = "intent://invite?code=" + encodeURIComponent(code) +
+        "#Intent;scheme=moneyspend;package=" + APP_PACKAGE +
+        ";S.browser_fallback_url=" + encodeURIComponent(store) + ";end";
+      openBtn.setAttribute("href", intentUrl);
+      // Try once automatically; the button is the fallback if the browser blocks it.
+      setTimeout(function () { location.href = intentUrl; }, 500);
+    } else {
+      openBtn.setAttribute("href", customUrl);
+      document.getElementById("note").textContent =
+        "MoneySpend is an Android app. Open this link on your Android phone.";
+    }
+  }
+</script>
+</body>
+</html>

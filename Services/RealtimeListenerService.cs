@@ -13,19 +13,21 @@ public interface IRealtimeListenerService
     /// <summary>Idempotent. Stops streaming (app in background, signed out).</summary>
     void Stop();
 
-    /// <summary>Raised (debounced) when the remote request index changed. Subscribers should reconcile.</summary>
+    /// <summary>Raised (debounced) when the remote request or connection index changed. Subscribers should reconcile.</summary>
     event Action? Changed;
 }
 
 /// <summary>
-/// Streams /userRequests/{uid} with the Realtime Database REST streaming protocol (Server-Sent Events).
-/// That node only holds "requestId → last-changed timestamp", written for BOTH participants on every
-/// create / accept / reject / cancel, so one stream per user is enough to hear about every change
-/// on every device. The payload is deliberately ignored: any put/patch just means "go reconcile",
-/// and reconcile is idempotent, so a missed or duplicated event can never corrupt anything.
+/// Streams two small per-user nodes with the Realtime Database REST streaming protocol (Server-Sent Events):
+///   /userRequests/{uid}    requestId → last-changed timestamp (written for BOTH participants on every change)
+///   /userConnections/{uid} connection requests / accepts (so an invite is picked up and auto-accepted live)
+/// The payload is deliberately ignored: any put/patch just means "go reconcile", and reconcile is
+/// idempotent, so a missed or duplicated event can never corrupt anything.
 /// </summary>
 public sealed class RealtimeListenerService : IRealtimeListenerService
 {
+    private static readonly string[] Nodes = { "userRequests", "userConnections" };
+
     // The server sends a keep-alive roughly every 30 s. Silence for 90 s = dead connection.
     private static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(90);
     private static readonly TimeSpan MaxBackoff = TimeSpan.FromSeconds(60);
@@ -59,7 +61,11 @@ public sealed class RealtimeListenerService : IRealtimeListenerService
             token = _cts.Token;
         }
 
-        _ = Task.Run(() => RunAsync(token));
+        foreach (var node in Nodes)
+        {
+            var path = node;
+            _ = Task.Run(() => RunAsync(path, token));
+        }
     }
 
     public void Stop()
@@ -77,7 +83,7 @@ public sealed class RealtimeListenerService : IRealtimeListenerService
         finally { cts.Dispose(); }
     }
 
-    private async Task RunAsync(CancellationToken ct)
+    private async Task RunAsync(string node, CancellationToken ct)
     {
         var backoff = TimeSpan.FromSeconds(1);
 
@@ -93,7 +99,7 @@ public sealed class RealtimeListenerService : IRealtimeListenerService
                     return;
                 }
 
-                var receivedEvents = await StreamOnceAsync(uid, ct);
+                var receivedEvents = await StreamOnceAsync(node, uid, ct);
                 if (receivedEvents) backoff = TimeSpan.FromSeconds(1); // it worked, so reconnect quickly
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -103,7 +109,7 @@ public sealed class RealtimeListenerService : IRealtimeListenerService
             catch (Exception ex)
             {
                 // Offline, DNS, token refresh failure… all handled by retrying with backoff.
-                CrashLogger.Log(ex, "Realtime.Stream");
+                CrashLogger.Log(ex, $"Realtime.Stream.{node}");
             }
 
             try { await Task.Delay(backoff, ct); }
@@ -114,12 +120,12 @@ public sealed class RealtimeListenerService : IRealtimeListenerService
     }
 
     /// <summary>One connection. Returns true if at least one data event arrived.</summary>
-    private async Task<bool> StreamOnceAsync(string uid, CancellationToken ct)
+    private async Task<bool> StreamOnceAsync(string node, string uid, CancellationToken ct)
     {
         var token = await _auth.GetValidIdTokenAsync();
         if (string.IsNullOrEmpty(token)) return false;
 
-        var url = $"{FirebaseConstants.DatabaseUrl}/userRequests/{uid}.json?auth={Uri.EscapeDataString(token)}";
+        var url = $"{FirebaseConstants.DatabaseUrl}/{node}/{uid}.json?auth={Uri.EscapeDataString(token)}";
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
@@ -185,7 +191,7 @@ public sealed class RealtimeListenerService : IRealtimeListenerService
         return gotData;
     }
 
-    /// <summary>Coalesces bursts (initial snapshot + our own writes) into one notification.</summary>
+    /// <summary>Coalesces bursts (initial snapshots + our own writes) into one notification.</summary>
     private void RaiseChanged()
     {
         if (Interlocked.Exchange(ref _debouncing, 1) == 1) return;

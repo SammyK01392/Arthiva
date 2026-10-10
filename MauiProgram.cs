@@ -121,6 +121,8 @@ public static class MauiProgram
         // Shared (multi-user) Firebase – metadata only, no personal financial data.
         services.AddSingleton<IFirebaseRtdbClient, FirebaseRtdbClient>();
         services.AddSingleton<IRealtimeListenerService, RealtimeListenerService>();
+        services.AddSingleton<IInviteService, InviteService>();
+        services.AddSingleton<ISharedSettlementService, SharedSettlementService>();
 #if ANDROID
         services.AddSingleton<IPushTokenProvider, AndroidPushTokenProvider>();
 #else

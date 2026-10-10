@@ -21,6 +21,10 @@ public class BorrowLendTransaction
     [MaxLength(50)]
     public string Type { get; set; } = string.Empty;
 
+    /// <summary>Same id on both users' movements for one confirmed shared settlement. Idempotency key.</summary>
+    [Indexed, MaxLength(40)]
+    public string? SharedSettlementId { get; set; }
+
     /// <summary>
     /// Linked Transaction table reference
     /// </summary>

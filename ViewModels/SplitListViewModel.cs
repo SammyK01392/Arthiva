@@ -249,6 +249,9 @@ public partial class SplitListViewModel : BaseViewModel
 
         if (result is { Success: false })
             await SplitPrompts.AlertAsync(result.ErrorMessage ?? "Could not record the payment.");
+
+        if (result is { Success: true, Info: not null })
+            await SplitPrompts.AlertAsync(result.Info);
     }
 
     // ─────────────────────────────────────────────
@@ -276,7 +279,11 @@ public partial class SplitListViewModel : BaseViewModel
         await ExecuteAsync(async () =>
             result = await _splitService.PayAsync(friend.ContactId, amount.Value, accountId.Value));
 
+
         if (result is { Success: false })
             await SplitPrompts.AlertAsync(result.ErrorMessage ?? "Could not record the payment.");
+
+        if (result is { Success: true, Info: not null })
+            await SplitPrompts.AlertAsync(result.Info);
     }
 }

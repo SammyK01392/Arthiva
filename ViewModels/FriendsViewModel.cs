@@ -35,6 +35,7 @@ public partial class FriendsViewModel : BaseViewModel
     private readonly IFriendConnectionService _friends;
     private readonly IContactService _contacts;
     private readonly IFirebaseAuthService _auth;
+    private readonly IInviteService _invites;
 
     private string _rawCode = string.Empty;
 
@@ -51,11 +52,13 @@ public partial class FriendsViewModel : BaseViewModel
     public FriendsViewModel(
         IFriendConnectionService friends,
         IContactService contacts,
-        IFirebaseAuthService auth)
+        IFirebaseAuthService auth,
+        IInviteService invites)
     {
         _friends = friends;
         _contacts = contacts;
         _auth = auth;
+        _invites = invites;
         Title = "Friends";
     }
 
@@ -76,6 +79,13 @@ public partial class FriendsViewModel : BaseViewModel
             MyCode = FriendCode.Format(_rawCode);
             await LoadConnectionsAsync();
         });
+
+        // A tapped invite link waiting for the user to open this app is handled here too.
+        if (IsLoggedIn)
+        {
+            await _invites.ProcessPendingInviteAsync();
+            await ExecuteAsync(LoadConnectionsAsync);
+        }
     }
 
     private async Task LoadConnectionsAsync()
@@ -101,7 +111,39 @@ public partial class FriendsViewModel : BaseViewModel
     }
 
     // ─────────────────────────────────────────────
-    //  My code
+    //  Invite a contact (WhatsApp)
+    // ─────────────────────────────────────────────
+    [RelayCommand]
+    private async Task InviteContactAsync()
+    {
+        var all = await _contacts.GetAllAsync();
+        var candidates = all.Where(c => string.IsNullOrEmpty(c.LinkedUid)).ToList();
+
+        if (candidates.Count == 0)
+        {
+            await Shell.Current.DisplayAlert(
+                "No one to invite",
+                "All your contacts are already connected, or you have no contacts yet. Use \"Share invite link\" instead.",
+                "OK");
+            return;
+        }
+
+        var names = candidates
+            .Select(c => string.IsNullOrWhiteSpace(c.Mobile) ? $"{c.Name} (no number)" : c.Name)
+            .ToArray();
+
+        var picked = await Shell.Current.DisplayActionSheet("Invite on WhatsApp", "Cancel", null, names);
+        if (picked is null || picked == "Cancel") return;
+
+        var index = Array.IndexOf(names, picked);
+        if (index < 0) return;
+
+        var contactId = candidates[index].Id;
+        await ExecuteAsync(async () => await _invites.SendWhatsAppInviteAsync(contactId));
+    }
+
+    // ─────────────────────────────────────────────
+    //  My code / link
     // ─────────────────────────────────────────────
     [RelayCommand]
     private async Task CopyCodeAsync()
@@ -116,10 +158,14 @@ public partial class FriendsViewModel : BaseViewModel
     {
         if (string.IsNullOrEmpty(_rawCode)) return;
 
+        string? link = null;
+        await ExecuteAsync(async () => link = await _invites.GetShareLinkAsync());
+        if (link is null) return;
+
         await Share.Default.RequestAsync(new ShareTextRequest
         {
-            Text = $"Connect with me on MoneySpend. My friend code: {MyCode}",
-            Title = "MoneySpend friend code"
+            Text = $"Connect with me on MoneySpend 👇\n{link}\n(Friend code: {MyCode})",
+            Title = "MoneySpend invite"
         });
     }
 
@@ -128,7 +174,7 @@ public partial class FriendsViewModel : BaseViewModel
     {
         var confirm = await Shell.Current.DisplayAlert(
             "Create a new code?",
-            "Your old code stops working. People you're already connected with are not affected.",
+            "Your old code and old share links stop working. People you're already connected with are not affected.",
             "Create new", "Cancel");
         if (!confirm) return;
 
@@ -152,7 +198,7 @@ public partial class FriendsViewModel : BaseViewModel
 
         if (found is null)
         {
-            await Shell.Current.DisplayAlert("Not found", "No user found with that code. Check it and try again.", "OK");
+            await Shell.Current.DisplayAlert("Not found", "No user found with that code, or the invite has expired.", "OK");
             return;
         }
 
@@ -165,7 +211,7 @@ public partial class FriendsViewModel : BaseViewModel
         var invite = found;
         await ExecuteAsync(async () =>
         {
-            await _friends.SendConnectionRequestAsync(invite);
+            await _friends.SendConnectionRequestAsync(invite, invite.Code);
             InviteCode = string.Empty;
             await LoadConnectionsAsync();
         });

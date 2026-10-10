@@ -60,6 +60,7 @@ public class SharedRequestService : ISharedRequestService
     private readonly IGenericRepository<BorrowLend> _blRepo;
     private readonly IGenericRepository<SplitExpense> _splitRepo;
     private readonly IGenericRepository<SplitShare> _shareRepo;
+    private readonly ISharedSettlementService _settlements;
 
     private readonly SemaphoreSlim _reconcileLock = new(1, 1);
     private readonly SemaphoreSlim _applyLock = new(1, 1);
@@ -74,8 +75,10 @@ public class SharedRequestService : ISharedRequestService
         IGenericRepository<SharedRequestLink> links,
         IGenericRepository<BorrowLend> blRepo,
         IGenericRepository<SplitExpense> splitRepo,
-        IGenericRepository<SplitShare> shareRepo)
+        IGenericRepository<SplitShare> shareRepo,
+        ISharedSettlementService settlements)
     {
+        _settlements = settlements;
         _rtdb = rtdb;
         _auth = auth;
         _friends = friends;
@@ -307,6 +310,7 @@ public class SharedRequestService : ISharedRequestService
             link.FanoutPending = false;
             link.UpdatedAt = DateTime.UtcNow;
             await _links.UpdateAsync(link);
+            await UnshareBorrowLendAsync(link);
             return SendOutcome.Denied;
         }
 
@@ -428,6 +432,29 @@ public class SharedRequestService : ISharedRequestService
             try { await ExecutePendingActionAsync(link, uid); }
             catch (FirebaseRtdbException) { /* retried at next trigger */ }
         }
+
+        // 4. Payment (settlement) outbox, after the requests they depend on are up to date.
+        try { await _settlements.FlushPendingAsync(uid); }
+        catch (FirebaseRtdbException) { /* retried at next trigger */ }
+    }
+
+    /// <summary>
+    /// A rejected / cancelled split request means the other person never agreed to share this record,
+    /// so the sender's Lend becomes a normal local-only record again (otherwise the "shared records need
+    /// both people to agree on payments" protection would block it forever).
+    /// </summary>
+    private async Task UnshareBorrowLendAsync(SharedRequestLink link)
+    {
+        if (link.Type != SharedRequestType.Split
+            || link.Role != SharedRequestRole.Sender
+            || link.BorrowLendId is not int blId) return;
+
+        var bl = await _blRepo.GetByIdAsync(blId);
+        if (bl is null || bl.SharedRequestId != link.SharedRequestId) return;
+
+        bl.SharedRequestId = null;
+        bl.UpdatedAt = DateTime.UtcNow;
+        await _blRepo.UpdateAsync(bl);
     }
 
     private async Task<SharedRequestResult> QueueActionAsync(SharedRequestLink link, string action, string message)
@@ -592,6 +619,9 @@ public class SharedRequestService : ISharedRequestService
 
         link.Status = newStatus; // keep the caller's instance coherent
         link.Version = newVersion;
+
+        if (newStatus is SharedRequestStatus.Rejected or SharedRequestStatus.Cancelled)
+            await UnshareBorrowLendAsync(fresh);
 
         return new SharedRequestResult(true);
     }
@@ -758,6 +788,15 @@ public class SharedRequestService : ISharedRequestService
 
                     if (updated.Status == SharedRequestStatus.Accepted && updated.BorrowLendId is null)
                         await ApplyAcceptedAsync(updated.SharedRequestId);
+
+                    // Payments (settlements) of requests that are live on this device. Because every settlement
+                    // change also bumps this index entry, the skip rule above still holds for quiet requests.
+                    var current = await GetLinkAsync(updated.SharedRequestId) ?? updated;
+                    if ((current.Status == SharedRequestStatus.Accepted || current.Status == SharedRequestStatus.Settled)
+                        && current.BorrowLendId is not null)
+                    {
+                        await _settlements.SyncRequestAsync(current, uid);
+                    }
                 }
 
                 return new SharedRequestResult(true);
@@ -815,6 +854,9 @@ public class SharedRequestService : ISharedRequestService
         if (!string.IsNullOrEmpty(knownName)) link.OtherName = knownName;
         link.UpdatedAt = DateTime.UtcNow;
         await _links.UpdateAsync(link);
+
+        if (changed && status is SharedRequestStatus.Rejected or SharedRequestStatus.Cancelled)
+            await UnshareBorrowLendAsync(link);
 
         if (changed && link.Role == SharedRequestRole.Sender
             && status is SharedRequestStatus.Accepted or SharedRequestStatus.Rejected)

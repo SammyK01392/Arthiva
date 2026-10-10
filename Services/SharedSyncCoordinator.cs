@@ -20,7 +20,7 @@ public interface ISharedSyncCoordinator
 /// <summary>
 /// Single entry point that keeps the shared-Firebase side consistent. Everything is
 /// best-effort and idempotent: a missed trigger only delays sync until the next one
-/// (stream event, resume, connectivity back, sign-in, pull-to-refresh, push in Phase 4).
+/// (stream event, resume, connectivity back, sign-in, invite link tap, pull-to-refresh, push in Phase 4).
 /// </summary>
 public class SharedSyncCoordinator : ISharedSyncCoordinator
 {
@@ -31,6 +31,7 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
     private readonly IUserProfileService _profile;
     private readonly ISharedRequestService _requests;
     private readonly IRealtimeListenerService _realtime;
+    private readonly IInviteService _invites;
     private readonly SemaphoreSlim _gate = new(1, 1);
 
     private sealed class ProfileDto
@@ -45,7 +46,8 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
         IFriendConnectionService friends,
         IUserProfileService profile,
         ISharedRequestService requests,
-        IRealtimeListenerService realtime)
+        IRealtimeListenerService realtime,
+        IInviteService invites)
     {
         _auth = auth;
         _rtdb = rtdb;
@@ -54,6 +56,7 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
         _profile = profile;
         _requests = requests;
         _realtime = realtime;
+        _invites = invites;
 
         // Constructed once at startup (see MauiProgram) so these subscriptions are always live.
         _auth.SignedIn += (sender, args) =>
@@ -63,6 +66,7 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
                 await EnsureReadyAsync(forceDevice: true);
                 _realtime.Start();
                 await ReconcileSafeAsync();
+                await PendingInviteSafeAsync(); // a link tapped before logging in is finished now
             });
         };
 
@@ -71,7 +75,7 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
             _realtime.Stop();
         };
 
-        // The stream says "something changed on the server" → pull.
+        // The streams say "something changed on the server" → pull.
         _realtime.Changed += () =>
         {
             _ = Task.Run(ReconcileSafeAsync);
@@ -94,13 +98,24 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
             if (args.NetworkAccess == NetworkAccess.Internet)
                 _ = Task.Run(ReconcileSafeAsync);
         };
+
+        // An invite link was tapped while the app was already running.
+        InviteLinkBridge.InviteReceived += () =>
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(800); // let the activity / Shell settle
+                await PendingInviteSafeAsync();
+            });
+        };
     }
 
     public async Task StartAsync()
     {
-        _realtime.Start(); // no-op / exits by itself if not logged in
+        _realtime.Start(); // exits by itself if not logged in
         await EnsureReadyAsync(forceDevice: false);
         await ReconcileSafeAsync();
+        await PendingInviteSafeAsync(); // cold start from an invite link
     }
 
     public async Task OnResumeAsync()
@@ -110,6 +125,7 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
         _realtime.Start();
         await RegisterDeviceSafeAsync();
         await ReconcileSafeAsync();
+        await PendingInviteSafeAsync();
     }
 
     public void OnPause() => _realtime.Stop();
@@ -140,6 +156,22 @@ public class SharedSyncCoordinator : ISharedSyncCoordinator
         {
             CrashLogger.Log(ex, "SharedSync.Reconcile");
         }
+
+        // Connections: auto-accept my one-time invites, notify about other incoming requests.
+        try
+        {
+            await _invites.ProcessIncomingAsync();
+        }
+        catch (Exception ex)
+        {
+            CrashLogger.Log(ex, "SharedSync.Invites");
+        }
+    }
+
+    private async Task PendingInviteSafeAsync()
+    {
+        try { await _invites.ProcessPendingInviteAsync(); }
+        catch (Exception ex) { CrashLogger.Log(ex, "SharedSync.PendingInvite"); }
     }
 
     private async Task EnsureReadyAsync(bool forceDevice)
