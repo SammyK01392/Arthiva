@@ -269,8 +269,22 @@ public class SharedRequestService : ISharedRequestService
                     FanoutPending = true
                 };
                 await _links.AddAsync(link);
-                await TrySendAsync(link, uid);
-                count++;
+
+                // CHANGED: one friend's failure must not stop the others, and a denied
+                // request must not be counted as "sent". FanoutPending stays true on
+                // failure, so FlushPendingAsync retries it later.
+                SendOutcome outcome;
+                try
+                {
+                    outcome = await TrySendAsync(link, uid);
+                }
+                catch (FirebaseRtdbException ex)
+                {
+                    CrashLogger.Log(ex, "SendSplit.TrySend");
+                    continue;
+                }
+
+                if (outcome != SendOutcome.Denied) count++;
             }
 
             return new SharedRequestResult(true,
@@ -753,54 +767,54 @@ public class SharedRequestService : ISharedRequestService
 
     private Task<SharedRequestResult> ReconcileCoreAsync(string uid)
         => RunAsync(async () =>
+        {
+            await FlushPendingAsync(uid);
+
+            var index = await _rtdb.GetAsync<Dictionary<string, long>>($"userRequests/{uid}")
+                        ?? new Dictionary<string, long>();
+            if (index.Count == 0) return new SharedRequestResult(true);
+
+            var names = (await _friends.GetConnectionsAsync())
+                .GroupBy(c => c.OtherUid)
+                .ToDictionary(g => g.Key, g => g.First().DisplayName);
+
+            var known = (await _links.GetAllAsync()).ToDictionary(l => l.SharedRequestId);
+
+            foreach (var entry in index)
             {
-                await FlushPendingAsync(uid);
+                var id = entry.Key;
+                var stamp = entry.Value;
+                known.TryGetValue(id, out var link);
 
-                var index = await _rtdb.GetAsync<Dictionary<string, long>>($"userRequests/{uid}")
-                            ?? new Dictionary<string, long>();
-                if (index.Count == 0) return new SharedRequestResult(true);
+                // Nothing can have changed for a finished + applied request whose index entry is unchanged.
+                if (link is not null
+                    && link.IndexStamp == stamp
+                    && link.Status != SharedRequestStatus.Pending
+                    && (link.BorrowLendId is not null
+                        || link.Status is SharedRequestStatus.Rejected or SharedRequestStatus.Cancelled))
+                    continue;
 
-                var names = (await _friends.GetConnectionsAsync())
-                    .GroupBy(c => c.OtherUid)
-                    .ToDictionary(g => g.Key, g => g.First().DisplayName);
+                var dto = await _rtdb.GetAsync<SharedRequestDto>($"sharedRequests/{id}");
+                if (dto is null) continue;
 
-                var known = (await _links.GetAllAsync()).ToDictionary(l => l.SharedRequestId);
+                var updated = await UpsertFromDtoAsync(link, id, dto, uid, stamp, names);
+                if (updated is null) continue;
 
-                foreach (var entry in index)
+                if (updated.Status == SharedRequestStatus.Accepted && updated.BorrowLendId is null)
+                    await ApplyAcceptedAsync(updated.SharedRequestId);
+
+                // Payments (settlements) of requests that are live on this device. Because every settlement
+                // change also bumps this index entry, the skip rule above still holds for quiet requests.
+                var current = await GetLinkAsync(updated.SharedRequestId) ?? updated;
+                if ((current.Status == SharedRequestStatus.Accepted || current.Status == SharedRequestStatus.Settled)
+                    && current.BorrowLendId is not null)
                 {
-                    var id = entry.Key;
-                    var stamp = entry.Value;
-                    known.TryGetValue(id, out var link);
-
-                    // Nothing can have changed for a finished + applied request whose index entry is unchanged.
-                    if (link is not null
-                        && link.IndexStamp == stamp
-                        && link.Status != SharedRequestStatus.Pending
-                        && (link.BorrowLendId is not null
-                            || link.Status is SharedRequestStatus.Rejected or SharedRequestStatus.Cancelled))
-                        continue;
-
-                    var dto = await _rtdb.GetAsync<SharedRequestDto>($"sharedRequests/{id}");
-                    if (dto is null) continue;
-
-                    var updated = await UpsertFromDtoAsync(link, id, dto, uid, stamp, names);
-                    if (updated is null) continue;
-
-                    if (updated.Status == SharedRequestStatus.Accepted && updated.BorrowLendId is null)
-                        await ApplyAcceptedAsync(updated.SharedRequestId);
-
-                    // Payments (settlements) of requests that are live on this device. Because every settlement
-                    // change also bumps this index entry, the skip rule above still holds for quiet requests.
-                    var current = await GetLinkAsync(updated.SharedRequestId) ?? updated;
-                    if ((current.Status == SharedRequestStatus.Accepted || current.Status == SharedRequestStatus.Settled)
-                        && current.BorrowLendId is not null)
-                    {
-                        await _settlements.SyncRequestAsync(current, uid);
-                    }
+                    await _settlements.SyncRequestAsync(current, uid);
                 }
+            }
 
-                return new SharedRequestResult(true);
-            });
+            return new SharedRequestResult(true);
+        });
 
     private async Task<SharedRequestLink?> UpsertFromDtoAsync(
         SharedRequestLink? link, string requestId, SharedRequestDto dto, string uid, long stamp,
@@ -836,8 +850,12 @@ public class SharedRequestService : ISharedRequestService
             };
             await _links.AddAsync(link);
 
+            // CHANGED: type-specific text (Split / Lend / Borrow) instead of a generic "New request".
             if (role == SharedRequestRole.Receiver && status == SharedRequestStatus.Pending)
-                await NotifyAsync("New request", link.Headline);
+            {
+                var (title, body) = BuildNewRequestMessage(link);
+                await NotifyAsync(title, body);
+            }
 
             return link;
         }
@@ -867,6 +885,27 @@ public class SharedRequestService : ISharedRequestService
         }
 
         return link;
+    }
+
+    // CHANGED (new): notification text for the RECEIVER, by request type.
+    private static (string Title, string Body) BuildNewRequestMessage(SharedRequestLink link)
+    {
+        var who = string.IsNullOrWhiteSpace(link.OtherName) ? "Your friend" : link.OtherName;
+        var amt = $"₹{link.Amount:N2}";
+
+        if (link.Type == SharedRequestType.Split)
+            return ("New Split Request",
+                $"{who} added you to a split. Your share is {amt}. Open the app to accept or reject.");
+
+        if (link.Type == SharedRequestType.Lend)
+            return ("Borrow Request",
+                $"{who} says you borrowed {amt} from them. Open the app to accept or reject.");
+
+        if (link.Type == SharedRequestType.Borrow)
+            return ("Lend Request",
+                $"{who} says they borrowed {amt} from you. Open the app to accept or reject.");
+
+        return ("New request", link.Headline);
     }
 
     private async Task NotifyAsync(string title, string body)

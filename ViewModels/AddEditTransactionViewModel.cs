@@ -250,6 +250,8 @@ public partial class AddEditTransactionViewModel : BaseViewModel
                 // Pushed on top of whichever tab we came from — jump to the
                 // Transactions tab (resets the nav stack) so the user lands
                 // straight on the list and immediately sees the new entry.
+                if (Shell.Current.Navigation.NavigationStack.Count > 1)
+                    await Shell.Current.Navigation.PopToRootAsync(false);
                 await Shell.Current.GoToAsync($"//{nameof(Views.TransactionListPage)}");
             }
         });

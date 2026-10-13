@@ -96,15 +96,17 @@ public partial class AddSplitViewModel : BaseViewModel
     }
 
     public AddSplitViewModel(
-        ISplitService splitService,
-        ISplitGroupService groupService,
-        IAccountService accountService,
-        ICategoryService categoryService)
+       ISplitService splitService,
+       ISplitGroupService groupService,
+       IAccountService accountService,
+       ICategoryService categoryService,
+       ISharedRequestService sharedRequests)
     {
         _splitService = splitService;
         _groupService = groupService;
         _accountService = accountService;
         _categoryService = categoryService;
+        _sharedRequests = sharedRequests;
         Title = "Split Expense";
     }
 
@@ -466,10 +468,16 @@ public partial class AddSplitViewModel : BaseViewModel
         await ExecuteAsync(async () => result = await _splitService.CreateAsync(request));
 
         if (result is null) return;
-
         if (result.Success)
         {
-            try { await _sharedRequests.SendSplitRequestsAsync(result.SplitId); }
+            try
+            {
+                var shared = await _sharedRequests.SendSplitRequestsAsync(result.SplitId);
+                if (!shared.Success)
+                    await SplitPrompts.AlertAsync(shared.Message ?? "Split saved, but the share request could not be sent.");
+                else if (!string.IsNullOrEmpty(shared.Message))
+                    System.Diagnostics.Debug.WriteLine($"[Split] {shared.Message}");
+            }
             catch (Exception ex) { CrashLogger.Log(ex, "AddSplit.SendShared"); }
             await Shell.Current.GoToAsync("..");
         }

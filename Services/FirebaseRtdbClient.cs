@@ -105,7 +105,7 @@ public class FirebaseRtdbClient : IFirebaseRtdbClient
         });
     }
 
-public async Task<bool> PutIfAbsentAsync(string path, object value)
+    public async Task<bool> PutIfAbsentAsync(string path, object value)
     {
         var json = JsonSerializer.Serialize(value, Json);
 
@@ -196,7 +196,7 @@ public async Task<bool> PutIfAbsentAsync(string path, object value)
                 continue;
             }
 
-if (!resp.IsSuccessStatusCode)
+            if (!resp.IsSuccessStatusCode)
             {
                 var code = resp.StatusCode;
                 var responseBody = await resp.Content.ReadAsStringAsync();
