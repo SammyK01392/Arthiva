@@ -41,9 +41,14 @@ public partial class TransactionSuccessPopup : ContentView
         TransactionMode mode = TransactionMode.Create,
         int autoCloseMs = 0,
         string? amountCaption = null,
-        string? subtitle = null)
+        string? subtitle = null,
+        bool playFeedback = true)
     {
         Apply(type, amount, mode, amountCaption, subtitle);
+
+        // Sound + haptic (settings me off ho to apne aap skip)
+        if (playFeedback)
+            TransactionFeedback.Play(type);
 
         _closing = false;
         _closeTcs = new TaskCompletionSource();
