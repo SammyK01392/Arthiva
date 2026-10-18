@@ -141,6 +141,7 @@ public static class MauiProgram
 
         services.AddTransient<AccountListViewModel>();
         services.AddTransient<AccountEditViewModel>();
+        services.AddTransient<AccountTransactionsViewModel>();
 
         services.AddTransient<TransactionListViewModel>();
         services.AddTransient<AddEditTransactionViewModel>();
@@ -183,6 +184,7 @@ public static class MauiProgram
         services.AddTransient<FriendsViewModel>();
         services.AddTransient<SharedRequestListViewModel>();
         services.AddTransient<DriveBackupViewModel>();
+      
     }
 
     private static void RegisterPages(IServiceCollection services)
@@ -194,6 +196,7 @@ public static class MauiProgram
 
         services.AddTransient<AccountListPage>();
         services.AddTransient<AccountEditPage>();
+        services.AddTransient<AccountTransactionsPage>();
 
         services.AddTransient<TransactionListPage>();
         services.AddTransient<AddEditTransactionPage>();

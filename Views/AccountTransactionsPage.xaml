@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="MoneySpend.Views.AccountTransactionsPage"
+    x:Name="PageRoot"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MoneySpend.ViewModels"
+    xmlns:models="clr-namespace:MoneySpend.Models"
+    x:DataType="vm:AccountTransactionsViewModel"
+    Title="{Binding Title}"
+    BackgroundColor="#FFFFFF">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Edit" Command="{Binding EditAccountCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- SUMMARY HEADER -->
+        <Border Grid.Row="0" Margin="16" Padding="18"
+                StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                BackgroundColor="#1E5EB8">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="AVAILABLE BALANCE" FontSize="10" FontAttributes="Bold"
+                       CharacterSpacing="1.2" TextColor="White" Opacity="0.85" />
+                <Label Text="{Binding Account.CurrentBalance, StringFormat='₹{0:N2}'}"
+                       FontSize="28" FontAttributes="Bold" TextColor="White" />
+                <Grid ColumnDefinitions="*,*">
+                    <VerticalStackLayout Grid.Column="0">
+                        <Label Text="Income" FontSize="11" TextColor="White" Opacity="0.85" />
+                        <Label Text="{Binding TotalIncome, StringFormat='₹{0:N0}'}"
+                               FontSize="15" FontAttributes="Bold" TextColor="White" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1">
+                        <Label Text="Expense" FontSize="11" TextColor="White" Opacity="0.85" />
+                        <Label Text="{Binding TotalExpense, StringFormat='₹{0:N0}'}"
+                               FontSize="15" FontAttributes="Bold" TextColor="White" />
+                    </VerticalStackLayout>
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- TRANSACTIONS -->
+        <RefreshView Grid.Row="1"
+                     IsRefreshing="{Binding IsBusy}"
+                     Command="{Binding LoadCommand}">
+            <CollectionView ItemsSource="{Binding Transactions}" Margin="16,0">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.EmptyView>
+                    <Label Text="Is account mein abhi koi transaction nahi hai"
+                           HorizontalOptions="Center" Margin="0,40"
+                           TextColor="#8A94A6" />
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Transaction">
+                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                                BackgroundColor="#F5F7FA" Padding="14">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                    <Label Text="{Binding Description}"
+                                           FontAttributes="Bold" FontSize="14"
+                                           TextColor="#1A1410" MaxLines="1"
+                                           LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding TransactionDate, StringFormat='{0:dd MMM yyyy}'}"
+                                           FontSize="11" TextColor="#8A94A6" />
+                                </VerticalStackLayout>
+
+                                <Label Grid.Column="1"
+                                       Text="{Binding Amount, StringFormat='₹{0:N2}'}"
+                                       FontAttributes="Bold" FontSize="15"
+                                       VerticalOptions="Center"
+                                       TextColor="#E63946">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label"
+                                                     Binding="{Binding IsIncome}" Value="True">
+                                            <Setter Property="TextColor" Value="#00875A" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Grid>
+
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditTransactionCommand}"
+                                    CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

@@ -205,6 +205,7 @@ public partial class AppShell : Shell
     private static void RegisterRoutes()
     {
         Routing.RegisterRoute(nameof(AccountEditPage), typeof(AccountEditPage));
+        Routing.RegisterRoute(nameof(AccountTransactionsPage), typeof(AccountTransactionsPage));
 
         Routing.RegisterRoute(nameof(CategoryListPage), typeof(CategoryListPage));
         Routing.RegisterRoute(nameof(CategoryEditPage), typeof(CategoryEditPage));

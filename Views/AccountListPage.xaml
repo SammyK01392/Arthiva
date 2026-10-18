@@ -355,8 +355,8 @@
 
                                         <Border.GestureRecognizers>
                                             <TapGestureRecognizer
-                                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToEditCommand}"
-                                                CommandParameter="{Binding .}" />
+        Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.GoToTransactionsCommand}"
+        CommandParameter="{Binding .}" />
                                         </Border.GestureRecognizers>
                                     </Border>
                                 </SwipeView>

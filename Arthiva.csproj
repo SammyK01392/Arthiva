@@ -81,6 +81,9 @@
 	  <MauiXaml Update="Views\AboutDeveloperPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\AccountTransactionsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\AddSplitPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

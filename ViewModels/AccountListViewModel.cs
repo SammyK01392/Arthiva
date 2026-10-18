@@ -71,4 +71,10 @@ public partial class AccountListViewModel : BaseViewModel
             Accounts.Remove(account);
         });
     }
+    [RelayCommand]
+    private static async Task GoToTransactionsAsync(Account account)
+    {
+        var route = nameof(AccountTransactionsViewModel).Replace("ViewModel", "Page");
+        await Shell.Current.GoToAsync($"{route}?AccountId={account.Id}");
+    }
 }
