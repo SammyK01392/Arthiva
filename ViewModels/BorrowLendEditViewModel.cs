@@ -17,6 +17,13 @@ public partial class BorrowLendEditViewModel : BaseViewModel
     private readonly IAccountService _accountService;
     private readonly ISharedRequestService _sharedRequests; // NEW
 
+    /// <summary>
+    /// NEW: Page isko set karta hai (OnAppearing me). Save kamyab hone ke baad VM isko
+    /// await karta hai (amount, optional subtitle) — popup band hone ke baad hi navigation hota hai.
+    /// Null ho to popup skip ho jata hai.
+    /// </summary>
+    public Func<decimal, string?, Task>? ShowSuccessAsync { get; set; }
+
     [ObservableProperty]
     private string type = "Lend"; // Borrow / Lend
 
@@ -123,6 +130,11 @@ public partial class BorrowLendEditViewModel : BaseViewModel
             return;
         }
 
+        var saved = false;
+        string? popupSubtitle = null;
+        var savedAmount = TotalAmount;
+
+        // STEP 1: save / request bhejna. Koi bhi navigation yahan nahi hai.
         await ExecuteAsync(async () =>
         {
             // NEW: a contact who is a connected MoneySpend user can receive this as a shared request.
@@ -150,7 +162,9 @@ public partial class BorrowLendEditViewModel : BaseViewModel
                     if (!string.IsNullOrEmpty(sent.Message))
                         await Shell.Current.DisplayAlert("Shared request", sent.Message, "OK");
 
-                    await Shell.Current.GoToAsync("..");
+                    // Request gaya hai, abhi dono ke liye record nahi hua — popup ka subtitle isi hisaab se
+                    popupSubtitle = $"Request sent to {SelectedContact.Name}.\nIt will be recorded once they accept.";
+                    saved = true;
                     return;
                 }
             }
@@ -180,8 +194,25 @@ public partial class BorrowLendEditViewModel : BaseViewModel
             };
 
             await _borrowLendService.CreateAsync(record, SelectedAccount?.Id);
-            await Shell.Current.GoToAsync("..");
+            saved = true;
         });
+
+        // Error / Cancel / save fail -> popup nahi, navigation nahi
+        if (!saved) return;
+
+        // STEP 2: success popup — band hone tak wait. Fail ho to bhi navigation na ruke.
+        try
+        {
+            if (ShowSuccessAsync is not null)
+                await ShowSuccessAsync(savedAmount, popupSubtitle);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Success popup failed: {ex}");
+        }
+
+        // STEP 3: navigation (popup ke baad)
+        await Shell.Current.GoToAsync("..");
     }
 
     [RelayCommand]

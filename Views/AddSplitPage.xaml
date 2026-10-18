@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:MoneySpend.ViewModels"
+    xmlns:controls="clr-namespace:MoneySpend.Controls"
     x:DataType="vm:AddSplitViewModel"
     Title="Split Expense"
     BackgroundColor="#FFFFFF">
@@ -314,5 +315,8 @@
                     CornerRadius="14"
                     HeightRequest="50" />
         </Border>
+
+        <!-- Success popup: RowSpan=2 taaki Save bar ko bhi dhak le (hamesha last child) -->
+        <controls:TransactionSuccessPopup x:Name="SuccessPopup" Grid.RowSpan="2" />
     </Grid>
 </ContentPage>

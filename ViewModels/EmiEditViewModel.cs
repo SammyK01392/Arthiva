@@ -15,6 +15,13 @@ public partial class EmiEditViewModel : BaseViewModel
     private int _emiId;
     private EmiMaster? _existingEmi;
 
+    /// <summary>
+    /// NEW: Page isko set karta hai (OnAppearing me). Save kamyab hone ke baad VM isko
+    /// await karta hai (argument = monthly EMI amount) — popup band hone ke baad hi navigation hota hai.
+    /// Null ho to popup skip ho jata hai.
+    /// </summary>
+    public Func<decimal, Task>? ShowSuccessAsync { get; set; }
+
     public string EmiId
     {
         set
@@ -122,11 +129,16 @@ public partial class EmiEditViewModel : BaseViewModel
             return;
         }
 
+        var wasEdit = IsEditMode && _existingEmi is not null;
+        var savedAmount = EmiAmount;
+        var saved = false;
+
+        // STEP 1: sirf save. IsBusy tab tak true rehta hai jab tak DB write poora na ho.
         await ExecuteAsync(async () =>
         {
-            if (IsEditMode && _existingEmi is not null)
+            if (wasEdit)
             {
-                _existingEmi.Title = EmiTitle;
+                _existingEmi!.Title = EmiTitle;
                 _existingEmi.LoanProvider = LoanProvider;
                 _existingEmi.TotalAmount = TotalAmount;
                 _existingEmi.EmiAmount = EmiAmount;
@@ -163,8 +175,25 @@ public partial class EmiEditViewModel : BaseViewModel
                 await _emiService.CreateAsync(emi);
             }
 
-            await Shell.Current.GoToAsync("..");
+            saved = true;
         });
+
+        // Save fail hua (ExecuteAsync ne ErrorMessage set kar diya) -> popup/navigation nahi
+        if (!saved) return;
+
+        // STEP 2: success popup — band hone tak wait. Fail ho to bhi navigation na ruke.
+        try
+        {
+            if (ShowSuccessAsync is not null)
+                await ShowSuccessAsync(savedAmount);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Success popup failed: {ex}");
+        }
+
+        // STEP 3: navigation (popup ke baad)
+        await Shell.Current.GoToAsync("..");
     }
 
     [RelayCommand]

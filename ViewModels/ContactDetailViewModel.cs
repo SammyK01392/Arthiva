@@ -23,6 +23,8 @@ public class ContactHistoryItem
     public DateTime Date { get; init; }
     public string? Notes { get; init; }
     public bool IsDeletable => TransactionId.HasValue;
+    public bool IsBorrow => string.Equals(RecordType, "Borrow", StringComparison.OrdinalIgnoreCase);
+    public bool IsLend => !IsBorrow;
 }
 
 [QueryProperty(nameof(ContactId), "ContactId")]

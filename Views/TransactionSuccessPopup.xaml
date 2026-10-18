@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MoneySpend.Controls.TransactionSuccessPopup"
+             IsVisible="False">
+
+    <!-- Backdrop -->
+    <Grid x:Name="Overlay" BackgroundColor="#B3000000">
+        <Grid.GestureRecognizers>
+            <TapGestureRecognizer Tapped="OnBackdropTapped" />
+        </Grid.GestureRecognizers>
+
+        <!-- Card -->
+        <Border x:Name="Card"
+                WidthRequest="320"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                BackgroundColor="White"
+                StrokeThickness="0"
+                Padding="0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="22" />
+            </Border.StrokeShape>
+            <Border.Shadow>
+                <Shadow Brush="Black" Opacity="0.3" Radius="28" Offset="0,10" />
+            </Border.Shadow>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnCardTapped" />
+            </Border.GestureRecognizers>
+
+            <Grid>
+                <!-- Waves (do layers) -->
+                <Grid VerticalOptions="End" HeightRequest="58" InputTransparent="True">
+                    <Path x:Name="WaveBack" Aspect="Fill" Opacity="0.45"
+                          Data="M0,22 C60,52 110,0 175,28 C235,54 290,6 340,26 L340,60 L0,60 Z" />
+                    <Path x:Name="WaveFront" Aspect="Fill" Opacity="0.85"
+                          Data="M0,38 C55,10 105,52 170,34 C235,14 285,50 340,30 L340,60 L0,60 Z" />
+                </Grid>
+
+                <VerticalStackLayout Padding="22,18,22,26" Spacing="6">
+
+                    <!-- Close -->
+                    <Grid HorizontalOptions="End" WidthRequest="28" HeightRequest="28" Margin="0,0,-8,-18">
+                        <Path Data="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                              Fill="#334155" Aspect="Uniform" WidthRequest="16" HeightRequest="16"
+                              HorizontalOptions="Center" VerticalOptions="Center" />
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnCloseTapped" />
+                        </Grid.GestureRecognizers>
+                    </Grid>
+
+                    <!-- Icon + confetti -->
+                    <Grid HeightRequest="104" Margin="0,4,0,2">
+                        <AbsoluteLayout x:Name="ConfettiLayer" InputTransparent="True" />
+                        <Grid HorizontalOptions="Center" VerticalOptions="Center">
+                            <Ellipse x:Name="IconRing" WidthRequest="96" HeightRequest="96" />
+                            <Ellipse x:Name="IconCircle" WidthRequest="68" HeightRequest="68" />
+                            <Path x:Name="MainIcon" Fill="White" Aspect="Uniform"
+                                  WidthRequest="32" HeightRequest="32"
+                                  HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Grid>
+                    </Grid>
+
+                    <Label x:Name="TitleLabel" FontSize="22" FontAttributes="Bold"
+                           TextColor="#0F172A" HorizontalTextAlignment="Center" />
+
+                    <Label x:Name="SubtitleLabel" FontSize="14" TextColor="#475569"
+                           HorizontalTextAlignment="Center" Margin="0,0,0,12" />
+
+                    <!-- Amount box -->
+                    <Border x:Name="AmountBox" StrokeThickness="1" Padding="14,12">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14" />
+                        </Border.StrokeShape>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                            <Grid WidthRequest="40" HeightRequest="40" VerticalOptions="Center">
+                                <Ellipse x:Name="AmountIconBg" />
+                                <Path x:Name="AmountIcon" Aspect="Uniform"
+                                      WidthRequest="20" HeightRequest="20"
+                                      HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Grid>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0">
+                                <Label x:Name="AmountCaption" FontSize="13" TextColor="#334155" />
+                                <Label x:Name="AmountLabel" FontSize="26" FontAttributes="Bold" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+
+                    <!-- wave ke liye jagah -->
+                    <BoxView HeightRequest="14" Color="Transparent" />
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+    </Grid>
+</ContentView>

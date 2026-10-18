@@ -13,6 +13,13 @@ public partial class BillEditViewModel : BaseViewModel
     private int _billId;
     private Bill? _existingBill;
 
+    /// <summary>
+    /// NEW: Page isko set karta hai (OnAppearing me). Save kamyab hone ke baad VM isko
+    /// await karta hai (argument = bill amount) — popup band hone ke baad hi navigation hota hai.
+    /// Null ho to popup skip ho jata hai.
+    /// </summary>
+    public Func<decimal, Task>? ShowSuccessAsync { get; set; }
+
     public string BillId
     {
         set
@@ -104,11 +111,16 @@ public partial class BillEditViewModel : BaseViewModel
             return;
         }
 
+        var wasEdit = IsEditMode && _existingBill is not null;
+        var savedAmount = Amount;
+        var saved = false;
+
+        // STEP 1: sirf save. IsBusy tab tak true rehta hai jab tak DB write poora na ho.
         await ExecuteAsync(async () =>
         {
-            if (IsEditMode && _existingBill is not null)
+            if (wasEdit)
             {
-                _existingBill.Name = Name;
+                _existingBill!.Name = Name;
                 _existingBill.Provider = Provider;
                 _existingBill.Type = Type;
                 _existingBill.Amount = Amount;
@@ -139,8 +151,25 @@ public partial class BillEditViewModel : BaseViewModel
                 await _billService.CreateAsync(bill);
             }
 
-            await Shell.Current.GoToAsync("..");
+            saved = true;
         });
+
+        // Save fail hua (ExecuteAsync ne ErrorMessage set kar diya) -> popup/navigation nahi
+        if (!saved) return;
+
+        // STEP 2: success popup — band hone tak wait. Fail ho to bhi navigation na ruke.
+        try
+        {
+            if (ShowSuccessAsync is not null)
+                await ShowSuccessAsync(savedAmount);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Success popup failed: {ex}");
+        }
+
+        // STEP 3: navigation (popup ke baad)
+        await Shell.Current.GoToAsync("..");
     }
 
     [RelayCommand]

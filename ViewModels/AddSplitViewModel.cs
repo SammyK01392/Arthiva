@@ -43,6 +43,13 @@ public partial class AddSplitViewModel : BaseViewModel
     private bool _loaded;
     private bool _suspend;
 
+    /// <summary>
+    /// NEW: Page isko set karta hai (OnAppearing me). Save kamyab hone ke baad VM isko
+    /// await karta hai (argument = total bill amount) — popup band hone ke baad hi navigation hota hai.
+    /// Null ho to popup skip ho jata hai.
+    /// </summary>
+    public Func<decimal, Task>? ShowSuccessAsync { get; set; }
+
     public ObservableCollection<Account> Accounts { get; } = new();
     public ObservableCollection<Category> Categories { get; } = new();
     public ObservableCollection<SplitGroup> Groups { get; } = new();
@@ -468,20 +475,54 @@ public partial class AddSplitViewModel : BaseViewModel
         await ExecuteAsync(async () => result = await _splitService.CreateAsync(request));
 
         if (result is null) return;
-        if (result.Success)
+
+        if (!result.Success)
         {
-            try
-            {
-                var shared = await _sharedRequests.SendSplitRequestsAsync(result.SplitId);
-                if (!shared.Success)
-                    await SplitPrompts.AlertAsync(shared.Message ?? "Split saved, but the share request could not be sent.");
-                else if (!string.IsNullOrEmpty(shared.Message))
-                    System.Diagnostics.Debug.WriteLine($"[Split] {shared.Message}");
-            }
-            catch (Exception ex) { CrashLogger.Log(ex, "AddSplit.SendShared"); }
-            await Shell.Current.GoToAsync("..");
-        }
-        else
             await SplitPrompts.AlertAsync(result.ErrorMessage ?? "Could not save the split.");
+            return;
+        }
+
+        var splitId = result.SplitId;
+
+        // Share requests network par jaate hain (slow ho sakte hain) —
+        // popup ke saath parallel chalao taaki user ko turant success dikhe.
+        var sharedTask = SendSharedAsync(splitId);
+
+        // Success popup — band hone tak wait. Fail ho to bhi navigation na ruke.
+        try
+        {
+            if (ShowSuccessAsync is not null)
+                await ShowSuccessAsync(total);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Success popup failed: {ex}");
+        }
+
+        // Popup band hone ke baad share ka natija: fail hua to hi alert
+        var sharedError = await sharedTask;
+        if (sharedError is not null)
+            await SplitPrompts.AlertAsync(sharedError);
+
+        await Shell.Current.GoToAsync("..");
+    }
+
+    /// <summary>Share requests bhejta hai. Error message return karta hai (null = sab theek).</summary>
+    private async Task<string?> SendSharedAsync(int splitId)
+    {
+        try
+        {
+            var shared = await _sharedRequests.SendSplitRequestsAsync(splitId);
+            if (!shared.Success)
+                return shared.Message ?? "Split saved, but the share request could not be sent.";
+
+            if (!string.IsNullOrEmpty(shared.Message))
+                System.Diagnostics.Debug.WriteLine($"[Split] {shared.Message}");
+        }
+        catch (Exception ex)
+        {
+            CrashLogger.Log(ex, "AddSplit.SendShared");
+        }
+        return null;
     }
 }

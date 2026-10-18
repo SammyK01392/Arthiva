@@ -452,6 +452,7 @@
                                                                      VerticalOptions="Center">
 
                                                     <HorizontalStackLayout Spacing="6">
+                                                        <!-- FIXED: Lend = UP arrow (money goes out), Borrow = DOWN arrow (money comes in) -->
                                                         <Path WidthRequest="9" HeightRequest="9"
                                                               Aspect="Uniform"
                                                               Fill="Transparent"
@@ -460,12 +461,12 @@
                                                               StrokeLineCap="Round"
                                                               StrokeLineJoin="Round"
                                                               VerticalOptions="Center"
-                                                              Data="M12,4 L12,20 M6,14 L12,20 L18,14">
+                                                              Data="M12,20 L12,4 M6,10 L12,4 L18,10">
                                                             <Path.Triggers>
                                                                 <DataTrigger TargetType="Path"
                                                                              Binding="{Binding Type}" Value="Borrow">
                                                                     <Setter Property="Stroke" Value="{StaticResource Borrow}" />
-                                                                    <Setter Property="Data" Value="M12,20 L12,4 M6,10 L12,4 L18,10" />
+                                                                    <Setter Property="Data" Value="M12,4 L12,20 M6,14 L12,20 L18,14" />
                                                                 </DataTrigger>
                                                             </Path.Triggers>
                                                         </Path>
@@ -583,23 +584,45 @@
                                                       Padding="12,10"
                                                       ColumnSpacing="10">
 
-                                                    <Border Grid.Column="0"
-                                                            WidthRequest="30" HeightRequest="30"
-                                                            StrokeThickness="0"
-                                                            VerticalOptions="Center"
-                                                            StrokeShape="RoundRectangle 15"
-                                                            BackgroundColor="{StaticResource PrimaryTint}">
-                                                        <Path WidthRequest="12" HeightRequest="12"
-                                                              Aspect="Uniform"
-                                                              Fill="Transparent"
-                                                              Stroke="{StaticResource Primary}"
-                                                              StrokeThickness="2.2"
-                                                              StrokeLineCap="Round"
-                                                              StrokeLineJoin="Round"
-                                                              HorizontalOptions="Center"
-                                                              VerticalOptions="Center"
-                                                              Data="M12,20 L12,4 M6,10 L12,4 L18,10" />
-                                                    </Border>
+                                                    <!-- FIXED: icon now follows Lend (green ↑) / Borrow (red ↓) -->
+                                                    <Grid Grid.Column="0"
+                                                          WidthRequest="30" HeightRequest="30"
+                                                          VerticalOptions="Center">
+
+                                                        <!-- LEND: green UP arrow -->
+                                                        <Border IsVisible="{Binding IsLend}"
+                                                                StrokeThickness="0"
+                                                                StrokeShape="RoundRectangle 15"
+                                                                BackgroundColor="{StaticResource LendTint}">
+                                                            <Path WidthRequest="12" HeightRequest="12"
+                                                                  Aspect="Uniform"
+                                                                  Fill="Transparent"
+                                                                  Stroke="{StaticResource Lend}"
+                                                                  StrokeThickness="2.2"
+                                                                  StrokeLineCap="Round"
+                                                                  StrokeLineJoin="Round"
+                                                                  HorizontalOptions="Center"
+                                                                  VerticalOptions="Center"
+                                                                  Data="M12,20 L12,4 M6,10 L12,4 L18,10" />
+                                                        </Border>
+
+                                                        <!-- BORROW: red DOWN arrow -->
+                                                        <Border IsVisible="{Binding IsBorrow}"
+                                                                StrokeThickness="0"
+                                                                StrokeShape="RoundRectangle 15"
+                                                                BackgroundColor="{StaticResource BorrowTint}">
+                                                            <Path WidthRequest="12" HeightRequest="12"
+                                                                  Aspect="Uniform"
+                                                                  Fill="Transparent"
+                                                                  Stroke="{StaticResource Borrow}"
+                                                                  StrokeThickness="2.2"
+                                                                  StrokeLineCap="Round"
+                                                                  StrokeLineJoin="Round"
+                                                                  HorizontalOptions="Center"
+                                                                  VerticalOptions="Center"
+                                                                  Data="M12,4 L12,20 M6,14 L12,20 L18,14" />
+                                                        </Border>
+                                                    </Grid>
 
                                                     <VerticalStackLayout Grid.Column="1"
                                                                          Spacing="2"

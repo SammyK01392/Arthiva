@@ -17,6 +17,13 @@ public partial class AddEditTransactionViewModel : BaseViewModel
     private int _transactionId;
     private Transaction? _existingTransaction;
 
+    /// <summary>
+    /// NEW: Page isko set karta hai (OnAppearing me). Save kamyab hone ke baad
+    /// VM isko await karta hai — popup band hone ke baad hi navigation hota hai.
+    /// Null ho to popup skip ho jata hai.
+    /// </summary>
+    public Func<decimal, Task>? ShowSuccessAsync { get; set; }
+
     // Set by Quick Actions (Dashboard) / the Transactions speed-dial when they
     // navigate straight to "Add Income" or "Add Expense" instead of the
     // generic Add tab. Same Shell quirk as TransactionId below: Shell resets
@@ -70,6 +77,7 @@ public partial class AddEditTransactionViewModel : BaseViewModel
     [ObservableProperty]
     private Category? selectedCategory;
 
+    // Ab UI me use nahi hota (popup ne le liya). Kisi aur jagah bind na ho to delete kar sakte ho.
     [ObservableProperty]
     private string? successMessage;
 
@@ -81,14 +89,12 @@ public partial class AddEditTransactionViewModel : BaseViewModel
 
     public List<string> PaymentMethods { get; } = new() { "Cash", "UPI", "Bank Transfer", "Card" };
 
-    // CHANGED: fire-and-forget ab safe wrapper se chalta hai
     partial void OnTransactionTypeChanged(string value)
     {
         if (_suppressCategoryAutoReload) return;
         _ = SafeLoadCategoriesAsync();
     }
 
-    // CHANGED: naya helper — exception silently gayab nahi hoga
     private async Task SafeLoadCategoriesAsync()
     {
         try
@@ -206,11 +212,16 @@ public partial class AddEditTransactionViewModel : BaseViewModel
             return;
         }
 
+        var wasEdit = IsEditMode && _existingTransaction is not null;
+        var savedAmount = Amount;
+        var saved = false;
+
+        // STEP 1: sirf save. IsBusy tab tak true rehta hai jab tak DB write poora na ho.
         await ExecuteAsync(async () =>
         {
-            if (IsEditMode && _existingTransaction is not null)
+            if (wasEdit)
             {
-                _existingTransaction.Amount = Amount;
+                _existingTransaction!.Amount = Amount;
                 _existingTransaction.TransactionType = TransactionType;
                 _existingTransaction.TransactionDate = TransactionDate;
                 _existingTransaction.Description = Description;
@@ -219,11 +230,8 @@ public partial class AddEditTransactionViewModel : BaseViewModel
                 _existingTransaction.AccountId = SelectedAccount.Id;
                 _existingTransaction.CategoryId = SelectedCategory.Id;
 
-                // DB write + balance adjust poora await hone ke baad hi navigate hoga
+                // DB write + balance adjust poora await hone ke baad hi aage badhega
                 await _transactionService.UpdateTransactionAsync(_existingTransaction);
-
-                // This instance was pushed on top of the list page — pop back to it.
-                await Shell.Current.GoToAsync("..");
             }
             else
             {
@@ -239,22 +247,40 @@ public partial class AddEditTransactionViewModel : BaseViewModel
                     CategoryId = SelectedCategory.Id
                 };
                 await _transactionService.AddTransactionAsync(transaction);
-
-                // Quick Actions land here and save in one motion — without this,
-                // the page would jump straight to the list with no acknowledgement
-                // that the entry actually went in. A short confirmation + a beat
-                // to see it keeps "fast entry" feeling fast AND confirmed.
-                SuccessMessage = $"✓ {TransactionType} of ₹{Amount:N0} added";
-                await Task.Delay(300); // CHANGED: 600 → 300
-
-                // Pushed on top of whichever tab we came from — jump to the
-                // Transactions tab (resets the nav stack) so the user lands
-                // straight on the list and immediately sees the new entry.
-                if (Shell.Current.Navigation.NavigationStack.Count > 1)
-                    await Shell.Current.Navigation.PopToRootAsync(false);
-                await Shell.Current.GoToAsync($"//{nameof(Views.TransactionListPage)}");
             }
+
+            saved = true;
         });
+
+        // Save fail hua (ExecuteAsync ne ErrorMessage set kar diya) -> yahin ruk jao
+        if (!saved) return;
+
+        // STEP 2: success popup — popup band hone tak wait. Fail ho to bhi navigation na ruke.
+        try
+        {
+            if (ShowSuccessAsync is not null)
+                await ShowSuccessAsync(savedAmount);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Success popup failed: {ex}");
+        }
+
+        // STEP 3: navigation (popup ke baad)
+        if (wasEdit)
+        {
+            // This instance was pushed on top of the list page — pop back to it.
+            await Shell.Current.GoToAsync("..");
+        }
+        else
+        {
+            // Pushed on top of whichever tab we came from — jump to the
+            // Transactions tab (resets the nav stack) so the user lands
+            // straight on the list and immediately sees the new entry.
+            if (Shell.Current.Navigation.NavigationStack.Count > 1)
+                await Shell.Current.Navigation.PopToRootAsync(false);
+            await Shell.Current.GoToAsync($"//{nameof(Views.TransactionListPage)}");
+        }
     }
 
     [RelayCommand]
