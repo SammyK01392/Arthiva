@@ -18,8 +18,6 @@ using AndroidPaint = Android.Graphics.Paint;
 using AndroidRectF = Android.Graphics.RectF;
 using AndroidCanvas = Android.Graphics.Canvas;
 using AndroidPath = Android.Graphics.Path;
-using AndroidLinearGradient = Android.Graphics.LinearGradient;
-using AndroidShader = Android.Graphics.Shader;
 
 using IOPath = System.IO.Path;
 
@@ -83,6 +81,27 @@ public static class PdfReportService
     // =====================================================================
 
     public static async Task<string> GenerateContactReportAsync(
+        string contactName,
+        string? mobile,
+        string? email,
+        decimal totalReceive,
+        decimal totalOwe,
+        string netBalance,
+        IEnumerable<ContactHistoryItem> history)
+    {
+        try
+        {
+            return await GenerateCoreAsync(
+                contactName, mobile, email, totalReceive, totalOwe, netBalance, history);
+        }
+        catch (Exception ex)
+        {
+            Android.Util.Log.Error("PdfReport", ex.ToString());
+            throw;
+        }
+    }
+
+    private static async Task<string> GenerateCoreAsync(
         string contactName,
         string? mobile,
         string? email,
@@ -357,7 +376,7 @@ public static class PdfReportService
 
             _regular = Typeface.Default;
             _bold = Typeface.Create(Typeface.Default, TypefaceStyle.Bold);
-            _script = Typeface.Create("cursive", TypefaceStyle.Italic);
+            _script = Typeface.Create(Typeface.Default, TypefaceStyle.Italic);
         }
 
         public void Dispose()
@@ -499,15 +518,7 @@ public static class PdfReportService
             var rect = new AndroidRectF(x, y, x + size, y + size);
             var radius = size * 0.26f;
 
-            using (var shader = new AndroidLinearGradient(
-                       x, y, x + size, y + size,
-                       OrangeLight.ToArgb(), OrangeDeep.ToArgb(),
-                       AndroidShader.TileMode.Clamp!))
-            {
-                _grad.SetShader(shader);
-                _c.DrawRoundRect(rect, radius, radius, _grad);
-                _grad.SetShader(null);
-            }
+            RRect(rect, radius, Orange);
 
             // flap
             RRect(new AndroidRectF(x + size * 0.26f, y + size * 0.22f, x + size * 0.62f, y + size * 0.34f),
@@ -837,18 +848,11 @@ public static class PdfReportService
             var h = TableBlockHeight(rows.Count);
             var rect = new AndroidRectF(M, top, PageW - M, top + h);
 
-            _c.Save();
+            RRect(rect, 10f, White);
 
-            using (var clip = new AndroidPath())
-            {
-                clip.AddRoundRect(rect, 10f, 10f, AndroidPath.Direction.Cw!);
-                _c.ClipPath(clip);
-            }
-
-            FillRect(M, top, PageW - M, top + h, White);
-
-            // header
-            FillRect(M, top, PageW - M, top + TableHeadH, TableHeadBg);
+            // header (rounded top corners)
+            RRect(new AndroidRectF(M, top, PageW - M, top + TableHeadH), 8f, TableHeadBg);
+            FillRect(M, top + 8f, PageW - M, top + TableHeadH, TableHeadBg);
 
             var hb = top + 14.5f;
 
@@ -872,7 +876,18 @@ public static class PdfReportService
                 var accent = TypeColor(item.RecordType);
 
                 if (i % 2 == 1)
-                    FillRect(M, rt, PageW - M, rt + RowH, RowAlt);
+                {
+                    if (i == rows.Count - 1)
+                    {
+                        // last row: keep bottom corners rounded
+                        RRect(new AndroidRectF(M, rt, PageW - M, rt + RowH), 8f, RowAlt);
+                        FillRect(M, rt, PageW - M, rt + RowH - 8f, RowAlt);
+                    }
+                    else
+                    {
+                        FillRect(M, rt, PageW - M, rt + RowH, RowAlt);
+                    }
+                }
 
                 Text(item.Date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture),
                     colDate, cy + 3f, 8.5f, Navy, true);
@@ -889,8 +904,6 @@ public static class PdfReportService
                 if (!string.IsNullOrWhiteSpace(item.Notes))
                     Text(Fit(item.Notes, 7.5f, false, noteMax), colNote, cy + 2.8f, 7.5f, Gray);
             }
-
-            _c.Restore();
 
             RRectStroke(rect, 10f, LineColor, 1f);
 
