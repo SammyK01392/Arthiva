@@ -1,6 +1,5 @@
 using MoneySpend.Models;
 using Plugin.LocalNotification;
-using Plugin.LocalNotification.Core.Models;
 
 namespace MoneySpend.Services;
 
@@ -110,20 +109,14 @@ public class NotificationService : INotificationService
         }
     }
 
+    // CHANGED: now goes through SystemNotifier -> premium look (own channel, high priority
+    // banner, MoneySpend icon + orange accent, expandable text, tap opens ActionRoute).
+    // Same notification Id as before, so Cancel(id) above keeps working.
     private static Task ScheduleOsNotificationAsync(Notification notification)
-    {
-        var request = new NotificationRequest
-        {
-            NotificationId = notification.Id,
-            Title = notification.Title,
-            Description = notification.Body,
-            ReturningData = notification.ActionRoute, // tapping the notification can carry the route to navigate to
-            Schedule = new NotificationRequestSchedule
-            {
-                NotifyTime = notification.ReminderDate
-            }
-        };
-
-        return LocalNotificationCenter.Current.Show(request);
-    }
+        => SystemNotifier.ScheduleWithIdAsync(
+            notification.Id,
+            notification.Title,
+            notification.Body,
+            notification.ReminderDate,
+            notification.ActionRoute);
 }

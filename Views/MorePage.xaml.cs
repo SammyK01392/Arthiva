@@ -115,4 +115,6 @@ public partial class MorePage : ContentPage
 
     private async void OnSharedRequestsTapped(object? sender, TappedEventArgs e)
         => await Shell.Current.GoToAsync(nameof(SharedRequestListPage));
+    private async void OnDetectedTransactionsTapped(object? sender, TappedEventArgs e)
+    => await Shell.Current.GoToAsync(nameof(DetectedTransactionsPage));
 }

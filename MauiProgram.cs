@@ -5,7 +5,7 @@ using MoneySpend.Views;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
 using Plugin.LocalNotification;
-
+using Plugin.LocalNotification.Core.Models.AndroidOption;   
 using INotificationService = MoneySpend.Services.INotificationService;
 namespace MoneySpend;
 
@@ -25,9 +25,31 @@ public static class MauiProgram
 
         builder
             .UseMauiApp<App>()
-            .UseLocalNotification()
-            .ConfigureFonts(fonts =>
-            {
+             .UseLocalNotification(config =>                        
+             {
+                 config.AddAndroid(android =>
+                 {
+                     foreach (var (id, name, desc) in new[]
+                     {
+                            (SystemNotifier.BillsChannel,    "Bill reminders", "Upcoming and due bills"),
+                            (SystemNotifier.EmiChannel,      "EMI reminders",  "Upcoming and due EMIs"),
+                            (SystemNotifier.BudgetChannel,   "Budget alerts",  "When you near or cross a budget"),
+                            (SystemNotifier.PaymentsChannel, "Payments",       "Detected and added payments"),
+                            (SystemNotifier.GeneralChannel,  "General",        "Other updates")
+                        })
+                     {
+                         android.AddChannel(new AndroidNotificationChannelRequest
+                         {
+                             Id = id,
+                             Name = name,
+                             Description = desc,
+                             Importance = AndroidImportance.High
+                         });
+                     }
+                 });
+             })
+                .ConfigureFonts(fonts =>
+    {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             })
@@ -123,6 +145,8 @@ public static class MauiProgram
         services.AddSingleton<IRealtimeListenerService, RealtimeListenerService>();
         services.AddSingleton<IInviteService, InviteService>();
         services.AddSingleton<ISharedSettlementService, SharedSettlementService>();
+        services.AddSingleton<ITransactionService, TransactionService>();
+        services.AddSingleton<IDetectedTransactionService, DetectedTransactionService>();   
 #if ANDROID
         services.AddSingleton<IPushTokenProvider, AndroidPushTokenProvider>();
 #else
@@ -184,7 +208,9 @@ public static class MauiProgram
         services.AddTransient<FriendsViewModel>();
         services.AddTransient<SharedRequestListViewModel>();
         services.AddTransient<DriveBackupViewModel>();
-      
+        services.AddTransient<DriveBackupViewModel>();
+        services.AddTransient<DetectedTransactionsViewModel>();  
+
     }
 
     private static void RegisterPages(IServiceCollection services)
@@ -250,5 +276,7 @@ public static class MauiProgram
         services.AddTransient<FriendsPage>();
         services.AddTransient<SharedRequestListPage>();
         services.AddTransient<DriveBackupPage>();
+        services.AddTransient<DriveBackupPage>();
+        services.AddTransient<DetectedTransactionsPage>();  
     }
 }

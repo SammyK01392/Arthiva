@@ -156,6 +156,34 @@
                             <Label Grid.Column="2" Style="{StaticResource Chevron}" InputTransparent="True" />
                         </Grid>
                         <BoxView Style="{StaticResource Divider}" />
+
+                        <Grid Style="{StaticResource RowGrid}">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnDetectedTransactionsTapped" />
+                            </Grid.GestureRecognizers>
+
+                            <Border Style="{StaticResource IconBox}" BackgroundColor="#FFF1E3">
+                                <Label Text="&#128276;"
+               FontSize="19"
+               HorizontalOptions="Center"
+               VerticalOptions="Center" />
+                            </Border>
+
+                            <VerticalStackLayout Grid.Column="1"
+                         VerticalOptions="Center"
+                         Spacing="2"
+                         InputTransparent="True">
+                                <Label Style="{StaticResource RowTitle}"
+               Text="Detected Transactions" />
+                                <Label Style="{StaticResource RowSub}"
+               Text="Automatically detect bank SMS payments" />
+                            </VerticalStackLayout>
+
+                            <Label Grid.Column="2"
+           Style="{StaticResource Chevron}"
+           InputTransparent="True" />
+                        </Grid>
+                        <BoxView Style="{StaticResource Divider}" />
                         <Grid Style="{StaticResource RowGrid}">
                             <Grid.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnSplitsTapped" />
@@ -169,6 +197,7 @@
                             </VerticalStackLayout>
                             <Label Grid.Column="2" Style="{StaticResource Chevron}" InputTransparent="True" />
                         </Grid>
+                        
                         <BoxView Style="{StaticResource Divider}" />
                         <Grid Style="{StaticResource RowGrid}">
                             <Grid.GestureRecognizers>

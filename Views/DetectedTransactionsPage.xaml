@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="MoneySpend.Views.DetectedTransactionsPage"
+    x:Name="PageRoot"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MoneySpend.ViewModels"
+    xmlns:models="clr-namespace:MoneySpend.Models"
+    x:DataType="vm:DetectedTransactionsViewModel"
+    Title="{Binding Title}"
+    BackgroundColor="#FFF8F2">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="Primary">#FF6B00</Color>
+            <Color x:Key="PrimaryTint">#FFF1E3</Color>
+            <Color x:Key="CardBg">#FFFFFF</Color>
+            <Color x:Key="CardStroke">#F4EBE1</Color>
+            <Color x:Key="TrackMuted">#F4EDE6</Color>
+            <Color x:Key="TextPrimary">#1A1410</Color>
+            <Color x:Key="TextSecondary">#7A6B5E</Color>
+            <Color x:Key="TextTertiary">#A89A8C</Color>
+            <Color x:Key="Borrow">#E63946</Color>
+            <Color x:Key="Lend">#0FA968</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <RefreshView IsRefreshing="{Binding IsBusy}"
+                 Command="{Binding AppearingCommand}"
+                 RefreshColor="{StaticResource Primary}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16,16,16,24" Spacing="12">
+
+                <!-- Permission banner -->
+                <Border IsVisible="{Binding NeedsPermission}"
+                        Padding="14"
+                        StrokeThickness="1"
+                        Stroke="#FDD7B0"
+                        StrokeShape="RoundRectangle 16"
+                        BackgroundColor="{StaticResource PrimaryTint}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Turn on auto-detect"
+                               FontSize="14" FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="Allow SMS access so MoneySpend can spot your bank debit messages (PhonePe, GPay, Paytm...). Messages are read only on this phone."
+                               FontSize="11.5"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Button Text="Allow SMS access"
+                                Command="{Binding EnableAutoDetectCommand}"
+                                BackgroundColor="{StaticResource Primary}"
+                                TextColor="White"
+                                CornerRadius="12"
+                                HeightRequest="40"
+                                FontSize="13"
+                                FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label IsVisible="{Binding SmsFeatureDisabled}"
+                       Text="SMS auto-detect is switched off in this build."
+                       HorizontalTextAlignment="Center"
+                       Margin="0,40,0,0"
+                       FontSize="13"
+                       TextColor="{StaticResource TextSecondary}" />
+
+                <!-- Auto-add switch -->
+                <Border IsVisible="{Binding SmsFeatureEnabled}"
+                        Padding="14,12"
+                        StrokeThickness="1"
+                        Stroke="{StaticResource CardStroke}"
+                        StrokeShape="RoundRectangle 16"
+                        BackgroundColor="{StaticResource CardBg}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Spacing="3" VerticalOptions="Center">
+                            <Label Text="Auto-add entries"
+                                   FontSize="14" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextPrimary}" />
+                            <Label Text="ON: every debit/credit SMS becomes an expense/income entry by itself. OFF: it waits here for your tap."
+                                   FontSize="11"
+                                   TextColor="{StaticResource TextSecondary}" />
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1"
+                                IsToggled="{Binding AutoAdd}"
+                                OnColor="{StaticResource Primary}"
+                                VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <Label Text="Payments found in your bank SMS. Tap a name to rename it - the app remembers it for next time."
+                       FontSize="11.5"
+                       TextColor="{StaticResource TextTertiary}" />
+
+                <Label IsVisible="{Binding IsEmpty}"
+                       Text="Nothing new right now. New payments will show up here automatically."
+                       HorizontalTextAlignment="Center"
+                       Margin="0,40,0,0"
+                       FontSize="13"
+                       TextColor="{StaticResource TextSecondary}" />
+
+                <CollectionView ItemsSource="{Binding Items}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
+                    </CollectionView.ItemsLayout>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:DetectedTransaction">
+
+                            <Border Padding="14"
+                                    Margin="0,0,0,10"
+                                    StrokeThickness="1"
+                                    Stroke="{StaticResource CardStroke}"
+                                    StrokeShape="RoundRectangle 16"
+                                    BackgroundColor="{StaticResource CardBg}">
+                                <Border.Shadow>
+                                    <Shadow Brush="#3D1E00" Offset="0,3" Radius="10" Opacity="0.05" />
+                                </Border.Shadow>
+
+                                <Grid RowDefinitions="Auto,Auto"
+                                      ColumnDefinitions="*,Auto"
+                                      RowSpacing="12">
+
+                                    <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="3">
+                                        <Label Text="{Binding DisplayPayee}"
+                                               FontSize="14"
+                                               FontAttributes="Bold"
+                                               LineBreakMode="TailTruncation"
+                                               MaxLines="1"
+                                               TextColor="{StaticResource TextPrimary}">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.RenamePayeeCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                            </Label.GestureRecognizers>
+                                        </Label>
+                                        <Label Text="{Binding Subtitle}"
+                                               FontSize="11"
+                                               TextColor="{StaticResource TextSecondary}" />
+                                        <Label Text="{Binding TransactionDate, StringFormat='{0:dd MMM yyyy, hh:mm tt}'}"
+                                               FontSize="10.5"
+                                               TextColor="{StaticResource TextTertiary}" />
+                                    </VerticalStackLayout>
+
+                                    <Label Grid.Row="0" Grid.Column="1"
+                                           IsVisible="{Binding IsDebit}"
+                                           Text="{Binding Amount, StringFormat='-₹{0:N2}'}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           VerticalOptions="Start"
+                                           TextColor="{StaticResource Borrow}" />
+
+                                    <Label Grid.Row="0" Grid.Column="1"
+                                           IsVisible="{Binding IsCredit}"
+                                           Text="{Binding Amount, StringFormat='+₹{0:N2}'}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           VerticalOptions="Start"
+                                           TextColor="{StaticResource Lend}" />
+
+                                    <Grid Grid.Row="1" Grid.ColumnSpan="2"
+                                          ColumnDefinitions="2*,*"
+                                          ColumnSpacing="10">
+                                        <Button Grid.Column="0"
+                                                Text="{Binding AddLabel}"
+                                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.AddToExpensesCommand}"
+                                                CommandParameter="{Binding .}"
+                                                BackgroundColor="{StaticResource Primary}"
+                                                TextColor="White"
+                                                CornerRadius="12"
+                                                HeightRequest="42"
+                                                FontSize="13"
+                                                FontAttributes="Bold" />
+                                        <Button Grid.Column="1"
+                                                Text="Skip"
+                                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SkipCommand}"
+                                                CommandParameter="{Binding .}"
+                                                BackgroundColor="{StaticResource TrackMuted}"
+                                                TextColor="{StaticResource TextSecondary}"
+                                                CornerRadius="12"
+                                                HeightRequest="42"
+                                                FontSize="13" />
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

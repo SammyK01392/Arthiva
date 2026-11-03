@@ -258,6 +258,7 @@ public partial class AppShell : Shell
 
         Routing.RegisterRoute(nameof(FriendsPage), typeof(FriendsPage));
         Routing.RegisterRoute(nameof(SharedRequestListPage), typeof(SharedRequestListPage));
+        Routing.RegisterRoute(nameof(DetectedTransactionsPage), typeof(DetectedTransactionsPage));
 
     }
 }
