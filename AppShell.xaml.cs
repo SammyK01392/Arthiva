@@ -56,6 +56,7 @@ public partial class AppShell : Shell
             await LoadUserInitialsAsync();
             _ = Task.Run(() => _sharedSync.StartAsync());
             UpdateCurrentPageTitle();
+            StatementFiles.DeleteOlderThan(TimeSpan.FromDays(1));
         };
 
         Navigated += async (_, _) =>

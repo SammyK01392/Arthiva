@@ -60,7 +60,7 @@
         <VerticalStackLayout Padding="16,12,16,32" Spacing="22" MaximumWidthRequest="500">
 
             <!-- PROFILE -->
-            <!-- PROFILE -->
+      
             <Border StrokeThickness="0" StrokeShape="RoundRectangle 22"
         BackgroundColor="White" Padding="16">
                 <Border.Shadow>

@@ -146,7 +146,11 @@ public static class MauiProgram
         services.AddSingleton<IInviteService, InviteService>();
         services.AddSingleton<ISharedSettlementService, SharedSettlementService>();
         services.AddSingleton<ITransactionService, TransactionService>();
-        services.AddSingleton<IDetectedTransactionService, DetectedTransactionService>();   
+        services.AddSingleton<IDetectedTransactionService, DetectedTransactionService>();
+        services.AddSingleton<IAccountLinkService, AccountLinkService>();
+        services.AddSingleton<IStatementImportService, StatementImportService>();
+        services.AddSingleton<IEmiImportService, EmiImportService>();
+
 #if ANDROID
         services.AddSingleton<IPushTokenProvider, AndroidPushTokenProvider>();
 #else

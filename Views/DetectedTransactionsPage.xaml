@@ -21,7 +21,9 @@
             <Color x:Key="TextSecondary">#7A6B5E</Color>
             <Color x:Key="TextTertiary">#A89A8C</Color>
             <Color x:Key="Borrow">#E63946</Color>
+            <Color x:Key="BorrowTint">#FDECEE</Color>
             <Color x:Key="Lend">#0FA968</Color>
+            <Color x:Key="LendTint">#E3F7EE</Color>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -31,7 +33,67 @@
         <ScrollView>
             <VerticalStackLayout Padding="16,16,16,24" Spacing="12">
 
-                <!-- Permission banner -->
+                <!-- Import statement -->
+                <Border Padding="14"
+                        StrokeThickness="1"
+                        Stroke="#FDD7B0"
+                        StrokeShape="RoundRectangle 16"
+                        BackgroundColor="{StaticResource PrimaryTint}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Import a statement"
+                               FontSize="14" FontAttributes="Bold"
+                               TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="Pick a PhonePe / Paytm / GPay PDF statement or screenshots. Every transaction is checked, duplicates are skipped, nothing is saved until you add it. The file is deleted from the phone after 1 day."
+                               FontSize="11.5"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                            <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                                <Label Text="Auto-add payees I added before"
+                                       FontSize="12.5" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextPrimary}" />
+                                <Label Text="A shop or person you already added once is added directly next time, no review."
+                                       FontSize="10.5"
+                                       TextColor="{StaticResource TextSecondary}" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1"
+                                    IsToggled="{Binding AutoAddKnown}"
+                                    OnColor="{StaticResource Primary}"
+                                    VerticalOptions="Center" />
+                        </Grid>
+                        <Button Text="{Binding ImportAccountText}"
+                                Command="{Binding ChooseImportAccountCommand}"
+                                BackgroundColor="White"
+                                TextColor="{StaticResource TextSecondary}"
+                                BorderColor="#FDD7B0"
+                                BorderWidth="1"
+                                CornerRadius="10"
+                                HeightRequest="38"
+                                FontSize="11.5" />
+                        <Button Text="Choose PDF or screenshots"
+                                Command="{Binding ImportStatementCommand}"
+                                BackgroundColor="{StaticResource Primary}"
+                                TextColor="White"
+                                CornerRadius="12"
+                                HeightRequest="42"
+                                FontSize="13"
+                                FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Add all confident -->
+                <Button IsVisible="{Binding HasConfident}"
+                        Text="{Binding AddAllText}"
+                        Command="{Binding AddAllConfidentCommand}"
+                        BackgroundColor="{StaticResource LendTint}"
+                        TextColor="{StaticResource Lend}"
+                        BorderColor="{StaticResource Lend}"
+                        BorderWidth="1"
+                        CornerRadius="12"
+                        HeightRequest="44"
+                        FontSize="13"
+                        FontAttributes="Bold" />
+
+                <!-- SMS permission banner (SMS build only) -->
                 <Border IsVisible="{Binding NeedsPermission}"
                         Padding="14"
                         StrokeThickness="1"
@@ -56,14 +118,7 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Label IsVisible="{Binding SmsFeatureDisabled}"
-                       Text="SMS auto-detect is switched off in this build."
-                       HorizontalTextAlignment="Center"
-                       Margin="0,40,0,0"
-                       FontSize="13"
-                       TextColor="{StaticResource TextSecondary}" />
-
-                <!-- Auto-add switch -->
+                <!-- Auto-add switch (SMS build only) -->
                 <Border IsVisible="{Binding SmsFeatureEnabled}"
                         Padding="14,12"
                         StrokeThickness="1"
@@ -86,14 +141,19 @@
                     </Grid>
                 </Border>
 
-                <Label Text="Payments found in your bank SMS. Tap a name to rename it - the app remembers it for next time."
+                <Label IsVisible="{Binding SmsFeatureDisabled}"
+                       Text="SMS auto-detect is switched off in this build. Statement import works."
+                       FontSize="10.5"
+                       TextColor="{StaticResource TextTertiary}" />
+
+                <Label Text="Rows that need review are shown first. Tap a name to rename it - the app remembers it for next time."
                        FontSize="11.5"
                        TextColor="{StaticResource TextTertiary}" />
 
                 <Label IsVisible="{Binding IsEmpty}"
-                       Text="Nothing new right now. New payments will show up here automatically."
+                       Text="Nothing new right now."
                        HorizontalTextAlignment="Center"
-                       Margin="0,40,0,0"
+                       Margin="0,30,0,0"
                        FontSize="13"
                        TextColor="{StaticResource TextSecondary}" />
 
@@ -115,10 +175,11 @@
                                     <Shadow Brush="#3D1E00" Offset="0,3" Radius="10" Opacity="0.05" />
                                 </Border.Shadow>
 
-                                <Grid RowDefinitions="Auto,Auto"
+                                <Grid RowDefinitions="Auto,Auto,Auto"
                                       ColumnDefinitions="*,Auto"
-                                      RowSpacing="12">
+                                      RowSpacing="10">
 
+                                    <!-- name / details -->
                                     <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="3">
                                         <Label Text="{Binding DisplayPayee}"
                                                FontSize="14"
@@ -134,12 +195,15 @@
                                         </Label>
                                         <Label Text="{Binding Subtitle}"
                                                FontSize="11"
+                                               LineBreakMode="TailTruncation"
+                                               MaxLines="1"
                                                TextColor="{StaticResource TextSecondary}" />
                                         <Label Text="{Binding TransactionDate, StringFormat='{0:dd MMM yyyy, hh:mm tt}'}"
                                                FontSize="10.5"
                                                TextColor="{StaticResource TextTertiary}" />
                                     </VerticalStackLayout>
 
+                                    <!-- amount -->
                                     <Label Grid.Row="0" Grid.Column="1"
                                            IsVisible="{Binding IsDebit}"
                                            Text="{Binding Amount, StringFormat='-₹{0:N2}'}"
@@ -156,7 +220,52 @@
                                            VerticalOptions="Start"
                                            TextColor="{StaticResource Lend}" />
 
-                                    <Grid Grid.Row="1" Grid.ColumnSpan="2"
+                                    <!-- statement rows: confidence, guessed type, why, category -->
+                                    <VerticalStackLayout Grid.Row="1" Grid.ColumnSpan="2"
+                                                         IsVisible="{Binding IsFromStatement}"
+                                                         Spacing="4">
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Border IsVisible="{Binding IsHigh}"
+                                                    Padding="8,2" StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 8"
+                                                    BackgroundColor="{StaticResource LendTint}">
+                                                <Label Text="Confident" FontSize="10" FontAttributes="Bold"
+                                                       TextColor="{StaticResource Lend}" />
+                                            </Border>
+                                            <Border IsVisible="{Binding IsMedium}"
+                                                    Padding="8,2" StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 8"
+                                                    BackgroundColor="{StaticResource PrimaryTint}">
+                                                <Label Text="Check" FontSize="10" FontAttributes="Bold"
+                                                       TextColor="{StaticResource Primary}" />
+                                            </Border>
+                                            <Border IsVisible="{Binding IsLow}"
+                                                    Padding="8,2" StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 8"
+                                                    BackgroundColor="{StaticResource BorrowTint}">
+                                                <Label Text="Needs review" FontSize="10" FontAttributes="Bold"
+                                                       TextColor="{StaticResource Borrow}" />
+                                            </Border>
+                                            <Label Text="{Binding TypeLabel}"
+                                                   FontSize="11"
+                                                   VerticalOptions="Center"
+                                                   TextColor="{StaticResource TextSecondary}" />
+                                        </HorizontalStackLayout>
+
+                                        <Label IsVisible="{Binding HasReason}"
+                                               Text="{Binding Reason}"
+                                               FontSize="10.5"
+                                               TextColor="{StaticResource TextTertiary}" />
+
+                                        <Label IsVisible="{Binding HasCategoryHint}"
+                                               Text="{Binding CategoryLine}"
+                                               FontSize="10.5"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource TextSecondary}" />
+                                    </VerticalStackLayout>
+
+                                    <!-- buttons -->
+                                    <Grid Grid.Row="2" Grid.ColumnSpan="2"
                                           ColumnDefinitions="2*,*"
                                           ColumnSpacing="10">
                                         <Button Grid.Column="0"

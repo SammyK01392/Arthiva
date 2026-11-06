@@ -55,6 +55,7 @@ public class MoneySpendDatabase
         await _database.CreateTableAsync<SharedSettlementLink>();
         await _database.CreateTableAsync<DetectedTransaction>();
         await _database.CreateTableAsync<PayeeRule>();
+        await _database.CreateTableAsync<AccountLink>();
         await SeedData.SeedAsync(_database);
 
         // One-time, idempotent: rows created before the sync feature existed
