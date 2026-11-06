@@ -227,7 +227,54 @@ public class HexToColorConverter : IValueConverter
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
+/// <summary>Category.Icon key ("food", "fuel"...) -> emoji. Falls back to the first letter of the parameter/name.</summary>
+public class IconKeyToEmojiConverter : IValueConverter
+{
+    private static readonly Dictionary<string, string> Icons = new(StringComparer.OrdinalIgnoreCase)
+    {
+        // Income
+        ["salary"] = "💼",
+        ["bonus"] = "🎉",
+        ["interest"] = "🏦",
+        ["gift"] = "🎁",
 
+        // Expense
+        ["food"] = "🍔",
+        ["fuel"] = "⛽",
+        ["travel"] = "✈️",
+        ["shopping"] = "🛍️",
+        ["medical"] = "💊",
+        ["rent"] = "🏠",
+        ["electricity"] = "💡",
+        ["internet"] = "🌐",
+        ["mobile"] = "📱",
+        ["emi"] = "💳",
+        ["movie"] = "🎬",
+        ["education"] = "🎓",
+        ["insurance"] = "🛡️",
+
+        // Extra keys for the import categories
+        ["groceries"] = "🛒",
+        ["personalcare"] = "💄",
+        ["others"] = "📦",
+        ["cashback"] = "💸",
+        ["refund"] = "↩️",
+        ["otherincome"] = "💰",
+    };
+
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var key = (value as string)?.Trim();
+
+        if (!string.IsNullOrEmpty(key) && Icons.TryGetValue(key, out var emoji))
+            return emoji;
+
+        return "📁"; // unknown key
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
 /// <summary>Same hex -> same color with alpha overlay (default 20%). Use ConverterParameter="30" for 30%.</summary>
 public class HexToTintConverter : IValueConverter
 {

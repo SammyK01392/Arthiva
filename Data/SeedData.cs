@@ -12,6 +12,7 @@ public static class SeedData
 
         // NEW: runs on every start, adds only what is missing (safe for phones that already have data)
         await EnsureImportCategoriesAsync(db);
+        await FixImportCategoryIconsAsync(db);
     }
 
     private static async Task SeedAccountsAsync(SQLiteAsyncConnection db)
@@ -102,13 +103,13 @@ public static class SeedData
 
         var wanted = new List<Category>
         {
-            new() { Name = "Groceries", Type = "Expense", Icon = "shopping", Color = "#4CAF50", IsDefault = true },
-            new() { Name = "Personal Care", Type = "Expense", Icon = "shopping", Color = "#EC407A", IsDefault = true },
-            new() { Name = "Others", Type = "Expense", Icon = "rent", Color = "#9E9E9E", IsDefault = true },
+            new() { Name = "Groceries", Type = "Expense", Icon = "groceries", Color = "#4CAF50", IsDefault = true },
+            new() { Name = "Personal Care", Type = "Expense", Icon = "personalcare", Color = "#EC407A", IsDefault = true },
+            new() { Name = "Others", Type = "Expense", Icon = "others", Color = "#9E9E9E", IsDefault = true },
 
-            new() { Name = "Cashback & Rewards", Type = "Income", Icon = "gift", Color = "#FF9800", IsDefault = true },
-            new() { Name = "Refund", Type = "Income", Icon = "interest", Color = "#00ACC1", IsDefault = true },
-            new() { Name = "Other Income", Type = "Income", Icon = "bonus", Color = "#78909C", IsDefault = true }
+            new() { Name = "Cashback & Rewards", Type = "Income", Icon = "cashback", Color = "#FF9800", IsDefault = true },
+            new() { Name = "Refund", Type = "Income", Icon = "refund", Color = "#00ACC1", IsDefault = true },
+            new() { Name = "Other Income", Type = "Income", Icon = "otherincome", Color = "#78909C", IsDefault = true }
         };
 
         var missing = wanted
@@ -119,5 +120,28 @@ public static class SeedData
 
         if (missing.Count > 0)
             await db.InsertAllAsync(missing);
+    }
+
+    private static async Task FixImportCategoryIconsAsync(SQLiteAsyncConnection db)
+    {
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Groceries"] = "groceries",
+            ["Personal Care"] = "personalcare",
+            ["Others"] = "others",
+            ["Cashback & Rewards"] = "cashback",
+            ["Refund"] = "refund",
+            ["Other Income"] = "otherincome",
+        };
+
+        var all = await db.Table<Category>().ToListAsync();
+        foreach (var c in all)
+        {
+            if (c.Name != null && map.TryGetValue(c.Name.Trim(), out var key) && c.Icon != key)
+            {
+                c.Icon = key;
+                await db.UpdateAsync(c);
+            }
+        }
     }
 }

@@ -6,11 +6,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:MoneySpend.ViewModels"
     xmlns:models="clr-namespace:MoneySpend.Models"
+    xmlns:conv="clr-namespace:MoneySpend.Converters"
     x:DataType="vm:CategoryListViewModel"
     Title="Categories"
     BackgroundColor="#F6F7FB">
 
     <ContentPage.Resources>
+        <conv:IconKeyToEmojiConverter x:Key="IconEmoji" />
+        <conv:HexToTintConverter x:Key="HexTint" />
+
         <DataTemplate x:Key="ExpenseCardTemplate" x:DataType="models:Category">
             <Border StrokeThickness="0" StrokeShape="RoundRectangle 18"
                     BackgroundColor="White" Padding="8,14,8,12">
@@ -26,11 +30,14 @@
                 <Grid>
                     <VerticalStackLayout Spacing="8" HorizontalOptions="Center" InputTransparent="True">
                         <Border WidthRequest="46" HeightRequest="46" StrokeThickness="0"
-                                StrokeShape="RoundRectangle 23" BackgroundColor="#FFEBEE"
+                                StrokeShape="RoundRectangle 23"
+                                BackgroundColor="{Binding Color, Converter={StaticResource HexTint}, ConverterParameter=18}"
                                 HorizontalOptions="Center">
-                            <Label Text="{Binding Name, StringFormat='{0:.1}'}"
-                                   FontSize="18" FontAttributes="Bold" TextColor="#E53935"
-                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                            <Label Text="{Binding Icon, Converter={StaticResource IconEmoji}}"
+                                   FontSize="22"
+                                   HorizontalOptions="Center" VerticalOptions="Center"
+                                   HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                                   LineBreakMode="NoWrap" />
                         </Border>
                         <Label Text="{Binding Name}" FontSize="12" FontAttributes="Bold"
                                TextColor="#111827" HorizontalTextAlignment="Center"
@@ -66,11 +73,14 @@
                 <Grid>
                     <VerticalStackLayout Spacing="8" HorizontalOptions="Center" InputTransparent="True">
                         <Border WidthRequest="46" HeightRequest="46" StrokeThickness="0"
-                                StrokeShape="RoundRectangle 23" BackgroundColor="#E8F5E9"
+                                StrokeShape="RoundRectangle 23"
+                                BackgroundColor="{Binding Color, Converter={StaticResource HexTint}, ConverterParameter=18}"
                                 HorizontalOptions="Center">
-                            <Label Text="{Binding Name, StringFormat='{0:.1}'}"
-                                   FontSize="18" FontAttributes="Bold" TextColor="#00B368"
-                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                            <Label Text="{Binding Icon, Converter={StaticResource IconEmoji}}"
+                                   FontSize="22"
+                                   HorizontalOptions="Center" VerticalOptions="Center"
+                                   HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                                   LineBreakMode="NoWrap" />
                         </Border>
                         <Label Text="{Binding Name}" FontSize="12" FontAttributes="Bold"
                                TextColor="#111827" HorizontalTextAlignment="Center"
